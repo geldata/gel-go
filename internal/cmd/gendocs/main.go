@@ -28,6 +28,7 @@ import (
 	"go/parser"
 	"go/token"
 	"os"
+	"slices"
 	"strings"
 )
 
@@ -42,8 +43,9 @@ func main() {
 	}
 
 	renderIndexPage()
-	typeNames := renderTypesPage()
-	renderAPIPage(typeNames)
+	apiTypesInfo, datatypesInfo := gatherAPITypes()
+	renderAPIPage(apiTypesInfo)
+	renderDatatypesPage(datatypesInfo)
 	renderCodegenPage()
 }
 
@@ -75,7 +77,107 @@ func writeFile(filename string, content string) {
 	}
 }
 
-func renderTypesPage() []string {
+func renderDecl(decl any, fset *token.FileSet) string {
+	var buf bytes.Buffer
+	if err := format.Node(&buf, fset, decl); err != nil {
+		panic(err)
+	}
+	return buf.String()
+}
+
+func renderDoc(p *doc.Package, doc string) string {
+	return strings.TrimSpace(string(printRST(p.Printer(), p.Parser().Parse(doc))))
+}
+
+type TypesInfo struct {
+	FuncNames []string
+	TypeNames []string
+}
+
+func gatherAPITypes() (TypesInfo, TypesInfo) {
+	fset := token.NewFileSet()
+	files := []*ast.File{
+		readAndParseFile(fset, "export.go"),
+	}
+
+	p, err := doc.NewFromFiles(fset, files, "github.com/edgedb/edgedb-go")
+	if err != nil {
+		panic(err)
+	}
+
+	apiTypesInfo := TypesInfo{}
+	datatypesInfo := TypesInfo{}
+
+	for _, v := range p.Vars {
+		lines := strings.Split(renderDecl(v.Decl, fset), "\n")
+		for _, line := range lines[1 : len(lines)-1] {
+			trimmed := strings.TrimSpace(line)
+			if trimmed == "" || strings.HasPrefix(trimmed, "//") {
+				continue
+			}
+			typeParts := strings.Split(strings.Split(trimmed, "=")[1], ".")
+
+			switch strings.TrimSpace(typeParts[0]) {
+			case "edgedb":
+				apiTypesInfo.FuncNames = append(apiTypesInfo.FuncNames, strings.TrimSpace(typeParts[1]))
+			case "edgedbtypes":
+				datatypesInfo.FuncNames = append(datatypesInfo.FuncNames, strings.TrimSpace(typeParts[1]))
+			default:
+				panic(fmt.Errorf("unknown internal module %s", typeParts[0]))
+			}
+		}
+	}
+
+	for _, t := range p.Types {
+		decl := strings.TrimPrefix(renderDecl(t.Decl, fset), "type ")
+		typeParts := strings.Split(strings.Split(decl, "=")[1], ".")
+
+		switch strings.TrimSpace(typeParts[0]) {
+		case "edgedb":
+			apiTypesInfo.TypeNames = append(apiTypesInfo.TypeNames, strings.TrimSpace(typeParts[1]))
+		case "edgedbtypes":
+			datatypesInfo.TypeNames = append(datatypesInfo.TypeNames, strings.TrimSpace(typeParts[1]))
+		default:
+			panic(fmt.Errorf("unknown internal module %s", typeParts[0]))
+		}
+	}
+
+	return apiTypesInfo, datatypesInfo
+}
+
+func renderAPIPage(info TypesInfo) {
+	dir, err := os.ReadDir("internal/client")
+	if err != nil {
+		panic(err)
+	}
+
+	fset := token.NewFileSet()
+	files := []*ast.File{}
+
+	for _, file := range dir {
+		if !file.IsDir() && strings.HasSuffix(file.Name(), ".go") {
+			files = append(
+				files, readAndParseFile(
+					fset, "internal/client/"+file.Name()))
+		}
+	}
+
+	p, err := doc.NewFromFiles(
+		fset, files, "github.com/edgedb/edgedb-go/internal/client")
+	if err != nil {
+		panic(err)
+	}
+
+	rst := `
+API
+===`
+
+	rst += renderTypes(fset, p, info)
+
+	writeFile("rstdocs/api.rst", rst)
+}
+
+func renderDatatypesPage(info TypesInfo) {
 	dir, err := os.ReadDir("internal/edgedbtypes")
 	if err != nil {
 		panic(err)
@@ -102,112 +204,87 @@ func renderTypesPage() []string {
 Datatypes
 =========`
 
-	rst += renderTypes(fset, p, p.Types)
+	rst += renderTypes(fset, p, info)
 
 	writeFile("rstdocs/types.rst", rst)
-
-	typeNames := []string{}
-	for _, t := range p.Types {
-		typeNames = append(typeNames, t.Name)
-	}
-
-	return typeNames
-}
-
-func renderAPIPage(skipTypeNames []string) {
-	fset := token.NewFileSet()
-	files := []*ast.File{
-		readAndParseFile(fset, "export.go"),
-	}
-
-	p, err := doc.NewFromFiles(fset, files, "github.com/edgedb/edgedb-go")
-	if err != nil {
-		panic(err)
-	}
-
-	rst := `
-API
-===`
-
-	skip := make(map[string]bool)
-	for _, name := range skipTypeNames {
-		skip[name] = true
-	}
-
-	types := []*doc.Type{}
-	for _, t := range p.Types {
-		if !skip[t.Name] {
-			types = append(types, t)
-		}
-	}
-
-	rst += renderTypes(fset, p, types)
-
-	writeFile("rstdocs/api.rst", rst)
 }
 
 func renderTypes(
 	fset *token.FileSet,
 	p *doc.Package,
-	types []*doc.Type) string {
+	info TypesInfo,
+) string {
 	out := ""
 
-	for _, t := range types {
-		out += fmt.Sprintf(`
-
-
-*type* %s
--------%s
-
-`, t.Name, strings.Repeat("-", len(t.Name)))
-
-		out += string(printRST(p.Printer(), p.Parser().Parse(t.Doc)))
-
-		var buf bytes.Buffer
-		if err := format.Node(&buf, fset, t.Decl); err != nil {
-			panic(err)
+	for _, t := range p.Types {
+		if !slices.Contains(info.TypeNames, t.Name) {
+			continue
 		}
 
-		out += "\n.. code-block:: go\n\n    " + strings.ReplaceAll(
-			buf.String(), "\n", "\n    ")
-
 		for _, f := range t.Funcs {
+			if !slices.Contains(info.FuncNames, f.Name) {
+				continue
+			}
+
 			out += fmt.Sprintf(`
 
 
-*function* %s
-...........%s
-`, f.Name, strings.Repeat(".", len(f.Name)))
+.. go:function:: %s
 
-			var buf bytes.Buffer
-			if err := format.Node(&buf, fset, f.Decl); err != nil {
-				panic(err)
-			}
+    `,
+				strings.ReplaceAll(
+					renderDecl(f.Decl, fset),
+					"\n", "\\\n    ",
+				))
 
-			out += "\n.. code-block:: go\n\n    " + strings.ReplaceAll(
-				buf.String(), "\n", "\n    ") + "\n\n"
-
-			out += string(printRST(p.Printer(), p.Parser().Parse(f.Doc)))
+			out += strings.ReplaceAll(renderDoc(p, f.Doc), "\n", "\n    ")
 		}
+
+		out += fmt.Sprintf(`
+
+
+.. go:type:: %s
+
+    `, strings.ReplaceAll(
+			renderDecl(t.Decl, fset),
+			"\n", "\\\n    ",
+		))
+
+		out += strings.ReplaceAll(renderDoc(p, t.Doc), "\n", "\n    ")
 
 		for _, m := range t.Methods {
 			out += fmt.Sprintf(`
 
 
-*method* %s
-.........%s
-`, m.Name, strings.Repeat(".", len(m.Name)))
+.. go:method:: %s
 
-			var buf bytes.Buffer
-			if err := format.Node(&buf, fset, m.Decl); err != nil {
-				panic(err)
-			}
+    `, strings.ReplaceAll(
+				renderDecl(m.Decl, fset),
+				"\n", "\\\n    ",
+			))
 
-			out += "\n.. code-block:: go\n\n    " + strings.ReplaceAll(
-				buf.String(), "\n", "\n    ") + "\n\n"
-
-			out += string(printRST(p.Printer(), p.Parser().Parse(m.Doc)))
+			out += strings.ReplaceAll(renderDoc(p, m.Doc), "\n", "\n    ")
 		}
+	}
+
+	for _, f := range p.Funcs {
+		if !slices.Contains(info.FuncNames, f.Name) {
+			continue
+		}
+
+		out += fmt.Sprintf(`
+
+
+.. go:function:: %s
+
+    `,
+			strings.ReplaceAll(
+				renderDecl(f.Decl, fset),
+				"\n", "\\\n    ",
+			))
+
+		out += strings.ReplaceAll(renderDoc(p, f.Doc), "\n", "\n    ")
+
 	}
 
 	return strings.ReplaceAll(out, "\t", "    ")
