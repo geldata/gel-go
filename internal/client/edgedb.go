@@ -204,10 +204,8 @@ func (c *protocolConnection) scriptFlow(ctx context.Context, q *query) error {
 	switch {
 	case c.protocolVersion.GTE(protocolVersion2p0):
 		err = c.execGranularFlow2pX(r, q)
-	case c.protocolVersion.GTE(protocolVersion1p0):
-		err = c.execGranularFlow1pX(r, q)
 	default:
-		err = c.execScriptFlow(r, q)
+		err = c.execGranularFlow1pX(r, q)
 	}
 
 	return firstError(err, c.releaseReader(r))
@@ -238,10 +236,8 @@ func (c *protocolConnection) granularFlow(
 	switch {
 	case c.protocolVersion.GTE(protocolVersion2p0):
 		err = c.execGranularFlow2pX(r, q)
-	case c.protocolVersion.GTE(protocolVersion1p0):
-		err = c.execGranularFlow1pX(r, q)
 	default:
-		err = c.execGranularFlow0pX(r, q)
+		err = c.execGranularFlow1pX(r, q)
 	}
 
 	return firstError(err, c.releaseReader(r))

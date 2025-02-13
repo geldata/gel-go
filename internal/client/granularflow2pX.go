@@ -19,6 +19,7 @@ package gel
 import (
 	"fmt"
 	"reflect"
+	"unsafe"
 
 	"github.com/edgedb/edgedb-go/internal/buff"
 	"github.com/edgedb/edgedb-go/internal/codecs"
@@ -373,7 +374,7 @@ func (c *protocolConnection) decodeCommandCompleteMsg2pX(
 	q *query,
 	r *buff.Reader,
 ) error {
-	discardHeaders0pX(r)
+	discardHeaders2pX(r)
 	c.cacheCapabilities1pX(q, r.PopUint64())
 	r.Discard(int(r.PopUint32())) // discard command status
 	if r.PopUUID() == descriptor.IDZero {
@@ -411,4 +412,44 @@ func (c *protocolConnection) decodeStateDataDescription2pX(
 
 	c.stateCodec = codec
 	return nil
+}
+
+func decodeReadyForCommandMsg(r *buff.Reader) {
+	ignoreHeaders(r)
+	r.Discard(1) // transaction state
+}
+
+func decodeDataMsg(
+	r *buff.Reader,
+	q *query,
+	cdcs *codecPair,
+) (reflect.Value, bool, error) {
+	elmCount := r.PopUint16()
+	if elmCount != 1 {
+		return reflect.Value{}, false, fmt.Errorf(
+			"unexpected number of elements: expected 1, got %v", elmCount)
+	}
+	elmLen := r.PopUint32()
+
+	if !q.flat() {
+		val := reflect.New(q.outType).Elem()
+		err := cdcs.out.Decode(
+			r.PopSlice(elmLen),
+			unsafe.Pointer(val.UnsafeAddr()),
+		)
+		if err != nil {
+			return reflect.Value{}, false, err
+		}
+		return val, true, nil
+	}
+
+	err := cdcs.out.Decode(
+		r.PopSlice(elmLen),
+		unsafe.Pointer(q.out.UnsafeAddr()),
+	)
+	if err != nil {
+		return reflect.Value{}, false, err
+	}
+
+	return reflect.Value{}, false, nil
 }

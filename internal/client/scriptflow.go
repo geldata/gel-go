@@ -32,21 +32,7 @@ func ignoreHeaders(r *buff.Reader) {
 	}
 }
 
-func decodeHeaders0pX(r *buff.Reader) header.Header0pX {
-	n := int(r.PopUint16())
-
-	headers := make(header.Header0pX, n)
-	for i := 0; i < n; i++ {
-		key := r.PopUint16()
-		val := r.PopBytes()
-		headers[key] = make([]byte, len(val))
-		copy(headers[key], val)
-	}
-
-	return headers
-}
-
-func discardHeaders0pX(r *buff.Reader) {
+func discardHeaders1pX(r *buff.Reader) {
 	n := int(r.PopUint16())
 
 	for i := 0; i < n; i++ {
@@ -54,6 +40,8 @@ func discardHeaders0pX(r *buff.Reader) {
 		r.PopBytes()
 	}
 }
+
+var discardHeaders2pX = discardHeaders1pX
 
 func decodeHeaders1pX(
 	r *buff.Reader,
@@ -89,51 +77,3 @@ func decodeHeaders1pX(
 }
 
 var decodeHeaders2pX = decodeHeaders1pX
-
-func writeHeaders0pX(w *buff.Writer, headers header.Header0pX) {
-	w.PushUint16(uint16(len(headers)))
-
-	for key, val := range headers {
-		w.PushUint16(key)
-		w.PushUint32(uint32(len(val)))
-		w.PushBytes(val)
-	}
-}
-
-func (c *protocolConnection) execScriptFlow(r *buff.Reader, q *query) error {
-	if len(q.state) != 0 {
-		return errStateNotSupported
-	}
-
-	w := buff.NewWriter(c.writeMemory[:0])
-	w.BeginMessage(uint8(ExecuteScript))
-	writeHeaders0pX(w, q.headers0pX())
-	w.PushString(q.cmd)
-	w.EndMessage()
-
-	if e := c.soc.WriteAll(w.Unwrap()); e != nil {
-		return e
-	}
-
-	var err error
-	done := buff.NewSignal()
-
-	for r.Next(done.Chan) {
-		switch Message(r.MsgType) {
-		case CommandComplete:
-			decodeCommandCompleteMsg0pX(r)
-		case ReadyForCommand:
-			decodeReadyForCommandMsg(r)
-			done.Signal()
-		case ErrorResponse:
-			err = wrapAll(err, decodeErrorResponseMsg(r, q.cmd))
-		default:
-			if e := c.fallThrough(r); e != nil {
-				// the connection will not be usable after this x_x
-				return e
-			}
-		}
-	}
-
-	return wrapAll(err, r.Err)
-}

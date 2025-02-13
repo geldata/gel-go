@@ -28,7 +28,7 @@ import (
 	"sync"
 	"testing"
 
-	gel "github.com/edgedb/edgedb-go"
+	gel "github.com/edgedb/edgedb-go/internal/client"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

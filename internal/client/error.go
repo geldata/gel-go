@@ -29,13 +29,8 @@ import (
 )
 
 var (
-	errNoTOMLFound             = errors.New("no gel.toml found")
-	errZeroResults       error = &noDataError{msg: "zero results"}
-	errStateNotSupported       = &interfaceError{msg: "client methods " +
-		"WithConfig, WithGlobals, and WithModuleAliases " +
-		"are not supported by the server. " +
-		"Upgrade your server to version 2.0 or greater " +
-		"to use these features."}
+	errNoTOMLFound       = errors.New("no gel.toml found")
+	errZeroResults error = &noDataError{msg: "zero results"}
 )
 
 // ErrorTag is the argument type to Error.HasTag().

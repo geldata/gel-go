@@ -26,8 +26,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	gel "github.com/edgedb/edgedb-go"
 	"github.com/edgedb/edgedb-go/internal"
+	gel "github.com/edgedb/edgedb-go/internal/client"
 	"github.com/edgedb/edgedb-go/internal/descriptor"
 	"github.com/edgedb/edgedb-go/internal/geltypes"
 )

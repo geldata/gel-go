@@ -18,13 +18,11 @@ package gel
 
 import (
 	"context"
-	"encoding/binary"
 	"errors"
 	"fmt"
 	"reflect"
 
 	types "github.com/edgedb/edgedb-go/internal/geltypes"
-	"github.com/edgedb/edgedb-go/internal/header"
 	"github.com/edgedb/edgedb-go/internal/introspect"
 )
 
@@ -58,13 +56,6 @@ func (q *query) flat() bool {
 	}
 
 	return false
-}
-
-func (q *query) headers0pX() header.Header0pX {
-	bts := make([]byte, 8)
-	binary.BigEndian.PutUint64(bts, q.capabilities)
-
-	return header.Header0pX{header.AllowCapabilities: bts}
 }
 
 // newQuery returns a new granular flow query.

@@ -323,7 +323,7 @@ func (c *protocolConnection) decodeCommandCompleteMsg1pX(
 	q *query,
 	r *buff.Reader,
 ) error {
-	discardHeaders0pX(r)
+	discardHeaders1pX(r)
 	c.cacheCapabilities1pX(q, r.PopUint64())
 	r.Discard(int(r.PopUint32())) // discard command status
 	if r.PopUUID() == descriptor.IDZero {
@@ -363,4 +363,45 @@ func (c *protocolConnection) decodeStateDataDescription(r *buff.Reader) error {
 
 	c.stateCodec = codec
 	return nil
+}
+
+func (c *protocolConnection) codecsFromIDs(
+	ids *idPair,
+	q *query,
+) (*codecPair, error) {
+	var err error
+
+	in, ok := c.inCodecCache.Get(ids.in)
+	if !ok {
+		desc, OK := descCache.Get(ids.in)
+		if !OK {
+			return nil, nil
+		}
+
+		in, err = codecs.BuildEncoder(
+			desc.(descriptor.Descriptor),
+			c.protocolVersion,
+		)
+		if err != nil {
+			return nil, &invalidArgumentError{msg: err.Error()}
+		}
+	}
+
+	out, ok := c.outCodecCache.Get(codecKey{ID: ids.out, Type: q.outType})
+	if !ok {
+		desc, OK := descCache.Get(ids.out)
+		if !OK {
+			return nil, nil
+		}
+
+		d := desc.(descriptor.Descriptor)
+		path := codecs.Path(q.outType.String())
+		out, err = codecs.BuildDecoder(d, q.outType, path)
+		if err != nil {
+			return nil, &invalidArgumentError{msg: fmt.Sprintf(
+				"the \"out\" argument does not match query schema: %v", err)}
+		}
+	}
+
+	return &codecPair{in: in.(codecs.Encoder), out: out.(codecs.Decoder)}, nil
 }
