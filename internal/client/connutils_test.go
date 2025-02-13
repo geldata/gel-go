@@ -34,8 +34,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/geldata/gel-go/internal/geltypes"
-	"github.com/geldata/gel-go/internal/snc"
+	"github.com/edgedb/edgedb-go/internal/geltypes"
+	"github.com/edgedb/edgedb-go/internal/snc"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

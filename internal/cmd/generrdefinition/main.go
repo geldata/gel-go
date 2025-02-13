@@ -24,7 +24,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/geldata/gel-go/internal/errgen"
+	"github.com/edgedb/edgedb-go/internal/errgen"
 )
 
 func printCategories(types []*errgen.Type) {

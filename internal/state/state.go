@@ -19,8 +19,8 @@ package state
 import (
 	"fmt"
 
-	"github.com/geldata/gel-go/internal/codecs"
-	"github.com/geldata/gel-go/internal/descriptor"
+	"github.com/edgedb/edgedb-go/internal/codecs"
+	"github.com/edgedb/edgedb-go/internal/descriptor"
 )
 
 type encoderField struct {

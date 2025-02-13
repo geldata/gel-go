@@ -24,7 +24,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/geldata/gel-go/internal/errgen"
+	"github.com/edgedb/edgedb-go/internal/errgen"
 )
 
 //nolint:typecheck
@@ -58,7 +58,7 @@ func main() {
 
 package gel
 
-import gel "github.com/geldata/gel-go/internal/client"
+import gel "github.com/edgedb/edgedb-go"
 
 const (
 `)

@@ -20,7 +20,7 @@ import (
 	"context"
 	"log"
 
-	gel "github.com/geldata/gel-go/internal/client"
+	gel "github.com/edgedb/edgedb-go"
 )
 
 // Transactions can be executed using the Tx() method. Note that queries are

@@ -26,10 +26,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/geldata/gel-go/internal"
-	gel "github.com/geldata/gel-go/internal/client"
-	"github.com/geldata/gel-go/internal/descriptor"
-	"github.com/geldata/gel-go/internal/geltypes"
+	gel "github.com/edgedb/edgedb-go"
+	"github.com/edgedb/edgedb-go/internal"
+	"github.com/edgedb/edgedb-go/internal/descriptor"
+	"github.com/edgedb/edgedb-go/internal/geltypes"
 )
 
 var (

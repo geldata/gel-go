@@ -6,7 +6,7 @@ import (
 	"context"
 	_ "embed"
 
-	gel "github.com/geldata/gel-go"
+	gel "github.com/edgedb/edgedb-go"
 )
 
 //go:embed select_tuple.edgeql

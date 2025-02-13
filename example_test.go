@@ -20,7 +20,7 @@ import (
 	"context"
 	"testing"
 
-	gel "github.com/geldata/gel-go"
+	gel "github.com/edgedb/edgedb-go"
 )
 
 var (

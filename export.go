@@ -20,8 +20,8 @@
 package gel
 
 import (
-	gel "github.com/geldata/gel-go/internal/client"
-	"github.com/geldata/gel-go/internal/geltypes"
+	gel "github.com/edgedb/edgedb-go/internal/client"
+	"github.com/edgedb/edgedb-go/internal/geltypes"
 )
 
 const (
