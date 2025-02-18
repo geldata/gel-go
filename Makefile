@@ -21,9 +21,9 @@ errors:
 		exit 1 \
 		)
 	edb gen-errors-json --client | \
-		go run internal/cmd/generrdefinition/main.go > errors_gen.go
+		go run internal/cmd/generrconst/main.go > gelerr/errors_gen.go
 	edb gen-errors-json --client | \
-		go run internal/cmd/generrexport/main.go > errors_gen.go
+		go run internal/cmd/generrtype/main.go > internal/gelerr/errors_gen.go
 	make format
 
 gen:

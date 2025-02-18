@@ -25,6 +25,7 @@ import (
 	"github.com/edgedb/edgedb-go/internal/buff"
 	"github.com/edgedb/edgedb-go/internal/cache"
 	"github.com/edgedb/edgedb-go/internal/codecs"
+	"github.com/edgedb/edgedb-go/internal/gelerr"
 	"github.com/edgedb/edgedb-go/internal/snc"
 	"github.com/edgedb/edgedb-go/internal/soc"
 )
@@ -95,17 +96,17 @@ func (c *protocolConnection) acquireReader(
 	ctx context.Context,
 ) (*buff.Reader, error) {
 	if c.isClosed() {
-		return nil, &clientConnectionClosedError{}
+		return nil, gelerr.NewClientConnectionClosedError("", nil)
 	}
 
 	c.acquireReaderSignal <- struct{}{}
 	select {
 	case r := <-c.readerChan:
 		if r.Err != nil {
-			return nil, &clientConnectionClosedError{err: r.Err}
+			return nil, gelerr.NewClientConnectionClosedError("", r.Err)
 		}
 		if c.soc.Closed() {
-			return nil, &clientConnectionClosedError{}
+			return nil, gelerr.NewClientConnectionClosedError("", nil)
 		}
 		return r, nil
 	case <-ctx.Done():
@@ -115,7 +116,7 @@ func (c *protocolConnection) acquireReader(
 
 func (c *protocolConnection) releaseReader(r *buff.Reader) error {
 	if c.isClosed() {
-		return &clientConnectionClosedError{}
+		return gelerr.NewClientConnectionClosedError("", nil)
 	}
 
 	if err := c.soc.SetDeadline(time.Time{}); err != nil {
@@ -158,7 +159,10 @@ func (c *protocolConnection) releaseReader(r *buff.Reader) error {
 // Close the db connection
 func (c *protocolConnection) close() error {
 	if c.soc == nil {
-		return &interfaceError{msg: "connection closed more than once"}
+		return gelerr.NewInterfaceError(
+			"connection closed more than once",
+			nil,
+		)
 	}
 
 	_, err := c.acquireReader(context.Background())
@@ -184,10 +188,11 @@ func (c *protocolConnection) isClosed() bool {
 
 func (c *protocolConnection) scriptFlow(ctx context.Context, q *query) error {
 	if q.lang == SQL && c.protocolVersion.LT(protocolVersion3p0) {
-		return &unsupportedFeatureError{
-			msg: "the server does not support SQL queries, " +
+		return gelerr.NewUnsupportedFeatureError(
+			"the server does not support SQL queries, "+
 				"upgrade to 6.0 or newer",
-		}
+			nil,
+		)
 	}
 
 	r, err := c.acquireReader(ctx)
@@ -216,10 +221,11 @@ func (c *protocolConnection) granularFlow(
 	q *query,
 ) error {
 	if q.lang == SQL && c.protocolVersion.LT(protocolVersion3p0) {
-		return &unsupportedFeatureError{
-			msg: "the server does not support SQL queries, " +
+		return gelerr.NewUnsupportedFeatureError(
+			"the server does not support SQL queries, "+
 				"upgrade to 6.0 or newer",
-		}
+			nil,
+		)
 	}
 
 	r, err := c.acquireReader(ctx)

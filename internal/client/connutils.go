@@ -36,6 +36,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/edgedb/edgedb-go/internal/gelerr"
 	"github.com/edgedb/edgedb-go/internal/geltypes"
 	"github.com/edgedb/edgedb-go/internal/snc"
 	"github.com/sigurn/crc16"
@@ -1248,12 +1249,12 @@ func parseConnectDSNAndArgs(
 ) (*connConfig, error) {
 	resolver, err := newConfigResolver(dsn, opts, paths)
 	if err != nil {
-		return nil, &configurationError{err: err}
+		return nil, gelerr.NewConfigurationError("", err)
 	}
 
 	c, err := resolver.config(opts)
 	if err != nil {
-		return nil, &configurationError{err: err}
+		return nil, gelerr.NewConfigurationError("", err)
 	}
 
 	return c, nil
@@ -1512,7 +1513,7 @@ func findEdgeDBTOML(paths *cfgPaths) (string, error) {
 	// symbolic links), Getwd may return any one of them.
 	dir, err := paths.Cwd()
 	if err != nil {
-		return "", &clientConnectionError{err: err}
+		return "", gelerr.NewClientConnectionError("", err)
 	}
 
 	dev, err := device(dir)

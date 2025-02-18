@@ -19,6 +19,8 @@ package gel
 import (
 	"context"
 	"fmt"
+
+	gelerrint "github.com/edgedb/edgedb-go/internal/gelerr"
 )
 
 type borrowableConn struct {
@@ -31,18 +33,20 @@ func (c *borrowableConn) borrow(reason string) (*protocolConnection, error) {
 	case "":
 		// this is the expected value
 	case "transaction":
-		return nil, &interfaceError{
-			msg: "The connection is borrowed for a transaction. " +
+		return nil, gelerrint.NewInterfaceError(
+			"The connection is borrowed for a transaction. "+
 				"Use the methods on the transaction object instead.",
-		}
+			nil,
+		)
 	case "subtransaction":
-		return nil, &interfaceError{
-			msg: "The transaction is borrowed for a subtransaction. " +
+		return nil, gelerrint.NewInterfaceError(
+			"The transaction is borrowed for a subtransaction. "+
 				"Use the methods on the subtransaction object instead.",
-		}
+			nil,
+		)
 	default:
-		return nil, &interfaceError{msg: fmt.Sprintf(
-			"existing borrow reason is unexpected: %q", c.reason)}
+		return nil, gelerrint.NewInterfaceError(fmt.Sprintf(
+			"existing borrow reason is unexpected: %q", c.reason), nil)
 	}
 
 	switch reason {
@@ -50,14 +54,17 @@ func (c *borrowableConn) borrow(reason string) (*protocolConnection, error) {
 		c.reason = reason
 		return c.conn, nil
 	default:
-		return nil, &interfaceError{msg: fmt.Sprintf(
-			"unexpected borrow reason: %q", c.reason)}
+		return nil, gelerrint.NewInterfaceError(fmt.Sprintf(
+			"unexpected borrow reason: %q", c.reason), nil)
 	}
 }
 
 func (c *borrowableConn) unborrow() error {
 	if c.reason == "" {
-		return &interfaceError{msg: "not currently borrowed, cannot unborrow"}
+		return gelerrint.NewInterfaceError(
+			"not currently borrowed, cannot unborrow",
+			nil,
+		)
 	}
 
 	c.reason = ""
@@ -69,18 +76,20 @@ func (c *borrowableConn) assertUnborrowed() error {
 	case "":
 		return nil
 	case "transaction":
-		return &interfaceError{
-			msg: "The connection is borrowed for a transaction. " +
+		return gelerrint.NewInterfaceError(
+			"The connection is borrowed for a transaction. "+
 				"Use the methods on the transaction object instead.",
-		}
+			nil,
+		)
 	case "subtransaction":
-		return &interfaceError{
-			msg: "The transaction is borrowed for a subtransaction. " +
+		return gelerrint.NewInterfaceError(
+			"The transaction is borrowed for a subtransaction. "+
 				"Use the methods on the subtransaction object instead.",
-		}
+			nil,
+		)
 	default:
-		return &interfaceError{msg: fmt.Sprintf(
-			"existing borrow reason is unexpected: %q", c.reason)}
+		return gelerrint.NewInterfaceError(fmt.Sprintf(
+			"existing borrow reason is unexpected: %q", c.reason), nil)
 	}
 }
 

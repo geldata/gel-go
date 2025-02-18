@@ -4,9 +4,6 @@ CreateClientDSN
 DateDuration
 Duration
 DurationFromNanoseconds
-Error
-ErrorCategory
-ErrorTag
 Executor
 IsolationLevel
 LocalDate

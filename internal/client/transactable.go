@@ -20,6 +20,9 @@ import (
 	"context"
 	"errors"
 	"time"
+
+	"github.com/edgedb/edgedb-go/gelerr"
+	gelerrint "github.com/edgedb/edgedb-go/internal/gelerr"
 )
 
 type transactableConn struct {
@@ -31,7 +34,7 @@ type transactableConn struct {
 func (c *transactableConn) granularFlow(ctx context.Context, q *query) error {
 	var (
 		err    error
-		edbErr Error
+		edbErr gelerr.Error
 	)
 
 	for i := 1; true; i++ {
@@ -52,8 +55,9 @@ func (c *transactableConn) granularFlow(ctx context.Context, q *query) error {
 		capabilities, ok := c.getCachedCapabilities(q)
 		if ok &&
 			errors.As(err, &edbErr) &&
-			edbErr.HasTag(ShouldRetry) &&
-			(capabilities == 0 || edbErr.Category(TransactionConflictError)) {
+			edbErr.HasTag(gelerr.ShouldRetry) &&
+			(capabilities == 0 ||
+				edbErr.Category(gelerr.TransactionConflictError)) {
 			rule, e := c.retryOpts.ruleForException(edbErr)
 			if e != nil {
 				return e
@@ -70,7 +74,7 @@ func (c *transactableConn) granularFlow(ctx context.Context, q *query) error {
 		return err
 	}
 
-	return &clientError{msg: "unreachable"}
+	return gelerrint.NewClientError("unreachable", nil)
 }
 
 func (c *transactableConn) tx(
@@ -85,7 +89,7 @@ func (c *transactableConn) tx(
 	}
 	defer func() { err = firstError(err, c.unborrow()) }()
 
-	var edbErr Error
+	var edbErr gelerr.Error
 	for i := 1; true; i++ {
 		if errors.As(err, &edbErr) && c.conn.soc.Closed() {
 			err = c.reconnect(ctx, true)
@@ -113,8 +117,8 @@ func (c *transactableConn) tx(
 			if err == nil {
 				err = tx.commit(ctx)
 				if errors.As(err, &edbErr) &&
-					edbErr.Category(TransactionError) &&
-					edbErr.HasTag(ShouldRetry) {
+					edbErr.Category(gelerr.TransactionError) &&
+					edbErr.HasTag(gelerr.ShouldRetry) {
 					goto Error
 				}
 				return err
@@ -128,7 +132,7 @@ func (c *transactableConn) tx(
 		}
 
 	Error:
-		if errors.As(err, &edbErr) && edbErr.HasTag(ShouldRetry) {
+		if errors.As(err, &edbErr) && edbErr.HasTag(gelerr.ShouldRetry) {
 			rule, e := c.retryOpts.ruleForException(edbErr)
 			if e != nil {
 				return e
@@ -145,5 +149,5 @@ func (c *transactableConn) tx(
 		return err
 	}
 
-	return &clientError{msg: "unreachable"}
+	return gelerrint.NewClientError("unreachable", nil)
 }

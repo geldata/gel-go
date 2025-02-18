@@ -23,6 +23,7 @@ import (
 
 	"github.com/edgedb/edgedb-go/internal"
 	"github.com/edgedb/edgedb-go/internal/buff"
+	"github.com/edgedb/edgedb-go/internal/gelerr"
 	"github.com/xdg/scram"
 	"golang.org/x/exp/slices"
 )
@@ -96,7 +97,7 @@ func (c *protocolConnection) connect(r *buff.Reader, cfg *connConfig) error {
 					protocolVersion.Major,
 					protocolVersion.Minor,
 				)
-				return &unsupportedProtocolVersionError{msg: msg}
+				return gelerr.NewUnsupportedProtocolVersionError(msg, nil)
 			}
 
 			c.protocolVersion = protocolVersion
@@ -152,13 +153,13 @@ func (c *protocolConnection) authenticate(
 ) error {
 	client, err := scram.SHA256.NewClient(cfg.user, cfg.password, "")
 	if err != nil {
-		return &authenticationError{msg: err.Error()}
+		return gelerr.NewAuthenticationError(err.Error(), nil)
 	}
 
 	conv := client.NewConversation()
 	scramMsg, err := conv.Step("")
 	if err != nil {
-		return &authenticationError{msg: err.Error()}
+		return gelerr.NewAuthenticationError(err.Error(), nil)
 	}
 
 	w := buff.NewWriter(c.writeMemory[:0])
@@ -179,16 +180,16 @@ func (c *protocolConnection) authenticate(
 			authStatus := r.PopUint32()
 			if authStatus != 0xb {
 				// the connection will not be usable after this x_x
-				return &authenticationError{msg: fmt.Sprintf(
+				return gelerr.NewAuthenticationError(fmt.Sprintf(
 					"unexpected authentication status: 0x%x", authStatus,
-				)}
+				), nil)
 			}
 
 			scramRcv := r.PopString()
 			scramMsg, err = conv.Step(scramRcv)
 			if err != nil {
 				// the connection will not be usable after this x_x
-				return &authenticationError{msg: err.Error()}
+				return gelerr.NewAuthenticationError(err.Error(), nil)
 			}
 
 			done.Signal()
@@ -228,13 +229,13 @@ func (c *protocolConnection) authenticate(
 				_, e := conv.Step(scramRcv)
 				if e != nil {
 					// the connection will not be usable after this x_x
-					return &authenticationError{msg: e.Error()}
+					return gelerr.NewAuthenticationError(e.Error(), nil)
 				}
 			default:
 				// the connection will not be usable after this x_x
-				return &authenticationError{msg: fmt.Sprintf(
+				return gelerr.NewAuthenticationError(fmt.Sprintf(
 					"unexpected authentication status: 0x%x", authStatus,
-				)}
+				), nil)
 			}
 		case ServerKeyData:
 			r.DiscardMessage() // key data

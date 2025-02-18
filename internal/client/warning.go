@@ -22,6 +22,8 @@ import (
 	"log"
 	"strings"
 	"unicode/utf8"
+
+	"github.com/edgedb/edgedb-go/internal/gelerr"
 )
 
 // Warning is used to decode warnings in the protocol.
@@ -36,14 +38,14 @@ type Warning struct {
 // Err returns a formatted error for a query
 func (w *Warning) Err(query string) error {
 	if w.Line == nil || w.Start == nil {
-		return errorFromCode(w.Code, w.Message)
+		return gelerr.ErrorFromCode(w.Code, w.Message)
 	}
 
 	lineNo := *w.Line - 1
 	byteNo := *w.Start
 	lines := strings.Split(query, "\n")
 	if lineNo >= len(lines) {
-		return errorFromCode(w.Code, w.Message)
+		return gelerr.ErrorFromCode(w.Code, w.Message)
 	}
 
 	// replace tabs with a single space
@@ -74,7 +76,7 @@ func (w *Warning) Err(query string) error {
 		hint,
 	)
 
-	return errorFromCode(w.Code, msg)
+	return gelerr.ErrorFromCode(w.Code, msg)
 }
 
 // LogWarnings is an gel.WarningHandler that logs warnings.

@@ -21,6 +21,8 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/edgedb/edgedb-go/gelerr"
+	gelerrint "github.com/edgedb/edgedb-go/internal/gelerr"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -109,23 +111,23 @@ query:2:1
 
 func TestNewErrorFromCodeAs(t *testing.T) {
 	msg := "example error message"
-	err := &duplicateCastDefinitionError{msg: msg}
+	err := gelerrint.NewDuplicateCastDefinitionError(msg, nil)
 	require.NotNil(t, err)
 
 	assert.EqualError(t, err, "gel.DuplicateCastDefinitionError: "+msg)
 
-	var edbErr Error
+	var edbErr gelerr.Error
 	require.True(t, errors.As(err, &edbErr))
 
-	assert.True(t, edbErr.Category(DuplicateCastDefinitionError))
-	assert.True(t, edbErr.Category(DuplicateDefinitionError))
-	assert.True(t, edbErr.Category(SchemaDefinitionError))
-	assert.True(t, edbErr.Category(QueryError))
+	assert.True(t, edbErr.Category(gelerr.DuplicateCastDefinitionError))
+	assert.True(t, edbErr.Category(gelerr.DuplicateDefinitionError))
+	assert.True(t, edbErr.Category(gelerr.SchemaDefinitionError))
+	assert.True(t, edbErr.Category(gelerr.QueryError))
 }
 
 func TestWrapAllAs(t *testing.T) {
-	err1 := &binaryProtocolError{msg: "bad bits!"}
-	err2 := &invalidValueError{msg: "guess again..."}
+	err1 := gelerrint.NewBinaryProtocolError("bad bits!", nil)
+	err2 := gelerrint.NewInvalidValueError("guess again...", nil)
 	err := wrapAll(err1, err2)
 
 	require.NotNil(t, err)
@@ -136,11 +138,11 @@ func TestWrapAllAs(t *testing.T) {
 		err.Error(),
 	)
 
-	var bin *binaryProtocolError
+	var bin *gelerrint.BinaryProtocolError
 	require.True(t, errors.As(err, &bin), "errors.As failed")
 	assert.Equal(t, "gel.BinaryProtocolError: bad bits!", bin.Error())
 
-	var val *invalidValueError
+	var val *gelerrint.InvalidValueError
 	require.True(t, errors.As(err, &val))
 	assert.Equal(t, "gel.InvalidValueError: guess again...", val.Error())
 }

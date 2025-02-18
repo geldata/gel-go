@@ -22,6 +22,8 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/edgedb/edgedb-go/gelerr"
+	gelerrint "github.com/edgedb/edgedb-go/internal/gelerr"
 	types "github.com/edgedb/edgedb-go/internal/geltypes"
 	"github.com/edgedb/edgedb-go/internal/introspect"
 )
@@ -137,7 +139,7 @@ func newQuery(
 	}
 
 	if err != nil {
-		return &query{}, &interfaceError{err: err}
+		return &query{}, gelerrint.NewInterfaceError("", err)
 	}
 
 	q.outType = q.out.Type()
@@ -170,9 +172,9 @@ func runQuery(
 		switch out.(type) {
 		case *[]byte, *types.OptionalBytes:
 		default:
-			return &interfaceError{msg: fmt.Sprintf(
+			return gelerrint.NewInterfaceError(fmt.Sprintf(
 				`the "out" argument must be *[]byte or *OptionalBytes, got %T`,
-				out)}
+				out), nil)
 		}
 	}
 
@@ -192,9 +194,9 @@ func runQuery(
 
 	err = c.granularFlow(ctx, q)
 
-	var edbErr Error
+	var edbErr gelerr.Error
 	if errors.As(err, &edbErr) &&
-		edbErr.Category(NoDataError) &&
+		edbErr.Category(gelerr.NoDataError) &&
 		(q.method == "QuerySingle" || q.method == "QuerySingleJSON") {
 		if opt, ok := out.(unseter); ok {
 			opt.Unset()

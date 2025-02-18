@@ -22,6 +22,7 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/edgedb/edgedb-go/gelerr"
 	"github.com/edgedb/edgedb-go/internal/geltypes"
 	types "github.com/edgedb/edgedb-go/internal/geltypes"
 	"github.com/stretchr/testify/assert"
@@ -115,9 +116,14 @@ func TestCloseClientConcurently(t *testing.T) {
 	go func() { errs <- p.Close() }()
 
 	assert.NoError(t, <-errs)
-	var edbErr Error
+	var edbErr gelerr.Error
 	require.True(t, errors.As(<-errs, &edbErr), "wrong error: %v", err)
-	assert.True(t, edbErr.Category(InterfaceError), "wrong error: %v", err)
+	assert.True(
+		t,
+		edbErr.Category(gelerr.InterfaceError),
+		"wrong error: %v",
+		err,
+	)
 }
 
 func TestClientTx(t *testing.T) {
@@ -234,7 +240,7 @@ func TestQuerySQL(t *testing.T) {
 		err = client.QuerySQL(ctx, "select 1", &res)
 		assert.EqualError(
 			t, err,
-			"edgedb.UnsupportedFeatureError: "+
+			"gel.UnsupportedFeatureError: "+
 				"the server does not support SQL queries, "+
 				"upgrade to 6.0 or newer",
 		)
@@ -242,7 +248,7 @@ func TestQuerySQL(t *testing.T) {
 		err = client.ExecuteSQL(ctx, "select 1")
 		assert.EqualError(
 			t, err,
-			"edgedb.UnsupportedFeatureError: "+
+			"gel.UnsupportedFeatureError: "+
 				"the server does not support SQL queries, "+
 				"upgrade to 6.0 or newer",
 		)

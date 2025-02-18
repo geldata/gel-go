@@ -26,6 +26,7 @@ import (
 	"github.com/edgedb/edgedb-go/internal/buff"
 	"github.com/edgedb/edgedb-go/internal/codecs"
 	"github.com/edgedb/edgedb-go/internal/descriptor"
+	"github.com/edgedb/edgedb-go/internal/gelerr"
 )
 
 var logMsgSeverityLookup = map[uint8]string{
@@ -49,9 +50,9 @@ func (c *protocolConnection) fallThrough(r *buff.Reader) error {
 		case "suggested_pool_concurrency":
 			i, err := strconv.Atoi(r.PopString())
 			if err != nil {
-				return &binaryProtocolError{err: fmt.Errorf(
+				return gelerr.NewBinaryProtocolError("", fmt.Errorf(
 					"decoding ParameterStatus suggested_pool_concurrency: %w",
-					err)}
+					err))
 			}
 			c.serverSettings.Set(name, i)
 		case "system_config":
@@ -60,13 +61,13 @@ func (c *protocolConnection) fallThrough(r *buff.Reader) error {
 			id := d.PopUUID()
 			desc, err := descriptor.Pop(d, c.protocolVersion)
 			if err != nil {
-				return &binaryProtocolError{err: fmt.Errorf(
+				return gelerr.NewBinaryProtocolError("", fmt.Errorf(
 					"decoding ParameterStatus system_config descriptor: %w",
-					err)}
+					err))
 			} else if desc.ID != id {
-				return &binaryProtocolError{err: fmt.Errorf(
+				return gelerr.NewBinaryProtocolError("", fmt.Errorf(
 					"system_config descriptor ids don't match: %v != %v",
-					id, desc.ID)}
+					id, desc.ID))
 			}
 
 			var cfg systemConfig
@@ -76,21 +77,21 @@ func (c *protocolConnection) fallThrough(r *buff.Reader) error {
 				codecs.Path("system_config"),
 			)
 			if err != nil {
-				return &binaryProtocolError{err: fmt.Errorf(
+				return gelerr.NewBinaryProtocolError("", fmt.Errorf(
 					"building codec from ParameterStatus "+
-						"system_config descriptor: %w", err)}
+						"system_config descriptor: %w", err))
 			}
 
 			err = codec.Decode(p.PopSlice(p.PopUint32()), unsafe.Pointer(&cfg))
 			if err != nil {
-				return &binaryProtocolError{err: fmt.Errorf(
-					"decoding ParameterStatus system_config: %w", err)}
+				return gelerr.NewBinaryProtocolError("", fmt.Errorf(
+					"decoding ParameterStatus system_config: %w", err))
 			}
 
 			c.systemConfig = cfg
 		default:
-			return &unexpectedMessageError{msg: fmt.Sprintf(
-				"got ParameterStatus for unknown parameter %q", name)}
+			return gelerr.NewUnexpectedMessageError(fmt.Sprintf(
+				"got ParameterStatus for unknown parameter %q", name), nil)
 		}
 	case LogMessage:
 		severity := logMsgSeverityLookup[r.PopUint8()]
@@ -100,7 +101,7 @@ func (c *protocolConnection) fallThrough(r *buff.Reader) error {
 		log.Println("SERVER MESSAGE", severity, code, message)
 	default:
 		msg := fmt.Sprintf("unexpected message type: 0x%x", r.MsgType)
-		return &unexpectedMessageError{msg: msg}
+		return gelerr.NewUnexpectedMessageError(msg, nil)
 	}
 
 	return nil
@@ -117,9 +118,9 @@ func (c *protocolConnection) fallThrough2pX(r *buff.Reader) error {
 		case "suggested_pool_concurrency":
 			i, err := strconv.Atoi(r.PopString())
 			if err != nil {
-				return &binaryProtocolError{err: fmt.Errorf(
+				return gelerr.NewBinaryProtocolError("", fmt.Errorf(
 					"decoding ParameterStatus suggested_pool_concurrency: %w",
-					err)}
+					err))
 			}
 			c.serverSettings.Set(name, i)
 		case "system_config":
@@ -128,13 +129,13 @@ func (c *protocolConnection) fallThrough2pX(r *buff.Reader) error {
 			id := d.PopUUID()
 			desc, err := descriptor.PopV2(d, c.protocolVersion)
 			if err != nil {
-				return &binaryProtocolError{err: fmt.Errorf(
+				return gelerr.NewBinaryProtocolError("", fmt.Errorf(
 					"decoding ParameterStatus system_config descriptor: %w",
-					err)}
+					err))
 			} else if desc.ID != id {
-				return &binaryProtocolError{err: fmt.Errorf(
+				return gelerr.NewBinaryProtocolError("", fmt.Errorf(
 					"system_config descriptor ids don't match: %v != %v",
-					id, desc.ID)}
+					id, desc.ID))
 			}
 
 			var cfg systemConfig
@@ -144,23 +145,23 @@ func (c *protocolConnection) fallThrough2pX(r *buff.Reader) error {
 				codecs.Path("system_config"),
 			)
 			if err != nil {
-				return &binaryProtocolError{err: fmt.Errorf(
+				return gelerr.NewBinaryProtocolError("", fmt.Errorf(
 					"building codec from ParameterStatus "+
-						"system_config descriptor: %w", err)}
+						"system_config descriptor: %w", err))
 			}
 
 			err = codec.Decode(
 				p.PopSlice(p.PopUint32()), unsafe.Pointer(&cfg),
 			)
 			if err != nil {
-				return &binaryProtocolError{err: fmt.Errorf(
-					"decoding ParameterStatus system_config: %w", err)}
+				return gelerr.NewBinaryProtocolError("", fmt.Errorf(
+					"decoding ParameterStatus system_config: %w", err))
 			}
 
 			c.systemConfig = cfg
 		default:
-			return &unexpectedMessageError{msg: fmt.Sprintf(
-				"got ParameterStatus for unknown parameter %q", name)}
+			return gelerr.NewUnexpectedMessageError(fmt.Sprintf(
+				"got ParameterStatus for unknown parameter %q", name), nil)
 		}
 	case LogMessage:
 		severity := logMsgSeverityLookup[r.PopUint8()]
@@ -170,7 +171,7 @@ func (c *protocolConnection) fallThrough2pX(r *buff.Reader) error {
 		log.Println("SERVER MESSAGE", severity, code, message)
 	default:
 		msg := fmt.Sprintf("unexpected message type: 0x%x", r.MsgType)
-		return &unexpectedMessageError{msg: msg}
+		return gelerr.NewUnexpectedMessageError(msg, nil)
 	}
 
 	return nil

@@ -20,6 +20,9 @@ import (
 	"context"
 	"errors"
 	"time"
+
+	"github.com/edgedb/edgedb-go/gelerr"
+	gelerrint "github.com/edgedb/edgedb-go/internal/gelerr"
 )
 
 type reconnectingConn struct {
@@ -39,7 +42,7 @@ func (c *reconnectingConn) reconnect(
 	single bool,
 ) error {
 	if c.isClosed {
-		return &interfaceError{msg: "Connection is closed"}
+		return gelerrint.NewInterfaceError("Connection is closed", nil)
 	}
 
 	maxTime := time.Now().Add(c.cfg.waitUntilAvailable)
@@ -47,7 +50,7 @@ func (c *reconnectingConn) reconnect(
 		maxTime = deadline
 	}
 
-	var edbErr Error
+	var edbErr gelerr.Error
 	for {
 		conn, err := connectWithTimeout(ctx, c.cfg, c.cacheCollection)
 		if err == nil {
@@ -58,8 +61,8 @@ func (c *reconnectingConn) reconnect(
 			errors.Is(err, context.Canceled) ||
 			errors.Is(err, context.DeadlineExceeded) ||
 			!errors.As(err, &edbErr) ||
-			!edbErr.Category(ClientConnectionError) ||
-			!edbErr.HasTag(ShouldReconnect) ||
+			!edbErr.Category(gelerr.ClientConnectionError) ||
+			!edbErr.HasTag(gelerr.ShouldReconnect) ||
 			time.Now().After(maxTime) {
 			return err
 		}
@@ -100,7 +103,10 @@ func (c *reconnectingConn) granularFlow(
 // closed.
 func (c *reconnectingConn) Close() (err error) {
 	if c.isClosed {
-		return &interfaceError{msg: "connection released more than once"}
+		return gelerrint.NewInterfaceError(
+			"connection released more than once",
+			nil,
+		)
 	}
 
 	c.isClosed = true

@@ -23,6 +23,7 @@ import (
 	"github.com/edgedb/edgedb-go/internal/buff"
 	"github.com/edgedb/edgedb-go/internal/codecs"
 	"github.com/edgedb/edgedb-go/internal/descriptor"
+	"github.com/edgedb/edgedb-go/internal/gelerr"
 	"github.com/edgedb/edgedb-go/internal/state"
 )
 
@@ -76,8 +77,8 @@ func (c *protocolConnection) parse1pX(
 	w.PushUUID(c.stateCodec.DescriptorID())
 	err := c.stateCodec.Encode(w, q.state, codecs.Path("state"), false)
 	if err != nil {
-		return nil, &binaryProtocolError{err: fmt.Errorf(
-			"invalid connection state: %w", err)}
+		return nil, gelerr.NewBinaryProtocolError("", fmt.Errorf(
+			"invalid connection state: %w", err))
 	}
 	w.EndMessage()
 
@@ -85,7 +86,7 @@ func (c *protocolConnection) parse1pX(
 	w.EndMessage()
 
 	if e := c.soc.WriteAll(w.Unwrap()); e != nil {
-		return nil, &clientConnectionClosedError{err: e}
+		return nil, gelerr.NewClientConnectionClosedError("", e)
 	}
 
 	var desc *CommandDescription
@@ -142,10 +143,10 @@ func (c *protocolConnection) decodeCommandDataDescriptionMsg1pX(
 	if err != nil {
 		return nil, err
 	} else if descs.In.ID != id {
-		return nil, &clientError{msg: fmt.Sprintf(
+		return nil, gelerr.NewClientError(fmt.Sprintf(
 			"unexpected in descriptor id: %v",
 			descs.In.ID,
-		)}
+		), nil)
 	}
 
 	id = r.PopUUID()
@@ -156,19 +157,19 @@ func (c *protocolConnection) decodeCommandDataDescriptionMsg1pX(
 	if err != nil {
 		return nil, err
 	} else if descs.Out.ID != id {
-		return nil, &clientError{msg: fmt.Sprintf(
+		return nil, gelerr.NewClientError(fmt.Sprintf(
 			"unexpected out descriptor id: got %v but expected %v",
 			descs.Out.ID,
 			id,
-		)}
+		), nil)
 	}
 
 	if q.expCard == AtMostOne && descs.Card == Many {
-		return nil, &resultCardinalityMismatchError{msg: fmt.Sprintf(
+		return nil, gelerr.NewResultCardinalityMismatchError(fmt.Sprintf(
 			"the query has cardinality %v "+
 				"which does not match the expected cardinality %v",
 			descs.Card,
-			q.expCard)}
+			q.expCard), nil)
 	}
 
 	c.cacheTypeIDs(q, idPair{in: descs.In.ID, out: descs.Out.ID})
@@ -195,14 +196,14 @@ func (c *protocolConnection) execute1pX(
 	w.PushUUID(c.stateCodec.DescriptorID())
 	err := c.stateCodec.Encode(w, q.state, codecs.Path("state"), false)
 	if err != nil {
-		return &binaryProtocolError{err: fmt.Errorf(
-			"invalid connection state: %w", err)}
+		return gelerr.NewBinaryProtocolError("", fmt.Errorf(
+			"invalid connection state: %w", err))
 	}
 
 	w.PushUUID(cdcs.in.DescriptorID())
 	w.PushUUID(cdcs.out.DescriptorID())
 	if e := cdcs.in.Encode(w, q.args, codecs.Path("args"), true); e != nil {
-		return &invalidArgumentError{msg: e.Error()}
+		return gelerr.NewInvalidArgumentError(e.Error(), nil)
 	}
 	w.EndMessage()
 
@@ -210,7 +211,7 @@ func (c *protocolConnection) execute1pX(
 	w.EndMessage()
 
 	if e := c.soc.WriteAll(w.Unwrap()); e != nil {
-		return &clientConnectionClosedError{err: e}
+		return gelerr.NewClientConnectionClosedError("", e)
 	}
 
 	tmp := q.out
@@ -286,7 +287,7 @@ func (c *protocolConnection) codecsFromDescriptors1pX(
 	var err error
 	cdcs.in, err = codecs.BuildEncoder(descs.In, c.protocolVersion)
 	if err != nil {
-		return nil, &invalidArgumentError{msg: err.Error()}
+		return nil, gelerr.NewInvalidArgumentError(err.Error(), nil)
 	}
 
 	if q.fmt == JSON {
@@ -306,7 +307,7 @@ func (c *protocolConnection) codecsFromDescriptors1pX(
 				"the \"out\" argument does not match query schema: %v",
 				err,
 			)
-			return nil, &invalidArgumentError{msg: err.Error()}
+			return nil, gelerr.NewInvalidArgumentError(err.Error(), nil)
 		}
 	}
 
@@ -347,18 +348,18 @@ func (c *protocolConnection) decodeStateDataDescription(r *buff.Reader) error {
 		c.protocolVersion,
 	)
 	if err != nil {
-		return &binaryProtocolError{err: fmt.Errorf(
-			"decoding ParameterStatus state_description: %w", err)}
+		return gelerr.NewBinaryProtocolError("", fmt.Errorf(
+			"decoding ParameterStatus state_description: %w", err))
 	} else if desc.ID != id {
-		return &binaryProtocolError{err: fmt.Errorf(
-			"state_description ids don't match: %v != %v", id, desc.ID)}
+		return gelerr.NewBinaryProtocolError("", fmt.Errorf(
+			"state_description ids don't match: %v != %v", id, desc.ID))
 	}
 
 	codec, err := state.BuildEncoder(desc, codecs.Path("state"))
 	if err != nil {
-		return &binaryProtocolError{err: fmt.Errorf(
+		return gelerr.NewBinaryProtocolError("", fmt.Errorf(
 			"building decoder from ParameterStatus state_description: %w",
-			err)}
+			err))
 	}
 
 	c.stateCodec = codec
@@ -383,7 +384,7 @@ func (c *protocolConnection) codecsFromIDs(
 			c.protocolVersion,
 		)
 		if err != nil {
-			return nil, &invalidArgumentError{msg: err.Error()}
+			return nil, gelerr.NewInvalidArgumentError(err.Error(), nil)
 		}
 	}
 
@@ -398,8 +399,10 @@ func (c *protocolConnection) codecsFromIDs(
 		path := codecs.Path(q.outType.String())
 		out, err = codecs.BuildDecoder(d, q.outType, path)
 		if err != nil {
-			return nil, &invalidArgumentError{msg: fmt.Sprintf(
-				"the \"out\" argument does not match query schema: %v", err)}
+			return nil, gelerr.NewInvalidArgumentError(fmt.Sprintf(
+				"the \"out\" argument does not match query schema: %v",
+				err,
+			), nil)
 		}
 	}
 

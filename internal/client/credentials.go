@@ -24,6 +24,7 @@ import (
 	"math"
 	"os"
 
+	"github.com/edgedb/edgedb-go/internal/gelerr"
 	types "github.com/edgedb/edgedb-go/internal/geltypes"
 )
 
@@ -42,7 +43,7 @@ func readCredentials(path string) (*credentials, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		msg := fmt.Sprintf("cannot read credentials at %q: %v", path, err)
-		return nil, &configurationError{msg: msg}
+		return nil, gelerr.NewConfigurationError(msg, nil)
 	}
 
 	return parseCredentials(data, path)
@@ -76,7 +77,7 @@ Failed:
 			"cannot parse credentials: %v", err)
 	}
 
-	return nil, &configurationError{msg: msg}
+	return nil, gelerr.NewConfigurationError(msg, nil)
 }
 
 func validateCredentials(data map[string]interface{}) (*credentials, error) {

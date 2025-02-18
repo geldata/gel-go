@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/edgedb/edgedb-go/internal/cache"
+	gelerrint "github.com/edgedb/edgedb-go/internal/gelerr"
 	types "github.com/edgedb/edgedb-go/internal/geltypes"
 )
 
@@ -134,7 +135,7 @@ func (p *Client) acquire(ctx context.Context) (*transactableConn, error) {
 	defer p.isClosedMutex.RUnlock()
 
 	if *p.isClosed {
-		return nil, &interfaceError{msg: "client closed"}
+		return nil, gelerrint.NewInterfaceError("client closed", nil)
 	}
 
 	p.potentialConnsMutext.Lock()
@@ -282,7 +283,7 @@ func (p *Client) Close() error {
 	defer p.isClosedMutex.Unlock()
 
 	if *p.isClosed {
-		return &interfaceError{msg: "client closed"}
+		return gelerrint.NewInterfaceError("client closed", nil)
 	}
 	*p.isClosed = true
 

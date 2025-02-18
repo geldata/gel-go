@@ -27,6 +27,34 @@ import (
 	"github.com/edgedb/edgedb-go/internal/errgen"
 )
 
+func printCategories(types []*errgen.Type) {
+	fmt.Print(`
+
+const (`)
+
+	for _, typ := range types {
+		fmt.Printf(`
+	%[1]v ErrorCategory = "errors::%[1]v"`, typ.Name)
+	}
+
+	fmt.Print(`
+)`)
+}
+
+func printTags(tags []errgen.Tag) {
+	fmt.Print(`
+
+const (`)
+
+	for _, tag := range tags {
+		fmt.Printf(`
+	%[1]v ErrorTag = %[2]q`, tag.Identifyer(), tag)
+	}
+
+	fmt.Print(`
+)`)
+}
+
 //nolint:typecheck
 func main() {
 	var data [][]interface{}
@@ -56,19 +84,13 @@ func main() {
 // This file is auto generated. Do not edit!
 // run 'make errors' to regenerate
 
-package gel
-
-import gel "github.com/edgedb/edgedb-go"
-
-const (
+// internal/cmd/export should ignore this file
+//go:build !export
 `)
-	for _, typ := range types {
-		fmt.Printf("\t%s = gel.%s\n", typ.Name, typ.Name)
-	}
 
-	for _, tag := range tags {
-		fmt.Printf("\t%s = gel.%s\n", tag.Identifyer(), tag.Identifyer())
-	}
-
-	fmt.Println(")")
+	fmt.Println()
+	fmt.Println("package gelerr")
+	fmt.Println()
+	printTags(tags)
+	printCategories(types)
 }

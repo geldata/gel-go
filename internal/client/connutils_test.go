@@ -34,6 +34,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/edgedb/edgedb-go/gelerr"
+	gelerrint "github.com/edgedb/edgedb-go/internal/gelerr"
 	"github.com/edgedb/edgedb-go/internal/geltypes"
 	"github.com/edgedb/edgedb-go/internal/snc"
 	"github.com/stretchr/testify/assert"
@@ -244,7 +246,7 @@ func TestConUtils(t *testing.T) {
 			name: "DSN with multiple hosts",
 			dsn:  "edgedb://user@host1,host2/db",
 			expected: Result{
-				err: &configurationError{},
+				err: gelerrint.NewConfigurationError("", nil),
 				errMessage: `gel.ConfigurationError: invalid DSN: ` +
 					`invalid host: "host1,host2"`,
 			},
@@ -253,7 +255,7 @@ func TestConUtils(t *testing.T) {
 			name: "DSN with multiple hosts and ports",
 			dsn:  "edgedb://user@host1:1111,host2:2222/db",
 			expected: Result{
-				err: &configurationError{},
+				err: gelerrint.NewConfigurationError("", nil),
 				errMessage: `gel.ConfigurationError: invalid DSN: ` +
 					`invalid host: "host1:1111,host2"`,
 			},
@@ -266,7 +268,7 @@ func TestConUtils(t *testing.T) {
 			},
 			dsn: "",
 			expected: Result{
-				err: &configurationError{},
+				err: gelerrint.NewConfigurationError("", nil),
 				errMessage: `gel.ConfigurationError: ` +
 					`invalid host: "host1:1111,host2:2222"`,
 			},
@@ -278,7 +280,7 @@ func TestConUtils(t *testing.T) {
 			},
 			dsn: "edgedb:///db?host=host1:1111,host2:2222",
 			expected: Result{
-				err: &configurationError{},
+				err: gelerrint.NewConfigurationError("", nil),
 				errMessage: `gel.ConfigurationError: invalid DSN: ` +
 					`invalid host: "host1:1111,host2:2222"`,
 			},
@@ -293,7 +295,7 @@ func TestConUtils(t *testing.T) {
 				Host: "host1,host2",
 			},
 			expected: Result{
-				err: &configurationError{},
+				err: gelerrint.NewConfigurationError("", nil),
 				errMessage: `gel.ConfigurationError: ` +
 					`mutually exclusive connection options specified: ` +
 					`dsn and gel.Options.Host`,
@@ -353,7 +355,7 @@ func TestConUtils(t *testing.T) {
 			name: "DSN with unix socket",
 			dsn:  "edgedb:///dbname?host=/unix_sock/test&user=spam",
 			expected: Result{
-				err: &configurationError{},
+				err: gelerrint.NewConfigurationError("", nil),
 				errMessage: `gel.ConfigurationError: invalid DSN: ` +
 					`invalid host: unix socket paths not supported, ` +
 					`got "/unix_sock/test"`,
@@ -363,7 +365,7 @@ func TestConUtils(t *testing.T) {
 			name: "DSN requires edgedb scheme",
 			dsn:  "pq:///dbname?host=/unix_sock/test&user=spam",
 			expected: Result{
-				err: &configurationError{},
+				err: gelerrint.NewConfigurationError("", nil),
 				errMessage: "gel.ConfigurationError: " +
 					`invalid DSN: scheme is expected to be "gel", got "pq"`,
 			},
@@ -372,7 +374,7 @@ func TestConUtils(t *testing.T) {
 			name: "DSN query parameter with unix socket",
 			dsn:  "edgedb://user@?port=56226&host=%2Ftmp",
 			expected: Result{
-				err: &configurationError{},
+				err: gelerrint.NewConfigurationError("", nil),
 				errMessage: `gel.ConfigurationError: invalid DSN: ` +
 					`invalid host: unix socket paths not supported, ` +
 					`got "/tmp"`,
@@ -730,7 +732,7 @@ func TestConnectionParameterResolution(t *testing.T) {
 			}
 
 			if testcase["error"] != nil {
-				errType := &configurationError{}
+				errType := gelerrint.NewConfigurationError("", nil)
 				require.IsType(t, errType, err)
 				e := testcase["error"].(map[string]interface{})
 				id := e["type"].(string)
@@ -765,12 +767,12 @@ func TestConnectTimeout(t *testing.T) {
 
 	require.NotNil(t, err, "connection didn't timeout")
 
-	var edbErr Error
+	var edbErr gelerr.Error
 
 	require.True(t, errors.As(err, &edbErr), "wrong error: %v", err)
 	assert.True(
 		t,
-		edbErr.Category(ClientConnectionTimeoutError),
+		edbErr.Category(gelerr.ClientConnectionTimeoutError),
 		"wrong error: %v",
 		err,
 	)
@@ -792,11 +794,11 @@ func TestConnectRefused(t *testing.T) {
 	require.NotNil(t, err, "connection wasn't refused")
 
 	msg := "wrong error: " + err.Error()
-	var edbErr Error
+	var edbErr gelerr.Error
 	require.True(t, errors.As(err, &edbErr), msg)
 	assert.True(
 		t,
-		edbErr.Category(ClientConnectionFailedError),
+		edbErr.Category(gelerr.ClientConnectionFailedError),
 		msg,
 	)
 }
@@ -816,11 +818,11 @@ func TestConnectInvalidName(t *testing.T) {
 
 	require.NotNil(t, err, "name was resolved")
 
-	var edbErr Error
+	var edbErr gelerr.Error
 	require.True(t, errors.As(err, &edbErr), "wrong error: %v", err)
 	assert.True(
 		t,
-		edbErr.Category(ClientConnectionFailedTemporarilyError),
+		edbErr.Category(gelerr.ClientConnectionFailedTemporarilyError),
 		"wrong error: %v",
 		err,
 	)
@@ -850,11 +852,11 @@ func TestConnectRefusedUnixSocket(t *testing.T) {
 
 	require.NotNil(t, err, "connection wasn't refused")
 
-	var edbErr Error
+	var edbErr gelerr.Error
 	require.True(t, errors.As(err, &edbErr), "wrong error: %v", err)
 	assert.True(
 		t,
-		edbErr.Category(ConfigurationError),
+		edbErr.Category(gelerr.ConfigurationError),
 		"wrong error: %v",
 		err,
 	)

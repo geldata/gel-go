@@ -62,15 +62,6 @@ type (
 	// as an int64 microsecond count.
 	Duration = geltypes.Duration
 
-	// Error is the error type returned from gel.
-	Error = gel.Error
-
-	// ErrorCategory values represent Gel's error types.
-	ErrorCategory = gel.ErrorCategory
-
-	// ErrorTag is the argument type to Error.HasTag().
-	ErrorTag = gel.ErrorTag
-
 	// Executor is a common interface between *Client and *Tx,
 	// that can run queries on an Gel database.
 	Executor = gel.Executor

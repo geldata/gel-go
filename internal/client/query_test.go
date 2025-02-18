@@ -24,6 +24,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/edgedb/edgedb-go/gelerr"
 	types "github.com/edgedb/edgedb-go/internal/geltypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -353,7 +354,7 @@ malformed query;
 ^ error`,
 	)
 
-	var expected Error
+	var expected gelerr.Error
 	assert.True(t, errors.As(err, &expected))
 }
 

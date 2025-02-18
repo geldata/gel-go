@@ -21,6 +21,8 @@ import (
 	"math"
 	"time"
 
+	"github.com/edgedb/edgedb-go/gelerr"
+	gelerrint "github.com/edgedb/edgedb-go/internal/gelerr"
 	types "github.com/edgedb/edgedb-go/internal/geltypes"
 )
 
@@ -273,16 +275,17 @@ func (o RetryOptions) WithCondition( // nolint:gocritic
 	return o
 }
 
-func (o RetryOptions) ruleForException(err Error) (RetryRule, error) {
+func (o RetryOptions) ruleForException(err gelerr.Error) (RetryRule, error) {
 	switch {
-	case err.Category(TransactionConflictError):
+	case err.Category(gelerr.TransactionConflictError):
 		return o.txConflict, nil
-	case err.Category(ClientError):
+	case err.Category(gelerr.ClientError):
 		return o.network, nil
 	default:
-		return RetryRule{}, &clientError{
-			msg: fmt.Sprintf("unexpected error type: %T", err),
-		}
+		return RetryRule{}, gelerrint.NewClientError(
+			fmt.Sprintf("unexpected error type: %T", err),
+			nil,
+		)
 	}
 }
 

@@ -14,8 +14,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build tools
-
 package main
 
 import (
@@ -27,29 +25,19 @@ import (
 	"github.com/edgedb/edgedb-go/internal/errgen"
 )
 
-func printCategories(types []*errgen.Type) {
-	fmt.Print(`
-
-const (`)
-
-	for _, typ := range types {
-		fmt.Printf(`
-	%[1]v ErrorCategory = "errors::%[1]v"`, typ.Name)
-	}
-
-	fmt.Print(`
-)`)
-}
-
 func printError(errType *errgen.Type) {
 	fmt.Printf(`
 
-type %[2]v struct {
+func New%[1]s(msg string, err error) error {
+	return &%[1]s{msg, err}
+}
+
+type %[1]v struct {
 	msg string
 	err error
 }
 
-func (e *%[2]v) Error() string {
+func (e *%[1]v) Error() string {
 	msg := e.msg
 	if e.err != nil {
 		msg = e.err.Error()
@@ -58,19 +46,19 @@ func (e *%[2]v) Error() string {
 	return "gel.%[1]v: " + msg
 }
 
-func (e *%[2]v) Unwrap() error { return e.err }
-`, errType.Name, errType.PrivateName())
+func (e *%[1]v) Unwrap() error { return e.err }
+`, errType.Name)
 
 	fmt.Printf(`
 
-func (e *%v) Category(c ErrorCategory) bool {
+func (e *%v) Category(c gelerr.ErrorCategory) bool {
 	switch c {
-	case %v:
-		return true`, errType.PrivateName(), errType.Name)
+	case gelerr.%v:
+		return true`, errType.Name, errType.Name)
 
 	for _, ancestor := range errType.Ancestors {
 		fmt.Printf(`
-	case %v:
+	case gelerr.%v:
 		return true`, ancestor)
 	}
 
@@ -83,16 +71,16 @@ func (e *%v) Category(c ErrorCategory) bool {
 	for _, ancestor := range errType.Ancestors {
 		fmt.Printf(`
 func (e *%v) isEdgeDB%v() {}
-`, errType.PrivateName(), ancestor)
+`, errType.Name, ancestor)
 	}
 
 	fmt.Printf(`
-func (e *%v) HasTag(tag ErrorTag) bool {
-	switch tag {`, errType.PrivateName())
+func (e *%v) HasTag(tag gelerr.ErrorTag) bool {
+	switch tag {`, errType.Name)
 
 	for _, tag := range errType.Tags {
 		fmt.Printf(`
-	case %v:
+	case gelerr.%v:
 		return true`, tag.Identifyer())
 	}
 
@@ -112,7 +100,7 @@ func printErrors(types []*errgen.Type) {
 func printCodeMap(types []*errgen.Type) {
 	fmt.Print(`
 
-func errorFromCode(code uint32, msg string) error {
+func ErrorFromCode(code uint32, msg string) error {
 	switch code {`)
 
 	for _, typ := range types {
@@ -120,12 +108,12 @@ func errorFromCode(code uint32, msg string) error {
 	case 0x%02x_%02x_%02x_%02x:
 		return &%v{msg: msg}`,
 			typ.Code[0], typ.Code[1], typ.Code[2], typ.Code[3],
-			typ.PrivateName(),
+			typ.Name,
 		)
 	}
 	code := `
 	default:
-		return &unexpectedMessageError{
+		return &UnexpectedMessageError{
 			msg: fmt.Sprintf(
 				"invalid error code 0x%x with message %q", code, msg,
 			),
@@ -133,20 +121,6 @@ func errorFromCode(code uint32, msg string) error {
 	}
 }`
 	fmt.Print(code)
-}
-
-func printTags(tags []errgen.Tag) {
-	fmt.Print(`
-
-const (`)
-
-	for _, tag := range tags {
-		fmt.Printf(`
-	%[1]v ErrorTag = %[2]q`, tag.Identifyer(), tag)
-	}
-
-	fmt.Print(`
-)`)
 }
 
 //nolint:typecheck
@@ -157,7 +131,6 @@ func main() {
 	}
 
 	types := errgen.ParseTypes(data)
-	tags := errgen.ParseTags(data)
 
 	fmt.Print(`// This source file is part of the EdgeDB open source project.
 //
@@ -183,11 +156,12 @@ func main() {
 `)
 
 	fmt.Println()
-	fmt.Println("package gel")
+	fmt.Println("package gelerr")
 	fmt.Println()
-	fmt.Print(`import "fmt"`)
-	printTags(tags)
-	printCategories(types)
+	fmt.Print(`import (
+	"fmt"
+	"github.com/edgedb/edgedb-go/gelerr"
+	)`)
 	printErrors(types)
 	printCodeMap(types)
 }

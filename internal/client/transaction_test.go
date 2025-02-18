@@ -23,6 +23,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/edgedb/edgedb-go/gelerr"
 	types "github.com/edgedb/edgedb-go/internal/geltypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -39,11 +40,11 @@ func TestTxRollesBack(t *testing.T) {
 		return tx.Execute(ctx, "SELECT 1 / 0;")
 	})
 
-	var edbErr Error
+	var edbErr gelerr.Error
 	require.True(t, errors.As(err, &edbErr), "wrong error: %v", err)
 	require.True(
 		t,
-		edbErr.Category(DivisionByZeroError),
+		edbErr.Category(gelerr.DivisionByZeroError),
 		"wrong error: %v",
 		err,
 	)
@@ -278,7 +279,7 @@ func TestSQLTx(t *testing.T) {
 		})
 		assert.EqualError(
 			t, err,
-			"edgedb.UnsupportedFeatureError: "+
+			"gel.UnsupportedFeatureError: "+
 				"the server does not support SQL queries, "+
 				"upgrade to 6.0 or newer",
 		)

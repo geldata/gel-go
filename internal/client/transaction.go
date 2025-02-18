@@ -19,6 +19,8 @@ package gel
 import (
 	"context"
 	"fmt"
+
+	"github.com/edgedb/edgedb-go/internal/gelerr"
 )
 
 // TxBlock is work to be done in a transaction.
@@ -42,17 +44,17 @@ type txState struct {
 func (s *txState) assertNotDone(opName string) error {
 	switch s.txStatus {
 	case committedTx:
-		return &interfaceError{msg: fmt.Sprintf(
+		return gelerr.NewInterfaceError(fmt.Sprintf(
 			"cannot %v; the transaction is already committed", opName,
-		)}
+		), nil)
 	case rolledBackTx:
-		return &interfaceError{msg: fmt.Sprintf(
+		return gelerr.NewInterfaceError(fmt.Sprintf(
 			"cannot %v; the transaction is already rolled back", opName,
-		)}
+		), nil)
 	case failedTx:
-		return &interfaceError{msg: fmt.Sprintf(
+		return gelerr.NewInterfaceError(fmt.Sprintf(
 			"cannot %v; the transaction is in error state", opName,
-		)}
+		), nil)
 	default:
 		return nil
 	}
@@ -64,9 +66,9 @@ func (s *txState) assertStarted(opName string) error {
 	case startedTx:
 		return nil
 	case newTx:
-		return &interfaceError{msg: fmt.Sprintf(
+		return gelerr.NewInterfaceError(fmt.Sprintf(
 			"cannot %v; the transaction is not yet started", opName,
-		)}
+		), nil)
 	default:
 		return s.assertNotDone(opName)
 	}
@@ -118,9 +120,10 @@ func (t *Tx) start(ctx context.Context) error {
 	}
 
 	if t.txStatus == startedTx {
-		return &interfaceError{
-			msg: "cannot start; the transaction is already started",
-		}
+		return gelerr.NewInterfaceError(
+			"cannot start; the transaction is already started",
+			nil,
+		)
 	}
 
 	query := t.options.startTxQuery()
