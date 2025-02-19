@@ -28,8 +28,11 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-func clientHandshakeMessage(
-	params map[string]string, alocatedMemory []byte) (*buff.Writer, error) {
+// ClientHandshakeMessage writes a client handshake message.
+func ClientHandshakeMessage(
+	params map[string]string,
+	alocatedMemory []byte,
+) (*buff.Writer, error) {
 	if len(params) > math.MaxUint16 {
 		return nil, errors.New("too many connection parameters")
 	}
@@ -42,8 +45,8 @@ func clientHandshakeMessage(
 	slices.Sort(paramKeys)
 	w := buff.NewWriter(alocatedMemory)
 	w.BeginMessage(uint8(ClientHandshake))
-	w.PushUint16(protocolVersionMax.Major)
-	w.PushUint16(protocolVersionMax.Minor)
+	w.PushUint16(ProtocolVersionMax.Major)
+	w.PushUint16(ProtocolVersionMax.Minor)
 	w.PushUint16(numParams)
 	for _, pk := range paramKeys {
 		w.PushString(pk)
@@ -65,12 +68,12 @@ func (c *protocolConnection) connect(r *buff.Reader, cfg *connConfig) error {
 		"secret_key": cfg.secretKey,
 	}
 
-	w, err := clientHandshakeMessage(params, c.writeMemory[:0])
+	w, err := ClientHandshakeMessage(params, c.writeMemory[:0])
 	if err != nil {
 		return err
 	}
 
-	c.protocolVersion = protocolVersionMax
+	c.protocolVersion = ProtocolVersionMax
 
 	if err = c.soc.WriteAll(w.Unwrap()); err != nil {
 		return err
@@ -90,7 +93,7 @@ func (c *protocolConnection) connect(r *buff.Reader, cfg *connConfig) error {
 			// if the protocol version can't be supported.
 			// https://www.edgedb.com/docs/internals/protocol/overview
 			if protocolVersion.LT(protocolVersionMin) ||
-				protocolVersion.GT(protocolVersionMax) {
+				protocolVersion.GT(ProtocolVersionMax) {
 				_ = c.soc.Close()
 				msg := fmt.Sprintf(
 					"unsupported protocol version: %v.%v",

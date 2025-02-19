@@ -21,14 +21,15 @@ import (
 	"errors"
 	"time"
 
+	"github.com/edgedb/edgedb-go/gelcfg"
 	"github.com/edgedb/edgedb-go/gelerr"
 	gelerrint "github.com/edgedb/edgedb-go/internal/gelerr"
 )
 
 type transactableConn struct {
 	*reconnectingConn
-	txOpts    TxOptions
-	retryOpts RetryOptions
+	txOpts    gelcfg.TxOptions
+	retryOpts gelcfg.RetryOptions
 }
 
 func (c *transactableConn) granularFlow(ctx context.Context, q *query) error {
@@ -58,16 +59,16 @@ func (c *transactableConn) granularFlow(ctx context.Context, q *query) error {
 			edbErr.HasTag(gelerr.ShouldRetry) &&
 			(capabilities == 0 ||
 				edbErr.Category(gelerr.TransactionConflictError)) {
-			rule, e := c.retryOpts.ruleForException(edbErr)
+			rule, e := c.retryOpts.RuleForException(edbErr)
 			if e != nil {
 				return e
 			}
 
-			if i >= rule.attempts {
+			if i >= rule.Attempts() {
 				return err
 			}
 
-			time.Sleep(rule.backoff(i))
+			time.Sleep(rule.Backoff()(i))
 			continue
 		}
 
@@ -77,17 +78,17 @@ func (c *transactableConn) granularFlow(ctx context.Context, q *query) error {
 	return gelerrint.NewClientError("unreachable", nil)
 }
 
-func (c *transactableConn) tx(
+func (c *transactableConn) Tx(
 	ctx context.Context,
 	action TxBlock,
 	state map[string]interface{},
-	warningHandler WarningHandler,
+	warningHandler gelcfg.WarningHandler,
 ) (err error) {
 	conn, err := c.borrow("transaction")
 	if err != nil {
 		return err
 	}
-	defer func() { err = firstError(err, c.unborrow()) }()
+	defer func() { err = FirstError(err, c.unborrow()) }()
 
 	var edbErr gelerr.Error
 	for i := 1; true; i++ {
@@ -133,16 +134,16 @@ func (c *transactableConn) tx(
 
 	Error:
 		if errors.As(err, &edbErr) && edbErr.HasTag(gelerr.ShouldRetry) {
-			rule, e := c.retryOpts.ruleForException(edbErr)
+			rule, e := c.retryOpts.RuleForException(edbErr)
 			if e != nil {
 				return e
 			}
 
-			if i >= rule.attempts {
+			if i >= rule.Attempts() {
 				return err
 			}
 
-			time.Sleep(rule.backoff(i))
+			time.Sleep(rule.Backoff()(i))
 			continue
 		}
 

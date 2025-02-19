@@ -21,6 +21,7 @@ import (
 	"log"
 
 	gel "github.com/edgedb/edgedb-go"
+	"github.com/edgedb/edgedb-go/gelcfg"
 )
 
 // Transactions can be executed using the Tx() method. Note that queries are
@@ -32,7 +33,7 @@ import (
 // RetryOptions.
 func ExampleTx() {
 	ctx := context.Background()
-	client, err := gel.CreateClient(ctx, gel.Options{})
+	client, err := gel.CreateClient(ctx, gelcfg.Options{})
 	if err != nil {
 		log.Println(err)
 	}

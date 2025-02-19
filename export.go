@@ -24,36 +24,7 @@ import (
 	"github.com/edgedb/edgedb-go/internal/geltypes"
 )
 
-const (
-	// NetworkError indicates that the transaction was interupted
-	// by a network error.
-	NetworkError = gel.NetworkError
-
-	// Serializable is the only isolation level
-	Serializable = gel.Serializable
-
-	// TLSModeDefault makes security mode inferred from other options
-	TLSModeDefault = gel.TLSModeDefault
-
-	// TLSModeInsecure results in no certificate verification whatsoever
-	TLSModeInsecure = gel.TLSModeInsecure
-
-	// TLSModeNoHostVerification enables certificate verification
-	// against CAs, but hostname matching is not performed.
-	TLSModeNoHostVerification = gel.TLSModeNoHostVerification
-
-	// TLSModeStrict enables full certificate and hostname verification.
-	TLSModeStrict = gel.TLSModeStrict
-
-	// TxConflict indicates that the server could not complete a transaction
-	// because it encountered a deadlock or serialization error.
-	TxConflict = gel.TxConflict
-)
-
 type (
-	// Client is a connection pool and is safe for concurrent use.
-	Client = gel.Client
-
 	// DateDuration represents the elapsed time between two dates in a fuzzy human
 	// way.
 	DateDuration = geltypes.DateDuration
@@ -65,10 +36,6 @@ type (
 	// Executor is a common interface between *Client and *Tx,
 	// that can run queries on an Gel database.
 	Executor = gel.Executor
-
-	// IsolationLevel documentation can be found here
-	// https://www.edgedb.com/docs/reference/edgeql/tx_start#parameters
-	IsolationLevel = gel.IsolationLevel
 
 	// LocalDate is a date without a time zone.
 	// https://www.edgedb.com/docs/stdlib/datetime#type::cal::local_date
@@ -84,9 +51,6 @@ type (
 
 	// Memory represents memory in bytes.
 	Memory = geltypes.Memory
-
-	// ModuleAlias is an alias name and module name pair.
-	ModuleAlias = gel.ModuleAlias
 
 	// Optional represents a shape field that is not required.
 	// Optional is embedded in structs to make them optional. For example:
@@ -197,9 +161,6 @@ type (
 	// parameters when a shape field is not required.
 	OptionalUUID = geltypes.OptionalUUID
 
-	// Options for connecting to a Gel server
-	Options = gel.Options
-
 	// RangeDateTime is an interval of time.Time values.
 	RangeDateTime = geltypes.RangeDateTime
 
@@ -225,65 +186,18 @@ type (
 	// human way.
 	RelativeDuration = geltypes.RelativeDuration
 
-	// RetryBackoff returns the duration to wait after the nth attempt
-	// before making the next attempt when retrying a transaction.
-	RetryBackoff = gel.RetryBackoff
-
-	// RetryCondition represents scenarios that can cause a transaction
-	// run in Tx() methods to be retried.
-	RetryCondition = gel.RetryCondition
-
-	// RetryOptions configures how Tx() retries failed transactions.  Use
-	// NewRetryOptions to get a default RetryOptions value instead of creating one
-	// yourself.
-	RetryOptions = gel.RetryOptions
-
-	// RetryRule determines how transactions should be retried when run in Tx()
-	// methods. See Client.Tx() for details.
-	RetryRule = gel.RetryRule
-
-	// TLSOptions contains the parameters needed to configure TLS on Gel
-	// server connections.
-	TLSOptions = gel.TLSOptions
-
-	// TLSSecurityMode specifies how strict TLS validation is.
-	TLSSecurityMode = gel.TLSSecurityMode
-
 	// Tx is a transaction. Use Client.Tx() to get a transaction.
 	Tx = gel.Tx
 
 	// TxBlock is work to be done in a transaction.
 	TxBlock = gel.TxBlock
 
-	// TxOptions configures how transactions behave.
-	TxOptions = gel.TxOptions
-
 	// UUID is a universally unique identifier
 	// https://www.edgedb.com/docs/stdlib/uuid
 	UUID = geltypes.UUID
-
-	// WarningHandler takes a slice of gel.Error that represent warnings and
-	// optionally returns an error. This can be used to log warnings, increment
-	// metrics, promote warnings to errors by returning them etc.
-	WarningHandler = gel.WarningHandler
 )
 
 var (
-	// CreateClient returns a new client. The client connects lazily. Call
-	// Client.EnsureConnected() to force a connection.
-	CreateClient = gel.CreateClient
-
-	// CreateClientDSN returns a new client. See also CreateClient.
-	//
-	// dsn is either an instance name
-	// https://www.edgedb.com/docs/clients/connection
-	// or it specifies a single string in the following format:
-	//
-	//	gel://user:password@host:port/database?option=value.
-	//
-	// The following options are recognized: host, port, user, database, password.
-	CreateClientDSN = gel.CreateClientDSN
-
 	// DurationFromNanoseconds creates a Duration represented as microseconds
 	// from a [time.Duration] represented as nanoseconds.
 	DurationFromNanoseconds = geltypes.DurationFromNanoseconds
@@ -426,15 +340,6 @@ var (
 
 	// NewRelativeDuration returns a new RelativeDuration
 	NewRelativeDuration = geltypes.NewRelativeDuration
-
-	// NewRetryOptions returns the default retry options.
-	NewRetryOptions = gel.NewRetryOptions
-
-	// NewRetryRule returns the default RetryRule value.
-	NewRetryRule = gel.NewRetryRule
-
-	// NewTxOptions returns the default TxOptions value.
-	NewTxOptions = gel.NewTxOptions
 
 	// ParseUUID parses s into a UUID or returns an error.
 	ParseUUID = geltypes.ParseUUID

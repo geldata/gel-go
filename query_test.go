@@ -24,7 +24,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/edgedb/edgedb-go/gelcfg"
 	"github.com/edgedb/edgedb-go/gelerr"
+	gel "github.com/edgedb/edgedb-go/internal/client"
 	types "github.com/edgedb/edgedb-go/internal/geltypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -279,7 +281,7 @@ func TestQuerySingleJSONZeroResults(t *testing.T) {
 	var result []byte
 	err := client.QuerySingleJSON(ctx, "SELECT <int64>{}", &result)
 
-	require.Equal(t, err, errZeroResults)
+	require.Equal(t, err, gel.ErrZeroResults)
 	assert.Equal(t, []byte(nil), result)
 }
 
@@ -297,7 +299,7 @@ func TestQuerySingleZeroResults(t *testing.T) {
 	var result int64
 	err := client.QuerySingle(ctx, "SELECT <int64>{}", &result)
 
-	assert.Equal(t, errZeroResults, err)
+	assert.Equal(t, gel.ErrZeroResults, err)
 }
 
 func TestQuerySingleNestedSlice(t *testing.T) {
@@ -385,7 +387,7 @@ func TestNilResultValue(t *testing.T) {
 }
 
 func TestExecutWithArgs(t *testing.T) {
-	if protocolVersion.LT(protocolVersion1p0) {
+	if protocolVersion.LT(gel.ProtocolVersion1p0) {
 		t.Skip()
 	}
 
@@ -403,7 +405,7 @@ func TestExecutWithArgs(t *testing.T) {
 }
 
 func TestClientRejectsSessionConfig(t *testing.T) {
-	if protocolVersion.LT(protocolVersion1p0) {
+	if protocolVersion.LT(gel.ProtocolVersion1p0) {
 		t.Skip()
 	}
 
@@ -429,7 +431,7 @@ func TestClientRejectsSessionConfig(t *testing.T) {
 }
 
 func TestWithConfig(t *testing.T) {
-	if protocolVersion.LT(protocolVersion1p0) {
+	if protocolVersion.LT(gel.ProtocolVersion1p0) {
 		t.Skip()
 	}
 
@@ -469,7 +471,7 @@ func TestWithConfig(t *testing.T) {
 }
 
 func TestInvalidWithConfig(t *testing.T) {
-	if protocolVersion.LT(protocolVersion1p0) {
+	if protocolVersion.LT(gel.ProtocolVersion1p0) {
 		t.Skip()
 	}
 
@@ -506,7 +508,7 @@ func TestInvalidWithConfig(t *testing.T) {
 }
 
 func TestWithoutConfig(t *testing.T) {
-	if protocolVersion.LT(protocolVersion1p0) {
+	if protocolVersion.LT(gel.ProtocolVersion1p0) {
 		t.Skip()
 	}
 
@@ -545,7 +547,7 @@ func TestWithoutConfig(t *testing.T) {
 }
 
 func TestWithModuleAliases(t *testing.T) {
-	if protocolVersion.LT(protocolVersion1p0) {
+	if protocolVersion.LT(gel.ProtocolVersion1p0) {
 		t.Skip()
 	}
 
@@ -563,7 +565,10 @@ func TestWithModuleAliases(t *testing.T) {
 		"SELECT <my_new_name_for_std::int64>1\n"+
 		"        ^ error")
 
-	a := client.WithModuleAliases(ModuleAlias{"my_new_name_for_std", "std"})
+	a := client.WithModuleAliases(gelcfg.ModuleAlias{
+		Alias:  "my_new_name_for_std",
+		Module: "std",
+	})
 
 	err = a.QuerySingle(ctx, "SELECT <my_new_name_for_std::int64>2", &result)
 	assert.NoError(t, err)
@@ -580,7 +585,10 @@ func TestWithModuleAliases(t *testing.T) {
 		"SELECT <my_new_name_for_std::int64>3\n"+
 		"        ^ error")
 
-	b := a.WithModuleAliases(ModuleAlias{"my_new_name_for_std", "math"})
+	b := a.WithModuleAliases(gelcfg.ModuleAlias{
+		Alias:  "my_new_name_for_std",
+		Module: "math",
+	})
 	err = b.QuerySingle(ctx, "SELECT <my_new_name_for_std::int64>4", &result)
 	assert.EqualError(t, err, "gel.InvalidReferenceError: "+
 		"type 'my_new_name_for_std::int64' does not exist\n"+
@@ -605,15 +613,17 @@ func TestWithModuleAliases(t *testing.T) {
 }
 
 func TestInvalidWithModuleAliases(t *testing.T) {
-	if protocolVersion.LT(protocolVersion1p0) {
+	if protocolVersion.LT(gel.ProtocolVersion1p0) {
 		t.Skip()
 	}
 
 	ctx := context.Background()
 	var result int64
 
-	a := client.WithModuleAliases(ModuleAlias{
-		"my_alias", "this_module_doesnt_exist"})
+	a := client.WithModuleAliases(gelcfg.ModuleAlias{
+		Alias:  "my_alias",
+		Module: "this_module_doesnt_exist",
+	})
 
 	err := a.QuerySingle(ctx, "SELECT <my_alias::int64>1", &result)
 	assert.EqualError(t, err, "gel.InvalidReferenceError: "+
@@ -624,14 +634,17 @@ func TestInvalidWithModuleAliases(t *testing.T) {
 }
 
 func TestWithoutModuleAliases(t *testing.T) {
-	if protocolVersion.LT(protocolVersion1p0) {
+	if protocolVersion.LT(gel.ProtocolVersion1p0) {
 		t.Skip()
 	}
 
 	ctx := context.Background()
 	var result int64
 
-	a := client.WithModuleAliases(ModuleAlias{"my_new_name_for_std", "std"})
+	a := client.WithModuleAliases(gelcfg.ModuleAlias{
+		Alias:  "my_new_name_for_std",
+		Module: "std",
+	})
 	b := a.WithoutModuleAliases("my_new_name_for_std")
 
 	err := b.QuerySingle(ctx, "SELECT <my_new_name_for_std::int64>4", &result)
@@ -658,7 +671,7 @@ func TestWithoutModuleAliases(t *testing.T) {
 }
 
 func TestWithGlobals(t *testing.T) {
-	if protocolVersion.LT(protocolVersion1p0) {
+	if protocolVersion.LT(gel.ProtocolVersion1p0) {
 		t.Skip()
 	}
 
@@ -697,7 +710,7 @@ func TestWithGlobals(t *testing.T) {
 }
 
 func TestWithGlobalUUID(t *testing.T) {
-	if protocolVersion.LT(protocolVersion1p0) {
+	if protocolVersion.LT(gel.ProtocolVersion1p0) {
 		t.Skip()
 	}
 
@@ -710,11 +723,11 @@ func TestWithGlobalUUID(t *testing.T) {
 	assert.Equal(t, types.UUID{1, 2, 3}, id)
 
 	err = client.QuerySingle(ctx, "SELECT GLOBAL global_id", &id)
-	require.Equal(t, errZeroResults, err)
+	require.Equal(t, gel.ErrZeroResults, err)
 }
 
 func TestWithGlobalBytes(t *testing.T) {
-	if protocolVersion.LT(protocolVersion1p0) {
+	if protocolVersion.LT(gel.ProtocolVersion1p0) {
 		t.Skip()
 	}
 
@@ -727,11 +740,11 @@ func TestWithGlobalBytes(t *testing.T) {
 	assert.Equal(t, []byte{1, 2, 3}, bytes)
 
 	err = client.QuerySingle(ctx, "SELECT GLOBAL global_bytes", &bytes)
-	require.Equal(t, errZeroResults, err)
+	require.Equal(t, gel.ErrZeroResults, err)
 }
 
 func TestWithGlobalInt16(t *testing.T) {
-	if protocolVersion.LT(protocolVersion1p0) {
+	if protocolVersion.LT(gel.ProtocolVersion1p0) {
 		t.Skip()
 	}
 
@@ -744,11 +757,11 @@ func TestWithGlobalInt16(t *testing.T) {
 	assert.Equal(t, int16(7), val)
 
 	err = client.QuerySingle(ctx, "SELECT GLOBAL global_int16", &val)
-	require.Equal(t, errZeroResults, err)
+	require.Equal(t, gel.ErrZeroResults, err)
 }
 
 func TestWithGlobalInt32(t *testing.T) {
-	if protocolVersion.LT(protocolVersion1p0) {
+	if protocolVersion.LT(gel.ProtocolVersion1p0) {
 		t.Skip()
 	}
 
@@ -761,11 +774,11 @@ func TestWithGlobalInt32(t *testing.T) {
 	assert.Equal(t, int32(7), val)
 
 	err = client.QuerySingle(ctx, "SELECT GLOBAL global_int32", &val)
-	require.Equal(t, errZeroResults, err)
+	require.Equal(t, gel.ErrZeroResults, err)
 }
 
 func TestWithGlobalInt64(t *testing.T) {
-	if protocolVersion.LT(protocolVersion1p0) {
+	if protocolVersion.LT(gel.ProtocolVersion1p0) {
 		t.Skip()
 	}
 
@@ -778,11 +791,11 @@ func TestWithGlobalInt64(t *testing.T) {
 	assert.Equal(t, int64(7), val)
 
 	err = client.QuerySingle(ctx, "SELECT GLOBAL global_int64", &val)
-	require.Equal(t, errZeroResults, err)
+	require.Equal(t, gel.ErrZeroResults, err)
 }
 
 func TestWithGlobalFloat32(t *testing.T) {
-	if protocolVersion.LT(protocolVersion1p0) {
+	if protocolVersion.LT(gel.ProtocolVersion1p0) {
 		t.Skip()
 	}
 
@@ -795,11 +808,11 @@ func TestWithGlobalFloat32(t *testing.T) {
 	assert.Equal(t, float32(7), val)
 
 	err = client.QuerySingle(ctx, "SELECT GLOBAL global_float32", &val)
-	require.Equal(t, errZeroResults, err)
+	require.Equal(t, gel.ErrZeroResults, err)
 }
 
 func TestWithGlobalFloat64(t *testing.T) {
-	if protocolVersion.LT(protocolVersion1p0) {
+	if protocolVersion.LT(gel.ProtocolVersion1p0) {
 		t.Skip()
 	}
 
@@ -812,11 +825,11 @@ func TestWithGlobalFloat64(t *testing.T) {
 	assert.Equal(t, float64(7), result)
 
 	err = client.QuerySingle(ctx, "SELECT GLOBAL global_float64", &result)
-	require.Equal(t, errZeroResults, err)
+	require.Equal(t, gel.ErrZeroResults, err)
 }
 
 func TestWithGlobalBool(t *testing.T) {
-	if protocolVersion.LT(protocolVersion1p0) {
+	if protocolVersion.LT(gel.ProtocolVersion1p0) {
 		t.Skip()
 	}
 
@@ -829,11 +842,11 @@ func TestWithGlobalBool(t *testing.T) {
 	assert.True(t, result)
 
 	err = client.QuerySingle(ctx, "SELECT GLOBAL global_bool", &result)
-	require.Equal(t, errZeroResults, err)
+	require.Equal(t, gel.ErrZeroResults, err)
 }
 
 func TestWithGlobalDateTime(t *testing.T) {
-	if protocolVersion.LT(protocolVersion1p0) {
+	if protocolVersion.LT(gel.ProtocolVersion1p0) {
 		t.Skip()
 	}
 
@@ -848,11 +861,11 @@ func TestWithGlobalDateTime(t *testing.T) {
 	assert.Equal(t, time.Date(1970, 1, 1, 0, 0, 0, 0, time.UTC), result)
 
 	err = client.QuerySingle(ctx, "SELECT GLOBAL global_datetime", &result)
-	require.Equal(t, errZeroResults, err)
+	require.Equal(t, gel.ErrZeroResults, err)
 }
 
 func TestWithGlobalDuration(t *testing.T) {
-	if protocolVersion.LT(protocolVersion1p0) {
+	if protocolVersion.LT(gel.ProtocolVersion1p0) {
 		t.Skip()
 	}
 
@@ -867,11 +880,11 @@ func TestWithGlobalDuration(t *testing.T) {
 	assert.Equal(t, types.Duration(7), result)
 
 	err = client.QuerySingle(ctx, "SELECT GLOBAL global_duration", &result)
-	require.Equal(t, errZeroResults, err)
+	require.Equal(t, gel.ErrZeroResults, err)
 }
 
 func TestWithGlobalJSON(t *testing.T) {
-	if protocolVersion.LT(protocolVersion1p0) {
+	if protocolVersion.LT(gel.ProtocolVersion1p0) {
 		t.Skip()
 	}
 
@@ -884,11 +897,11 @@ func TestWithGlobalJSON(t *testing.T) {
 	assert.Equal(t, []byte("7"), result)
 
 	err = client.QuerySingle(ctx, "SELECT GLOBAL global_json", &result)
-	require.Equal(t, errZeroResults, err)
+	require.Equal(t, gel.ErrZeroResults, err)
 }
 
 func TestWithGlobalLocalDateTime(t *testing.T) {
-	if protocolVersion.LT(protocolVersion1p0) {
+	if protocolVersion.LT(gel.ProtocolVersion1p0) {
 		t.Skip()
 	}
 
@@ -915,11 +928,11 @@ func TestWithGlobalLocalDateTime(t *testing.T) {
 		"SELECT GLOBAL global_local_datetime",
 		&result,
 	)
-	require.Equal(t, errZeroResults, err)
+	require.Equal(t, gel.ErrZeroResults, err)
 }
 
 func TestWithGlobalLocalDate(t *testing.T) {
-	if protocolVersion.LT(protocolVersion1p0) {
+	if protocolVersion.LT(gel.ProtocolVersion1p0) {
 		t.Skip()
 	}
 
@@ -934,11 +947,11 @@ func TestWithGlobalLocalDate(t *testing.T) {
 	assert.Equal(t, types.NewLocalDate(1970, 1, 1), result)
 
 	err = client.QuerySingle(ctx, "SELECT GLOBAL global_local_date", &result)
-	require.Equal(t, errZeroResults, err)
+	require.Equal(t, gel.ErrZeroResults, err)
 }
 
 func TestWithGlobalLocalTime(t *testing.T) {
-	if protocolVersion.LT(protocolVersion1p0) {
+	if protocolVersion.LT(gel.ProtocolVersion1p0) {
 		t.Skip()
 	}
 
@@ -953,11 +966,11 @@ func TestWithGlobalLocalTime(t *testing.T) {
 	assert.Equal(t, types.NewLocalTime(1, 2, 3, 4), result)
 
 	err = client.QuerySingle(ctx, "SELECT GLOBAL global_local_time", &result)
-	require.Equal(t, errZeroResults, err)
+	require.Equal(t, gel.ErrZeroResults, err)
 }
 
 func TestWithGlobalBigInt(t *testing.T) {
-	if protocolVersion.LT(protocolVersion1p0) {
+	if protocolVersion.LT(gel.ProtocolVersion1p0) {
 		t.Skip()
 	}
 
@@ -970,11 +983,11 @@ func TestWithGlobalBigInt(t *testing.T) {
 	assert.Equal(t, big.NewInt(7), result)
 
 	err = client.QuerySingle(ctx, "SELECT GLOBAL global_bigint", &result)
-	require.Equal(t, errZeroResults, err)
+	require.Equal(t, gel.ErrZeroResults, err)
 }
 
 func TestWithGlobalRelativeDuration(t *testing.T) {
-	if protocolVersion.LT(protocolVersion1p0) {
+	if protocolVersion.LT(gel.ProtocolVersion1p0) {
 		t.Skip()
 	}
 
@@ -993,11 +1006,11 @@ func TestWithGlobalRelativeDuration(t *testing.T) {
 		"SELECT GLOBAL global_relative_duration",
 		&result,
 	)
-	require.Equal(t, errZeroResults, err)
+	require.Equal(t, gel.ErrZeroResults, err)
 }
 
 func TestWithGlobalDateDuration(t *testing.T) {
-	if protocolVersion.LT(protocolVersion1p0) {
+	if protocolVersion.LT(gel.ProtocolVersion1p0) {
 		t.Skip()
 	}
 
@@ -1016,11 +1029,11 @@ func TestWithGlobalDateDuration(t *testing.T) {
 		"SELECT GLOBAL global_date_duration",
 		&result,
 	)
-	require.Equal(t, errZeroResults, err)
+	require.Equal(t, gel.ErrZeroResults, err)
 }
 
 func TestWithGlobalMemory(t *testing.T) {
-	if protocolVersion.LT(protocolVersion1p0) {
+	if protocolVersion.LT(gel.ProtocolVersion1p0) {
 		t.Skip()
 	}
 
@@ -1033,11 +1046,11 @@ func TestWithGlobalMemory(t *testing.T) {
 	assert.Equal(t, types.Memory(7), result)
 
 	err = client.QuerySingle(ctx, "SELECT GLOBAL global_memory", &result)
-	require.Equal(t, errZeroResults, err)
+	require.Equal(t, gel.ErrZeroResults, err)
 }
 
 func TestInvalidWithGlobals(t *testing.T) {
-	if protocolVersion.LT(protocolVersion1p0) {
+	if protocolVersion.LT(gel.ProtocolVersion1p0) {
 		t.Skip()
 	}
 
@@ -1066,7 +1079,7 @@ func TestInvalidWithGlobals(t *testing.T) {
 }
 
 func TestWithoutGlobals(t *testing.T) {
-	if protocolVersion.LT(protocolVersion1p0) {
+	if protocolVersion.LT(gel.ProtocolVersion1p0) {
 		t.Skip()
 	}
 
@@ -1096,7 +1109,7 @@ func TestWithoutGlobals(t *testing.T) {
 }
 
 func TestWithConfigWrongServerVersion(t *testing.T) {
-	if protocolVersion.GTE(protocolVersion1p0) {
+	if protocolVersion.GTE(gel.ProtocolVersion1p0) {
 		t.Skip()
 	}
 	ctx := context.Background()
@@ -1111,7 +1124,10 @@ func TestWithConfigWrongServerVersion(t *testing.T) {
 		"are not supported by the server. "+
 		"Upgrade your server to version 2.0 or greater to use these features.")
 
-	b := client.WithModuleAliases(ModuleAlias{"other_math", "math"})
+	b := client.WithModuleAliases(gelcfg.ModuleAlias{
+		Alias:  "other_math",
+		Module: "math",
+	})
 	err = b.QuerySingle(ctx, "SELECT 1", &result)
 	require.EqualError(t, err, "gel.InterfaceError: "+
 		"client methods WithConfig, WithGlobals, and WithModuleAliases "+

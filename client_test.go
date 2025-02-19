@@ -22,7 +22,9 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/edgedb/edgedb-go/gelcfg"
 	"github.com/edgedb/edgedb-go/gelerr"
+	gel "github.com/edgedb/edgedb-go/internal/client"
 	"github.com/edgedb/edgedb-go/internal/geltypes"
 	types "github.com/edgedb/edgedb-go/internal/geltypes"
 	"github.com/stretchr/testify/assert"
@@ -39,7 +41,7 @@ func TestConnectClient(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "hello", result)
 
-	p2 := p.WithTxOptions(NewTxOptions())
+	p2 := p.WithTxOptions(gelcfg.NewTxOptions())
 
 	err = p.Close()
 	assert.NoError(t, err)
@@ -90,12 +92,12 @@ func TestConnectClientZeroConcurrency(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, p.EnsureConnected(ctx))
 
-	expected := client.cfg.serverSettings.
+	expected := client.pool.Cfg.ServerSettings.
 		Get("suggested_pool_concurrency").(int)
 	if err != nil {
-		expected = defaultConcurrency
+		expected = gel.DefaultConcurrency
 	}
-	require.Equal(t, expected, p.concurrency)
+	require.Equal(t, expected, p.pool.Concurrency)
 
 	var result string
 	err = p.QuerySingle(ctx, "SELECT 'hello';", &result)

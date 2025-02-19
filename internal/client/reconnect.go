@@ -28,7 +28,7 @@ import (
 type reconnectingConn struct {
 	borrowableConn
 	cacheCollection
-	cfg *connConfig
+	Cfg *connConfig
 
 	// isClosed is true when the connection has been closed by a user.
 	isClosed bool
@@ -45,14 +45,14 @@ func (c *reconnectingConn) reconnect(
 		return gelerrint.NewInterfaceError("Connection is closed", nil)
 	}
 
-	maxTime := time.Now().Add(c.cfg.waitUntilAvailable)
+	maxTime := time.Now().Add(c.Cfg.waitUntilAvailable)
 	if deadline, ok := ctx.Deadline(); ok && deadline.Before(maxTime) {
 		maxTime = deadline
 	}
 
 	var edbErr gelerr.Error
 	for {
-		conn, err := connectWithTimeout(ctx, c.cfg, c.cacheCollection)
+		conn, err := connectWithTimeout(ctx, c.Cfg, c.cacheCollection)
 		if err == nil {
 			c.conn = conn
 			return nil
@@ -80,12 +80,12 @@ func (c *reconnectingConn) ensureConnection(ctx context.Context) error {
 	return c.reconnect(ctx, false)
 }
 
-func (c *reconnectingConn) scriptFlow(ctx context.Context, q *query) error {
+func (c *reconnectingConn) ScriptFlow(ctx context.Context, q *query) error {
 	if e := c.ensureConnection(ctx); e != nil {
 		return e
 	}
 
-	return c.borrowableConn.scriptFlow(ctx, q)
+	return c.borrowableConn.ScriptFlow(ctx, q)
 }
 
 func (c *reconnectingConn) granularFlow(

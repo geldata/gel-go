@@ -93,16 +93,16 @@ func (c *borrowableConn) assertUnborrowed() error {
 	}
 }
 
-func (c *borrowableConn) capabilities1pX() uint64 {
+func (c *borrowableConn) Capabilities1pX() uint64 {
 	return userCapabilities
 }
 
-func (c *borrowableConn) scriptFlow(ctx context.Context, q *query) error {
+func (c *borrowableConn) ScriptFlow(ctx context.Context, q *query) error {
 	if e := c.assertUnborrowed(); e != nil {
 		return e
 	}
 
-	return c.conn.scriptFlow(ctx, q)
+	return c.conn.ScriptFlow(ctx, q)
 }
 
 func (c *borrowableConn) granularFlow(ctx context.Context, q *query) error {

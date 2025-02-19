@@ -216,7 +216,7 @@ func (c *protocolConnection) execute1pX(
 
 	tmp := q.out
 	if q.expCard == AtMostOne {
-		err = errZeroResults
+		err = ErrZeroResults
 	}
 	done := buff.NewSignal()
 
@@ -234,7 +234,7 @@ func (c *protocolConnection) execute1pX(
 		case Data:
 			val, ok, e := decodeDataMsg(r, q, cdcs)
 			if e != nil {
-				if err == errZeroResults {
+				if err == ErrZeroResults {
 					err = e
 				} else {
 					err = wrapAll(err, e)
@@ -244,7 +244,7 @@ func (c *protocolConnection) execute1pX(
 				tmp = reflect.Append(tmp, val)
 			}
 
-			if err == errZeroResults {
+			if err == ErrZeroResults {
 				err = nil
 			}
 		case CommandComplete:
@@ -255,7 +255,7 @@ func (c *protocolConnection) execute1pX(
 			decodeReadyForCommandMsg(r)
 			done.Signal()
 		case ErrorResponse:
-			if err == errZeroResults {
+			if err == ErrZeroResults {
 				err = nil
 			}
 

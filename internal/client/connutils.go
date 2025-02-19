@@ -36,6 +36,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/edgedb/edgedb-go/gelcfg"
 	"github.com/edgedb/edgedb-go/internal/gelerr"
 	"github.com/edgedb/edgedb-go/internal/geltypes"
 	"github.com/edgedb/edgedb-go/internal/snc"
@@ -69,7 +70,7 @@ type connConfig struct {
 	tlsCAData          []byte
 	tlsSecurity        string
 	tlsServerName      string
-	serverSettings     *snc.ServerSettings
+	ServerSettings     *snc.ServerSettings
 	secretKey          string
 }
 
@@ -328,7 +329,7 @@ func (r *configResolver) addServerSettingsStr(s map[string]string) {
 }
 
 func (r *configResolver) resolveOptions(
-	opts *Options,
+	opts *gelcfg.Options,
 	paths *cfgPaths,
 ) (err error) {
 	defer func() {
@@ -349,8 +350,12 @@ func (r *configResolver) resolveOptions(
 		}
 	}
 
-	if opts.Database != "" {
-		if e := r.setDatabase(opts.Database, "Database options"); e != nil {
+	if opts.Database != "" { // nolint:staticcheck
+		e := r.setDatabase(
+			opts.Database, // nolint:staticcheck
+			"Database options",
+		)
+		if e != nil {
 			return e
 		}
 	}
@@ -990,7 +995,7 @@ func lookupGelOrEdgedbEnv(name string) (string, string, bool) {
 	return "", "", false
 }
 
-func (r *configResolver) config(opts *Options) (*connConfig, error) {
+func (r *configResolver) config(opts *gelcfg.Options) (*connConfig, error) {
 	host := "localhost"
 	if r.host.val != nil {
 		host = r.host.val.(string)
@@ -1092,7 +1097,7 @@ func (r *configResolver) config(opts *Options) (*connConfig, error) {
 		branch:             branch,
 		connectTimeout:     opts.ConnectTimeout,
 		waitUntilAvailable: waitUntilAvailable,
-		serverSettings:     r.serverSettings,
+		ServerSettings:     r.serverSettings,
 		tlsCAData:          certData,
 		tlsSecurity:        tlsSecurity,
 		tlsServerName:      tlsServerName,
@@ -1138,7 +1143,7 @@ func englishList(items []string, conjunction string) string {
 
 func newConfigResolver(
 	dsn string,
-	opts *Options,
+	opts *gelcfg.Options,
 	paths *cfgPaths,
 ) (*configResolver, error) {
 	cfg := &configResolver{serverSettings: snc.NewServerSettings()}
@@ -1244,7 +1249,7 @@ func newConfigResolver(
 
 func parseConnectDSNAndArgs(
 	dsn string,
-	opts *Options,
+	opts *gelcfg.Options,
 	paths *cfgPaths,
 ) (*connConfig, error) {
 	resolver, err := newConfigResolver(dsn, opts, paths)

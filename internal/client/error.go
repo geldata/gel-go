@@ -31,12 +31,14 @@ import (
 )
 
 var (
-	errNoTOMLFound       = errors.New("no gel.toml found")
-	errZeroResults error = gelerrint.NewNoDataError("zero results", nil)
+	errNoTOMLFound = errors.New("no gel.toml found")
+
+	// ErrZeroResults is returned when a query didn't return any data.
+	ErrZeroResults error = gelerrint.NewNoDataError("zero results", nil)
 )
 
-// firstError returns the first non nil error or nil.
-func firstError(a, b error) error {
+// FirstError returns the first non nil error or nil.
+func FirstError(a, b error) error {
 	if a != nil {
 		return a
 	}

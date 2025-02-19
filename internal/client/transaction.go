@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/edgedb/edgedb-go/gelcfg"
 	"github.com/edgedb/edgedb-go/internal/gelerr"
 )
 
@@ -78,9 +79,9 @@ func (s *txState) assertStarted(opName string) error {
 type Tx struct {
 	borrowableConn
 	*txState
-	options        TxOptions
+	options        gelcfg.TxOptions
 	state          map[string]interface{}
-	warningHandler WarningHandler
+	warningHandler gelcfg.WarningHandler
 }
 
 func (t *Tx) execute(
@@ -88,7 +89,7 @@ func (t *Tx) execute(
 	cmd string,
 	sucessState txStatus,
 ) error {
-	q, err := newQuery(
+	q, err := NewQuery(
 		"Execute",
 		cmd,
 		nil,
@@ -102,7 +103,7 @@ func (t *Tx) execute(
 		return err
 	}
 
-	err = t.borrowableConn.scriptFlow(ctx, q)
+	err = t.borrowableConn.ScriptFlow(ctx, q)
 
 	switch err {
 	case nil:
@@ -112,6 +113,32 @@ func (t *Tx) execute(
 	}
 
 	return err
+}
+
+func startTxQuery(o gelcfg.TxOptions) string { // nolint:gocritic
+	query := "START TRANSACTION"
+
+	switch o.IsolationLevel() {
+	case gelcfg.Serializable:
+		query += " ISOLATION SERIALIZABLE"
+	default:
+		panic(fmt.Sprintf("unknown isolation level: %q", o.IsolationLevel()))
+	}
+
+	if o.ReadOnly() {
+		query += ", READ ONLY"
+	} else {
+		query += ", READ WRITE"
+	}
+
+	if o.Deferrable() {
+		query += ", DEFERRABLE"
+	} else {
+		query += ", NOT DEFERRABLE"
+	}
+
+	query += ";"
+	return query
 }
 
 func (t *Tx) start(ctx context.Context) error {
@@ -126,7 +153,7 @@ func (t *Tx) start(ctx context.Context) error {
 		)
 	}
 
-	query := t.options.startTxQuery()
+	query := startTxQuery(t.options)
 	return t.execute(ctx, query, startedTx)
 }
 
@@ -151,7 +178,7 @@ func (t *Tx) scriptFlow(ctx context.Context, q *query) error {
 		return e
 	}
 
-	return t.borrowableConn.scriptFlow(ctx, q)
+	return t.borrowableConn.ScriptFlow(ctx, q)
 }
 
 func (t *Tx) granularFlow(ctx context.Context, q *query) error {
@@ -168,11 +195,11 @@ func (t *Tx) Execute(
 	cmd string,
 	args ...interface{},
 ) error {
-	q, err := newQuery(
+	q, err := NewQuery(
 		"Execute",
 		cmd,
 		args,
-		t.capabilities1pX(),
+		t.Capabilities1pX(),
 		t.state,
 		nil,
 		true,
@@ -192,7 +219,7 @@ func (t *Tx) Query(
 	out interface{},
 	args ...interface{},
 ) error {
-	return runQuery(
+	return RunQuery(
 		ctx,
 		t,
 		"Query",
@@ -214,7 +241,7 @@ func (t *Tx) QuerySingle(
 	out interface{},
 	args ...interface{},
 ) error {
-	return runQuery(
+	return RunQuery(
 		ctx,
 		t,
 		"QuerySingle",
@@ -233,7 +260,7 @@ func (t *Tx) QueryJSON(
 	out *[]byte,
 	args ...interface{},
 ) error {
-	return runQuery(
+	return RunQuery(
 		ctx,
 		t,
 		"QueryJSON",
@@ -254,7 +281,7 @@ func (t *Tx) QuerySingleJSON(
 	out interface{},
 	args ...interface{},
 ) error {
-	return runQuery(
+	return RunQuery(
 		ctx,
 		t,
 		"QuerySingleJSON",
@@ -272,11 +299,11 @@ func (t *Tx) ExecuteSQL(
 	cmd string,
 	args ...interface{},
 ) error {
-	q, err := newQuery(
+	q, err := NewQuery(
 		"ExecuteSQL",
 		cmd,
 		args,
-		t.capabilities1pX(),
+		t.Capabilities1pX(),
 		t.state,
 		nil,
 		true,
@@ -296,7 +323,7 @@ func (t *Tx) QuerySQL(
 	out interface{},
 	args ...interface{},
 ) error {
-	return runQuery(
+	return RunQuery(
 		ctx,
 		t,
 		"QuerySQL",

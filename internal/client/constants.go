@@ -17,8 +17,6 @@
 package gel
 
 import (
-	"runtime"
-
 	"github.com/edgedb/edgedb-go/internal"
 	"github.com/edgedb/edgedb-go/internal/cache"
 	"github.com/edgedb/edgedb-go/internal/snc"
@@ -28,14 +26,14 @@ var (
 	descCache = cache.New(1_000)
 	rnd       = snc.NewRand()
 
-	defaultConcurrency = max(4, runtime.NumCPU())
-
+	// ProtocolVersionMax is the highest version that the client supports.
+	ProtocolVersionMax  = protocolVersion3p0
 	protocolVersionMin  = protocolVersion0p13
-	protocolVersionMax  = protocolVersion3p0
 	protocolVersion0p13 = internal.ProtocolVersion{Major: 0, Minor: 13}
-	protocolVersion1p0  = internal.ProtocolVersion{Major: 1, Minor: 0}
-	protocolVersion2p0  = internal.ProtocolVersion{Major: 2, Minor: 0}
-	protocolVersion3p0  = internal.ProtocolVersion{Major: 3, Minor: 0}
+	// ProtocolVersion1p0 is the version 1.0 protocol version.
+	ProtocolVersion1p0 = internal.ProtocolVersion{Major: 1, Minor: 0}
+	protocolVersion2p0 = internal.ProtocolVersion{Major: 2, Minor: 0}
+	protocolVersion3p0 = internal.ProtocolVersion{Major: 3, Minor: 0}
 
 	capabilitiesSessionConfig uint64 = 0x2
 	capabilitiesTransaction   uint64 = 0x4

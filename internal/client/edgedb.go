@@ -26,12 +26,18 @@ import (
 	"github.com/edgedb/edgedb-go/internal/cache"
 	"github.com/edgedb/edgedb-go/internal/codecs"
 	"github.com/edgedb/edgedb-go/internal/gelerr"
+	types "github.com/edgedb/edgedb-go/internal/geltypes"
 	"github.com/edgedb/edgedb-go/internal/snc"
 	"github.com/edgedb/edgedb-go/internal/soc"
 )
 
+type systemConfig struct {
+	ID                 types.OptionalUUID     `gel:"id"`
+	SessionIdleTimeout types.OptionalDuration `gel:"session_idle_timeout"`
+}
+
 type cacheCollection struct {
-	serverSettings    *snc.ServerSettings
+	ServerSettings    *snc.ServerSettings
 	typeIDCache       *cache.Cache
 	inCodecCache      *cache.Cache
 	outCodecCache     *cache.Cache
@@ -47,7 +53,7 @@ type protocolConnection struct {
 	protocolVersion internal.ProtocolVersion
 	cacheCollection
 
-	systemConfig systemConfig
+	SystemConfig systemConfig
 	stateCodec   codecs.Encoder
 }
 
@@ -186,7 +192,7 @@ func (c *protocolConnection) isClosed() bool {
 	return false
 }
 
-func (c *protocolConnection) scriptFlow(ctx context.Context, q *query) error {
+func (c *protocolConnection) ScriptFlow(ctx context.Context, q *query) error {
 	if q.lang == SQL && c.protocolVersion.LT(protocolVersion3p0) {
 		return gelerr.NewUnsupportedFeatureError(
 			"the server does not support SQL queries, "+
@@ -213,7 +219,7 @@ func (c *protocolConnection) scriptFlow(ctx context.Context, q *query) error {
 		err = c.execGranularFlow1pX(r, q)
 	}
 
-	return firstError(err, c.releaseReader(r))
+	return FirstError(err, c.releaseReader(r))
 }
 
 func (c *protocolConnection) granularFlow(
@@ -246,5 +252,5 @@ func (c *protocolConnection) granularFlow(
 		err = c.execGranularFlow1pX(r, q)
 	}
 
-	return firstError(err, c.releaseReader(r))
+	return FirstError(err, c.releaseReader(r))
 }

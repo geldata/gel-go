@@ -54,7 +54,7 @@ func (c *protocolConnection) fallThrough(r *buff.Reader) error {
 					"decoding ParameterStatus suggested_pool_concurrency: %w",
 					err))
 			}
-			c.serverSettings.Set(name, i)
+			c.ServerSettings.Set(name, i)
 		case "system_config":
 			p := r.PopSlice(r.PopUint32())
 			d := p.PopSlice(p.PopUint32())
@@ -88,7 +88,7 @@ func (c *protocolConnection) fallThrough(r *buff.Reader) error {
 					"decoding ParameterStatus system_config: %w", err))
 			}
 
-			c.systemConfig = cfg
+			c.SystemConfig = cfg
 		default:
 			return gelerr.NewUnexpectedMessageError(fmt.Sprintf(
 				"got ParameterStatus for unknown parameter %q", name), nil)
@@ -122,7 +122,7 @@ func (c *protocolConnection) fallThrough2pX(r *buff.Reader) error {
 					"decoding ParameterStatus suggested_pool_concurrency: %w",
 					err))
 			}
-			c.serverSettings.Set(name, i)
+			c.ServerSettings.Set(name, i)
 		case "system_config":
 			p := r.PopSlice(r.PopUint32())
 			d := p.PopSlice(p.PopUint32())
@@ -158,7 +158,7 @@ func (c *protocolConnection) fallThrough2pX(r *buff.Reader) error {
 					"decoding ParameterStatus system_config: %w", err))
 			}
 
-			c.systemConfig = cfg
+			c.SystemConfig = cfg
 		default:
 			return gelerr.NewUnexpectedMessageError(fmt.Sprintf(
 				"got ParameterStatus for unknown parameter %q", name), nil)

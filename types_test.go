@@ -30,6 +30,7 @@ import (
 	"testing"
 	"time"
 
+	gel "github.com/edgedb/edgedb-go/internal/client"
 	types "github.com/edgedb/edgedb-go/internal/geltypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -3495,7 +3496,7 @@ func TestSendOptionalRelativeDurationMarshaler(t *testing.T) {
 }
 
 func TestSendAndReceiveDateDuration(t *testing.T) {
-	if protocolVersion.LT(protocolVersion1p0) {
+	if protocolVersion.LT(gel.ProtocolVersion1p0) {
 		t.Skip()
 	}
 
@@ -3574,7 +3575,7 @@ func (m *CustomDateDuration) UnmarshalEdgeDBDateDuration(
 }
 
 func TestReceiveDateDurationUnmarshaler(t *testing.T) {
-	if protocolVersion.LT(protocolVersion1p0) {
+	if protocolVersion.LT(gel.ProtocolVersion1p0) {
 		t.Skip()
 	}
 	ctx := context.Background()
@@ -3612,7 +3613,7 @@ func TestReceiveDateDurationUnmarshaler(t *testing.T) {
 }
 
 func TestSendDateDurationMarshaler(t *testing.T) {
-	if protocolVersion.LT(protocolVersion1p0) {
+	if protocolVersion.LT(gel.ProtocolVersion1p0) {
 		t.Skip()
 	}
 
@@ -3696,7 +3697,7 @@ func (m *CustomOptionalDateDuration) SetMissing(missing bool) {
 func (m CustomOptionalDateDuration) Missing() bool { return !m.isSet }
 
 func TestReceiveOptionalDateDurationUnmarshaler(t *testing.T) {
-	if protocolVersion.LT(protocolVersion1p0) {
+	if protocolVersion.LT(gel.ProtocolVersion1p0) {
 		t.Skip()
 	}
 
@@ -3732,7 +3733,7 @@ func TestReceiveOptionalDateDurationUnmarshaler(t *testing.T) {
 }
 
 func TestSendOptionalDateDurationMarshaler(t *testing.T) {
-	if protocolVersion.LT(protocolVersion1p0) {
+	if protocolVersion.LT(gel.ProtocolVersion1p0) {
 		t.Skip()
 	}
 

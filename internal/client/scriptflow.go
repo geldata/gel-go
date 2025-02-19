@@ -19,6 +19,7 @@ package gel
 import (
 	"encoding/json"
 
+	"github.com/edgedb/edgedb-go/gelcfg"
 	"github.com/edgedb/edgedb-go/internal/buff"
 	"github.com/edgedb/edgedb-go/internal/header"
 )
@@ -46,7 +47,7 @@ var discardHeaders2pX = discardHeaders1pX
 func decodeHeaders1pX(
 	r *buff.Reader,
 	query string,
-	warningHandler WarningHandler,
+	warningHandler gelcfg.WarningHandler,
 ) (header.Header1pX, error) {
 	n := int(r.PopUint16())
 

@@ -23,6 +23,7 @@ import (
 	"time"
 
 	gel "github.com/edgedb/edgedb-go"
+	"github.com/edgedb/edgedb-go/gelcfg"
 )
 
 type User struct {
@@ -32,7 +33,7 @@ type User struct {
 }
 
 func Example() {
-	opts := gel.Options{Concurrency: 4}
+	opts := gelcfg.Options{Concurrency: 4}
 	ctx := context.Background()
 	db, err := gel.CreateClientDSN(ctx, "gel://edgedb@localhost/test", opts)
 	if err != nil {

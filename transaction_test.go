@@ -23,11 +23,16 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/edgedb/edgedb-go/gelcfg"
 	"github.com/edgedb/edgedb-go/gelerr"
+	gel "github.com/edgedb/edgedb-go/internal/client"
 	types "github.com/edgedb/edgedb-go/internal/geltypes"
+	"github.com/edgedb/edgedb-go/internal/snc"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+var rnd = snc.NewRand()
 
 func TestTxRollesBack(t *testing.T) {
 	ctx := context.Background()
@@ -119,8 +124,12 @@ func TestTxCommits(t *testing.T) {
 	)
 }
 
-func newTxOpts(level IsolationLevel, readOnly, deferrable bool) TxOptions {
-	return NewTxOptions().
+func newTxOpts(
+	level gelcfg.IsolationLevel,
+	readOnly,
+	deferrable bool,
+) gelcfg.TxOptions {
+	return gelcfg.NewTxOptions().
 		WithIsolation(level).
 		WithReadOnly(readOnly).
 		WithDeferrable(deferrable)
@@ -129,24 +138,32 @@ func newTxOpts(level IsolationLevel, readOnly, deferrable bool) TxOptions {
 func TestTxKinds(t *testing.T) {
 	ctx := context.Background()
 
-	combinations := []TxOptions{
-		newTxOpts(Serializable, true, true),
-		newTxOpts(Serializable, true, false),
-		newTxOpts(Serializable, false, true),
-		newTxOpts(Serializable, false, false),
-		NewTxOptions().WithIsolation(Serializable).WithReadOnly(true),
-		NewTxOptions().WithIsolation(Serializable).WithReadOnly(false),
-		NewTxOptions().WithIsolation(Serializable).WithDeferrable(true),
-		NewTxOptions().WithIsolation(Serializable).WithDeferrable(false),
-		NewTxOptions().WithReadOnly(true).WithDeferrable(true),
-		NewTxOptions().WithReadOnly(true).WithDeferrable(false),
-		NewTxOptions().WithReadOnly(false).WithDeferrable(true),
-		NewTxOptions().WithReadOnly(false).WithDeferrable(false),
-		NewTxOptions().WithIsolation(Serializable),
-		NewTxOptions().WithReadOnly(true),
-		NewTxOptions().WithReadOnly(false),
-		NewTxOptions().WithDeferrable(true),
-		NewTxOptions().WithDeferrable(false),
+	combinations := []gelcfg.TxOptions{
+		newTxOpts(gelcfg.Serializable, true, true),
+		newTxOpts(gelcfg.Serializable, true, false),
+		newTxOpts(gelcfg.Serializable, false, true),
+		newTxOpts(gelcfg.Serializable, false, false),
+		gelcfg.NewTxOptions().
+			WithIsolation(gelcfg.Serializable).
+			WithReadOnly(true),
+		gelcfg.NewTxOptions().
+			WithIsolation(gelcfg.Serializable).
+			WithReadOnly(false),
+		gelcfg.NewTxOptions().
+			WithIsolation(gelcfg.Serializable).
+			WithDeferrable(true),
+		gelcfg.NewTxOptions().
+			WithIsolation(gelcfg.Serializable).
+			WithDeferrable(false),
+		gelcfg.NewTxOptions().WithReadOnly(true).WithDeferrable(true),
+		gelcfg.NewTxOptions().WithReadOnly(true).WithDeferrable(false),
+		gelcfg.NewTxOptions().WithReadOnly(false).WithDeferrable(true),
+		gelcfg.NewTxOptions().WithReadOnly(false).WithDeferrable(false),
+		gelcfg.NewTxOptions().WithIsolation(gelcfg.Serializable),
+		gelcfg.NewTxOptions().WithReadOnly(true),
+		gelcfg.NewTxOptions().WithReadOnly(false),
+		gelcfg.NewTxOptions().WithDeferrable(true),
+		gelcfg.NewTxOptions().WithDeferrable(false),
 	}
 
 	noOp := func(ctx context.Context, tx *Tx) error { return nil }
@@ -162,7 +179,7 @@ func TestTxKinds(t *testing.T) {
 }
 
 func TestWithConfigInTx(t *testing.T) {
-	if protocolVersion.LT(protocolVersion1p0) {
+	if protocolVersion.LT(gel.ProtocolVersion1p0) {
 		t.Skip()
 	}
 

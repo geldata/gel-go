@@ -22,6 +22,7 @@ import (
 	"math/rand"
 	"testing"
 
+	"github.com/edgedb/edgedb-go/gelcfg"
 	types "github.com/edgedb/edgedb-go/internal/geltypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -49,7 +50,7 @@ func TestTutorial(t *testing.T) {
 
 	edb, err := CreateClient(
 		ctx,
-		Options{
+		gelcfg.Options{
 			Host:       opts.Host,
 			Port:       opts.Port,
 			User:       opts.User,

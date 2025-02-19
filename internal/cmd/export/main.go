@@ -95,7 +95,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	quicksort(exports[token.CONST], func(e Export) string { return e.Name })
 	quicksort(exports[token.TYPE], func(e Export) string { return e.Name })
 	quicksort(exports[token.VAR], func(e Export) string { return e.Name })
 	err = t.Execute(&buf, map[string]any{
