@@ -6,7 +6,16 @@ lint:
 	go run github.com/golangci/golangci-lint/cmd/golangci-lint@v1.61.0 run --sort-results
 
 test:
+	# The test server shuts it self down after 10 seconds of inactivity.  If
+	# the server is still running when a subsequent test run is started the old
+	# server will be reused.  This saves developer time at the expense of
+	# repeatability.  You can set EDGEDB_SERVER_AUTO_SHUTDOWN_AFTER_SECONDS to
+	# extend the timeout. Use make kill-test-server to stop the currently
+	# running test server.
 	go test -v -count=1 -race -bench=$$^ -timeout=20m ./...
+
+kill-test-server:
+	kill $(shell jq -r '.pid' /tmp/edgedb-go-test-server-info)
 
 bench:
 	go test -run=^$$ -bench=. -benchmem -timeout=10m ./...

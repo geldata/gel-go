@@ -50,6 +50,7 @@ var (
 type info struct {
 	TLSCertFile string `json:"tls_cert_file"`
 	Port        int    `json:"port"`
+	PID         int    `json:"pid"`
 }
 
 func (i *info) options() gelcfg.Options {
@@ -179,6 +180,11 @@ func startServerProcess() *info {
 		args = append([]string{"wsl", "-u", "edgedb"}, args...)
 	}
 
+	autoShutdownAfter := os.Getenv("EDGEDB_SERVER_AUTO_SHUTDOWN_AFTER_SECONDS")
+	if autoShutdownAfter == "" {
+		autoShutdownAfter = "10"
+	}
+
 	args = append(
 		args,
 		"--temp-dir",
@@ -186,7 +192,7 @@ func startServerProcess() *info {
 		"--port=auto",
 		"--emit-server-status="+statusFileUnix,
 		"--tls-cert-mode=generate_self_signed",
-		"--auto-shutdown-after=10",
+		"--auto-shutdown-after="+autoShutdownAfter,
 		`--bootstrap-command=`+
 			`CREATE SUPERUSER ROLE test { SET password := "shhh" }`,
 	)
@@ -271,6 +277,7 @@ Set EDGEDB_DEBUG_SERVER=1 to see server debug logs.
 		localInfo.TLSCertFile = tmpFile
 	}
 
+	localInfo.PID = cmd.Process.Pid
 	data, err := json.Marshal(localInfo)
 	if err != nil {
 		Fatal(err)
