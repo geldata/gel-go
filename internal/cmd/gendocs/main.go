@@ -76,7 +76,7 @@ func writeFile(filename string, content string) {
 }
 
 func renderTypesPage() []string {
-	dir, err := os.ReadDir("internal/geltypes")
+	dir, err := os.ReadDir("geltypes")
 	if err != nil {
 		panic(err)
 	}
@@ -88,12 +88,12 @@ func renderTypesPage() []string {
 		if !file.IsDir() {
 			files = append(
 				files, readAndParseFile(
-					fset, "internal/geltypes/"+file.Name()))
+					fset, "geltypes/"+file.Name()))
 		}
 	}
 
 	p, err := doc.NewFromFiles(
-		fset, files, "github.com/geldata/gel-go/internal/geltypes")
+		fset, files, "github.com/geldata/gel-go/geltypes")
 	if err != nil {
 		panic(err)
 	}

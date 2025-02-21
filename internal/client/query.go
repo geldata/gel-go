@@ -24,8 +24,8 @@ import (
 
 	"github.com/edgedb/edgedb-go/gelcfg"
 	"github.com/edgedb/edgedb-go/gelerr"
+	types "github.com/edgedb/edgedb-go/geltypes"
 	gelerrint "github.com/edgedb/edgedb-go/internal/gelerr"
-	types "github.com/edgedb/edgedb-go/internal/geltypes"
 	"github.com/edgedb/edgedb-go/internal/introspect"
 )
 

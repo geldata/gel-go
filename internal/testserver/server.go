@@ -34,8 +34,8 @@ import (
 	"time"
 
 	"github.com/edgedb/edgedb-go/gelcfg"
+	"github.com/edgedb/edgedb-go/geltypes"
 	gelint "github.com/edgedb/edgedb-go/internal/client"
-	"github.com/edgedb/edgedb-go/internal/geltypes"
 )
 
 var (

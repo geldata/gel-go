@@ -24,9 +24,9 @@ import (
 
 	"github.com/edgedb/edgedb-go/gelcfg"
 	"github.com/edgedb/edgedb-go/gelerr"
+	"github.com/edgedb/edgedb-go/geltypes"
+	types "github.com/edgedb/edgedb-go/geltypes"
 	gel "github.com/edgedb/edgedb-go/internal/client"
-	"github.com/edgedb/edgedb-go/internal/geltypes"
-	types "github.com/edgedb/edgedb-go/internal/geltypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

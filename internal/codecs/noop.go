@@ -19,9 +19,9 @@ package codecs
 import (
 	"unsafe"
 
+	types "github.com/edgedb/edgedb-go/geltypes"
 	"github.com/edgedb/edgedb-go/internal/buff"
 	"github.com/edgedb/edgedb-go/internal/descriptor"
-	types "github.com/edgedb/edgedb-go/internal/geltypes"
 )
 
 var (

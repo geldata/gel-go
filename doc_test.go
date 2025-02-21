@@ -24,12 +24,13 @@ import (
 
 	gel "github.com/edgedb/edgedb-go"
 	"github.com/edgedb/edgedb-go/gelcfg"
+	"github.com/edgedb/edgedb-go/geltypes"
 )
 
 type User struct {
-	ID   gel.UUID  `gel:"id"`
-	Name string    `gel:"name"`
-	DOB  time.Time `gel:"dob"`
+	ID   geltypes.UUID `gel:"id"`
+	Name string        `gel:"name"`
+	DOB  time.Time     `gel:"dob"`
 }
 
 func Example() {
@@ -53,7 +54,7 @@ func Example() {
 	}
 
 	// Insert a new user.
-	var inserted struct{ id gel.UUID }
+	var inserted struct{ id geltypes.UUID }
 	err = db.QuerySingle(ctx, `
 		INSERT User {
 			name := <str>$0,

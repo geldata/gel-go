@@ -20,7 +20,7 @@ import (
 	"encoding/binary"
 	"fmt"
 
-	types "github.com/edgedb/edgedb-go/internal/geltypes"
+	types "github.com/edgedb/edgedb-go/geltypes"
 	"github.com/edgedb/edgedb-go/internal/soc"
 )
 

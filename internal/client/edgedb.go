@@ -21,12 +21,12 @@ import (
 	"log"
 	"time"
 
+	types "github.com/edgedb/edgedb-go/geltypes"
 	"github.com/edgedb/edgedb-go/internal"
 	"github.com/edgedb/edgedb-go/internal/buff"
 	"github.com/edgedb/edgedb-go/internal/cache"
 	"github.com/edgedb/edgedb-go/internal/codecs"
 	"github.com/edgedb/edgedb-go/internal/gelerr"
-	types "github.com/edgedb/edgedb-go/internal/geltypes"
 	"github.com/edgedb/edgedb-go/internal/snc"
 	"github.com/edgedb/edgedb-go/internal/soc"
 )

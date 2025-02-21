@@ -32,7 +32,7 @@ type RetryCondition int
 const (
 	// TxConflict indicates that the server could not complete a transaction
 	// because it encountered a deadlock or serialization error.
-	TxConflict = iota
+	TxConflict RetryCondition = iota
 
 	// NetworkError indicates that the transaction was interupted
 	// by a network error.

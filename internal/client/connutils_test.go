@@ -33,8 +33,8 @@ import (
 	"time"
 
 	"github.com/edgedb/edgedb-go/gelcfg"
+	"github.com/edgedb/edgedb-go/geltypes"
 	gelerrint "github.com/edgedb/edgedb-go/internal/gelerr"
-	"github.com/edgedb/edgedb-go/internal/geltypes"
 	"github.com/edgedb/edgedb-go/internal/snc"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

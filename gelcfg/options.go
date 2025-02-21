@@ -19,7 +19,7 @@ package gelcfg
 import (
 	"time"
 
-	types "github.com/edgedb/edgedb-go/internal/geltypes"
+	types "github.com/edgedb/edgedb-go/geltypes"
 )
 
 // WarningHandler takes an error slice that represent warnings and optionally

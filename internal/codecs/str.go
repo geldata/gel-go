@@ -21,8 +21,8 @@ import (
 	"reflect"
 	"unsafe"
 
+	types "github.com/edgedb/edgedb-go/geltypes"
 	"github.com/edgedb/edgedb-go/internal/buff"
-	types "github.com/edgedb/edgedb-go/internal/geltypes"
 	"github.com/edgedb/edgedb-go/internal/marshal"
 )
 

@@ -19,10 +19,10 @@ package state
 import (
 	"fmt"
 
+	"github.com/edgedb/edgedb-go/geltypes"
 	"github.com/edgedb/edgedb-go/internal/buff"
 	"github.com/edgedb/edgedb-go/internal/codecs"
 	"github.com/edgedb/edgedb-go/internal/descriptor"
-	"github.com/edgedb/edgedb-go/internal/geltypes"
 )
 
 func buildObjectOrNamedTupleEncoder(

@@ -21,9 +21,9 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/edgedb/edgedb-go/geltypes"
 	"github.com/edgedb/edgedb-go/internal"
 	"github.com/edgedb/edgedb-go/internal/buff"
-	"github.com/edgedb/edgedb-go/internal/geltypes"
 )
 
 // IDZero is descriptor ID 00000000-0000-0000-0000-000000000000
