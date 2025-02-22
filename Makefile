@@ -6,7 +6,8 @@ lint:
 	go run github.com/golangci/golangci-lint/cmd/golangci-lint@v1.61.0 run --sort-results
 
 test:
-	go test -v -count=1 -race -bench=$$^ -timeout=20m ./...
+	# temporarily skip edgeql-go tests until a gel-go version is published
+	go test -v -count=1 -race -bench=$$^ -timeout=20m $(shell go list ./... | grep -v edgeql-go)
 
 bench:
 	go test -run=^$$ -bench=. -benchmem -timeout=10m ./...
