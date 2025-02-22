@@ -17,6 +17,8 @@
 package gelcfg
 
 import (
+	"errors"
+	"log"
 	"time"
 
 	types "github.com/edgedb/edgedb-go/geltypes"
@@ -26,6 +28,21 @@ import (
 // returns an error. This can be used to log warnings, increment metrics,
 // promote warnings to errors by returning them etc.
 type WarningHandler = func([]error) error
+
+// LogWarnings is an gel.WarningHandler that logs warnings.
+func LogWarnings(errors []error) error {
+	for _, err := range errors {
+		log.Println("Gel warning:", err.Error())
+	}
+
+	return nil
+}
+
+// WarningsAsErrors is an gel.WarningHandler that returns warnings as
+// errors.
+func WarningsAsErrors(warnings []error) error {
+	return errors.Join(warnings...)
+}
 
 // Options for connecting to a Gel server
 type Options struct {

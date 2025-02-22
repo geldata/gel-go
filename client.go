@@ -45,7 +45,7 @@ func CreateClientDSN(_ context.Context, dsn string, opts gelcfg.Options) (*Clien
 		return nil, err
 	}
 
-	warningHandler := LogWarnings
+	warningHandler := gelcfg.LogWarnings
 	if opts.WarningHandler != nil {
 		warningHandler = opts.WarningHandler
 	}
@@ -260,7 +260,7 @@ func (c *Client) ExecuteSQL(
 // If either field is unset (see RetryRule) then the default rule is used.
 // If the object's default is unset the fall back is 3 attempts
 // and exponential backoff.
-func (c *Client) Tx(ctx context.Context, action func(context.Context, geltypes.Tx) error) error {
+func (c *Client) Tx(ctx context.Context, action geltypes.TxBlock) error {
 	conn, err := c.pool.Acquire(ctx)
 	if err != nil {
 		return err

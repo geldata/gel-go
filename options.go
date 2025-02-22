@@ -186,7 +186,7 @@ func (c Client) WithWarningHandler( // nolint:gocritic
 	warningHandler gelcfg.WarningHandler,
 ) *Client {
 	if warningHandler == nil {
-		warningHandler = LogWarnings
+		warningHandler = gelcfg.LogWarnings
 	}
 
 	c.warningHandler = warningHandler

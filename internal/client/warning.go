@@ -17,9 +17,7 @@
 package gel
 
 import (
-	"errors"
 	"fmt"
-	"log"
 	"strings"
 	"unicode/utf8"
 
@@ -77,19 +75,4 @@ func (w *Warning) Err(query string) error {
 	)
 
 	return gelerr.ErrorFromCode(w.Code, msg)
-}
-
-// LogWarnings is an gel.WarningHandler that logs warnings.
-func LogWarnings(errors []error) error {
-	for _, err := range errors {
-		log.Println("Gel warning:", err.Error())
-	}
-
-	return nil
-}
-
-// WarningsAsErrors is an gel.WarningHandler that returns warnings as
-// errors.
-func WarningsAsErrors(warnings []error) error {
-	return errors.Join(warnings...)
 }
