@@ -278,7 +278,7 @@ func TestSQLTx(t *testing.T) {
 		})
 		assert.EqualError(
 			t, err,
-			"edgedb.UnsupportedFeatureError: "+
+			"gel.UnsupportedFeatureError: "+
 				"the server does not support SQL queries, "+
 				"upgrade to 6.0 or newer",
 		)
