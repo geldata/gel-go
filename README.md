@@ -1,7 +1,7 @@
 # The Go driver for Gel
 
 [![Build Status](https://github.com/geldata/gel-go/workflows/Tests/badge.svg?event=push&branch=master)](https://github.com/geldata/gel-go/actions)
-[![Join GitHub discussions](https://img.shields.io/badge/join-github%20discussions-green)](https://github.com/edgedb/edgedb/discussions)
+[![Join GitHub discussions](https://img.shields.io/badge/join-github%20discussions-green)](https://github.com/geldata/gel/discussions)
 
 ## Installation
 
@@ -13,7 +13,7 @@ $ go get github.com/geldata/gel-go
 
 ## Basic Usage
 
-Follow the [Gel tutorial](https://www.edgedb.com/docs/guides/quickstart)
+Follow the [Gel tutorial](https://www.geldata.com/docs/guides/quickstart)
 to get Gel installed and minimally configured.
 
 ```go
@@ -48,8 +48,8 @@ func main() {
 ## Development
 
 A local installation of Gel is required to run tests.
-Download Gel from [here](https://www.edgedb.com/download)
-or [build it manually](https://www.edgedb.com/docs/reference/dev).
+Download Gel from [here](https://www.geldata.com/download)
+or [build it manually](https://www.geldata.com/docs/reference/dev).
 
 To run the test suite run `make test`.
 To run lints `make lint`.
