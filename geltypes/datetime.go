@@ -597,7 +597,7 @@ func parseDurationHuman(str string) (Duration, error) {
 	), nil
 }
 
-// ParseDuration parses an Gel duration string.
+// ParseDuration parses a Gel duration string.
 func ParseDuration(s string) (Duration, error) {
 	if strings.HasPrefix(s, "PT") {
 		return parseDurationISO(s)

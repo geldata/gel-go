@@ -29,7 +29,7 @@ import (
 // promote warnings to errors by returning them etc.
 type WarningHandler = func([]error) error
 
-// LogWarnings is an gel.WarningHandler that logs warnings.
+// LogWarnings is a gel.WarningHandler that logs warnings.
 func LogWarnings(errors []error) error {
 	for _, err := range errors {
 		log.Println("Gel warning:", err.Error())
@@ -38,7 +38,7 @@ func LogWarnings(errors []error) error {
 	return nil
 }
 
-// WarningsAsErrors is an gel.WarningHandler that returns warnings as
+// WarningsAsErrors is a gel.WarningHandler that returns warnings as
 // errors.
 func WarningsAsErrors(warnings []error) error {
 	return errors.Join(warnings...)
@@ -46,7 +46,7 @@ func WarningsAsErrors(warnings []error) error {
 
 // Options for connecting to a Gel server
 type Options struct {
-	// Host is an Gel server host address, given as either an IP address or
+	// Host is a Gel server host address, given as either an IP address or
 	// domain name. (Unix-domain socket paths are not supported)
 	//
 	// Host cannot be specified alongside the 'dsn' argument, or

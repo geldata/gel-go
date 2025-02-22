@@ -55,7 +55,7 @@ func buildRangeDecoder(
 	}
 
 	return nil, fmt.Errorf(
-		"expected %v to be an gel.Range type got %v",
+		"expected %v to be a gel.Range type got %v",
 		path, typ)
 }
 
@@ -85,7 +85,7 @@ func buildRangeDecoderV2(
 	}
 
 	return nil, fmt.Errorf(
-		"expected %v to be an gel.Range type got %v",
+		"expected %v to be a gel.Range type got %v",
 		path, typ)
 }
 
