@@ -136,7 +136,7 @@ func TestClientTx(t *testing.T) {
 	defer p.Close() // nolint:errcheck
 
 	var result int64
-	err = p.Tx(ctx, func(ctx context.Context, tx *Tx) error {
+	err = p.Tx(ctx, func(ctx context.Context, tx geltypes.Tx) error {
 		return tx.QuerySingle(ctx, "SELECT 33*21", &result)
 	})
 

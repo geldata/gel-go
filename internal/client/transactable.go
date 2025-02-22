@@ -23,6 +23,7 @@ import (
 
 	"github.com/edgedb/edgedb-go/gelcfg"
 	"github.com/edgedb/edgedb-go/gelerr"
+	types "github.com/edgedb/edgedb-go/geltypes"
 	gelerrint "github.com/edgedb/edgedb-go/internal/gelerr"
 )
 
@@ -80,7 +81,7 @@ func (c *transactableConn) granularFlow(ctx context.Context, q *query) error {
 
 func (c *transactableConn) Tx(
 	ctx context.Context,
-	action TxBlock,
+	action types.TxBlock,
 	state map[string]interface{},
 	warningHandler gelcfg.WarningHandler,
 ) (err error) {

@@ -30,6 +30,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/edgedb/edgedb-go/geltypes"
 	types "github.com/edgedb/edgedb-go/geltypes"
 	gel "github.com/edgedb/edgedb-go/internal/client"
 	"github.com/stretchr/testify/assert"
@@ -260,7 +261,7 @@ func (m CustomOptionalInt64) Missing() bool { return !m.isSet }
 
 func TestReceiveOptionalInt64Unmarshaler(t *testing.T) {
 	ddl := `CREATE TYPE Sample { CREATE PROPERTY val -> int64; };`
-	inRolledBackTx(t, ddl, func(ctx context.Context, tx *Tx) {
+	inRolledBackTx(t, ddl, func(ctx context.Context, tx geltypes.Tx) {
 		var result struct {
 			Val CustomOptionalInt64 `gel:"val"`
 		}
@@ -530,7 +531,7 @@ func (m CustomOptionalInt32) Missing() bool { return !m.isSet }
 
 func TestReceiveOptionalInt32Unmarshaler(t *testing.T) {
 	ddl := `CREATE TYPE Sample { CREATE PROPERTY val -> int32; };`
-	inRolledBackTx(t, ddl, func(ctx context.Context, tx *Tx) {
+	inRolledBackTx(t, ddl, func(ctx context.Context, tx geltypes.Tx) {
 		var result struct {
 			Val CustomOptionalInt32 `gel:"val"`
 		}
@@ -619,7 +620,7 @@ func TestSendOptionalInt32Marshaler(t *testing.T) {
 func TestSendAndReceiveOptionalInt32(t *testing.T) {
 	ctx := context.Background()
 
-	err := client.Tx(ctx, func(ctx context.Context, tx *Tx) error {
+	err := client.Tx(ctx, func(ctx context.Context, tx geltypes.Tx) error {
 		e := tx.Execute(ctx, `
 			CREATE TYPE Int32FieldHolder {
 				CREATE PROPERTY int32 -> int32;
@@ -864,7 +865,7 @@ func (m CustomOptionalInt16) Missing() bool { return !m.isSet }
 
 func TestReceiveOptionalInt16Unmarshaler(t *testing.T) {
 	ddl := `CREATE TYPE Sample { CREATE PROPERTY val -> int16; };`
-	inRolledBackTx(t, ddl, func(ctx context.Context, tx *Tx) {
+	inRolledBackTx(t, ddl, func(ctx context.Context, tx geltypes.Tx) {
 		var result struct {
 			Val CustomOptionalInt16 `gel:"val"`
 		}
@@ -953,7 +954,7 @@ func TestSendOptionalInt16Marshaler(t *testing.T) {
 func TestSendAndReceiveOptionalInt16(t *testing.T) {
 	ctx := context.Background()
 
-	err := client.Tx(ctx, func(ctx context.Context, tx *Tx) error {
+	err := client.Tx(ctx, func(ctx context.Context, tx geltypes.Tx) error {
 		e := tx.Execute(ctx, `
 			CREATE TYPE Int16FieldHolder {
 				CREATE PROPERTY int16 -> int16;
@@ -1175,7 +1176,7 @@ func (m CustomOptionalBool) Missing() bool { return !m.isSet }
 
 func TestReceiveOptionalBoolUnmarshaler(t *testing.T) {
 	ddl := `CREATE TYPE Sample { CREATE PROPERTY val -> bool; };`
-	inRolledBackTx(t, ddl, func(ctx context.Context, tx *Tx) {
+	inRolledBackTx(t, ddl, func(ctx context.Context, tx geltypes.Tx) {
 		var result struct {
 			Val CustomOptionalBool `gel:"val"`
 		}
@@ -1437,7 +1438,7 @@ func (m CustomOptionalFloat64) Missing() bool { return !m.isSet }
 
 func TestReceiveOptionalFloat64Unmarshaler(t *testing.T) {
 	ddl := `CREATE TYPE Sample { CREATE PROPERTY val -> float64; };`
-	inRolledBackTx(t, ddl, func(ctx context.Context, tx *Tx) {
+	inRolledBackTx(t, ddl, func(ctx context.Context, tx geltypes.Tx) {
 		var result struct {
 			Val CustomOptionalFloat64 `gel:"val"`
 		}
@@ -1536,7 +1537,7 @@ func TestSendOptionalFloat64Marshaler(t *testing.T) {
 func TestSendAndReceiveOptionalFloat64(t *testing.T) {
 	ctx := context.Background()
 
-	err := client.Tx(ctx, func(ctx context.Context, tx *Tx) error {
+	err := client.Tx(ctx, func(ctx context.Context, tx geltypes.Tx) error {
 		e := tx.Execute(ctx, `
 			CREATE TYPE Float64FieldHolder {
 				CREATE PROPERTY float64 -> float64;
@@ -1785,7 +1786,7 @@ func (m CustomOptionalFloat32) Missing() bool { return !m.isSet }
 
 func TestReceiveOptionalFloat32Unmarshaler(t *testing.T) {
 	ddl := `CREATE TYPE Sample { CREATE PROPERTY val -> float32; };`
-	inRolledBackTx(t, ddl, func(ctx context.Context, tx *Tx) {
+	inRolledBackTx(t, ddl, func(ctx context.Context, tx geltypes.Tx) {
 		var result struct {
 			Val CustomOptionalFloat32 `gel:"val"`
 		}
@@ -2029,7 +2030,7 @@ func (m CustomOptionalBytes) Missing() bool { return !m.isSet }
 
 func TestReceiveOptionalBytesUnmarshaler(t *testing.T) {
 	ddl := `CREATE TYPE Sample { CREATE PROPERTY val -> bytes; };`
-	inRolledBackTx(t, ddl, func(ctx context.Context, tx *Tx) {
+	inRolledBackTx(t, ddl, func(ctx context.Context, tx geltypes.Tx) {
 		var result struct {
 			Val CustomOptionalBytes `gel:"val"`
 		}
@@ -2232,7 +2233,7 @@ func (m CustomOptionalStr) Missing() bool { return !m.isSet }
 
 func TestReceiveOptionalStrUnmarshaler(t *testing.T) {
 	ddl := `CREATE TYPE Sample { CREATE PROPERTY val -> str; };`
-	inRolledBackTx(t, ddl, func(ctx context.Context, tx *Tx) {
+	inRolledBackTx(t, ddl, func(ctx context.Context, tx geltypes.Tx) {
 		var result struct {
 			Val CustomOptionalStr `gel:"val"`
 		}
@@ -2301,7 +2302,7 @@ func TestSendOptionalStrMarshaler(t *testing.T) {
 func TestSendAndReceiveOptionalStr(t *testing.T) {
 	ctx := context.Background()
 
-	err := client.Tx(ctx, func(ctx context.Context, tx *Tx) error {
+	err := client.Tx(ctx, func(ctx context.Context, tx geltypes.Tx) error {
 		e := tx.Execute(ctx, `
 			CREATE TYPE StrFieldHolder {
 				CREATE PROPERTY str -> str;
@@ -2600,7 +2601,7 @@ func (m CustomOptionalJSON) Missing() bool { return !m.isSet }
 
 func TestReceiveOptionalJSONUnmarshaler(t *testing.T) {
 	ddl := `CREATE TYPE Sample { CREATE PROPERTY val -> json; };`
-	inRolledBackTx(t, ddl, func(ctx context.Context, tx *Tx) {
+	inRolledBackTx(t, ddl, func(ctx context.Context, tx geltypes.Tx) {
 		var result struct {
 			Val CustomOptionalJSON `gel:"val"`
 		}
@@ -2704,7 +2705,7 @@ func TestSendAndReceiveEnum(t *testing.T) {
 		)
 	`
 
-	err := client.Tx(ctx, func(ctx context.Context, tx *Tx) error {
+	err := client.Tx(ctx, func(ctx context.Context, tx geltypes.Tx) error {
 		e := tx.Execute(ctx,
 			"CREATE SCALAR TYPE Color EXTENDING enum<Red, Green, Blue>;")
 		assert.NoError(t, e)
@@ -2738,7 +2739,7 @@ func TestReceiveEnumUnmarshaler(t *testing.T) {
 		Val CustomStr `gel:"val"`
 	}
 
-	err := client.Tx(ctx, func(ctx context.Context, tx *Tx) error {
+	err := client.Tx(ctx, func(ctx context.Context, tx geltypes.Tx) error {
 		e := tx.Execute(ctx,
 			"CREATE SCALAR TYPE Color EXTENDING enum<Red, Green, Blue>;")
 		assert.NoError(t, e)
@@ -2772,7 +2773,7 @@ func TestSendEnumMarshaler(t *testing.T) {
 		Val types.OptionalStr `gel:"val"`
 	}
 
-	err := client.Tx(ctx, func(ctx context.Context, tx *Tx) error {
+	err := client.Tx(ctx, func(ctx context.Context, tx geltypes.Tx) error {
 		e := tx.Execute(ctx,
 			"CREATE SCALAR TYPE Color EXTENDING enum<Red, Green, Blue>;")
 		assert.NoError(t, e)
@@ -2807,7 +2808,7 @@ func TestReceiveOptionalEnumUnmarshaler(t *testing.T) {
 			CREATE PROPERTY val -> Color;
 		};
 	`
-	inRolledBackTx(t, ddl, func(ctx context.Context, tx *Tx) {
+	inRolledBackTx(t, ddl, func(ctx context.Context, tx geltypes.Tx) {
 		var result struct {
 			Val CustomOptionalStr `gel:"val"`
 		}
@@ -2835,7 +2836,7 @@ func TestSendOptionalEnumMarshaler(t *testing.T) {
 		return CustomOptionalStr{isSet: true, data: data}
 	}
 
-	err := client.Tx(ctx, func(ctx context.Context, tx *Tx) error {
+	err := client.Tx(ctx, func(ctx context.Context, tx geltypes.Tx) error {
 		e := tx.Execute(ctx,
 			"CREATE SCALAR TYPE Color EXTENDING enum<Red, Green, Blue>;")
 		assert.NoError(t, e)
@@ -3069,7 +3070,7 @@ func (m CustomOptionalDuration) Missing() bool { return !m.isSet }
 
 func TestReceiveOptionalDurationUnmarshaler(t *testing.T) {
 	ddl := `CREATE TYPE Sample { CREATE PROPERTY val -> duration; };`
-	inRolledBackTx(t, ddl, func(ctx context.Context, tx *Tx) {
+	inRolledBackTx(t, ddl, func(ctx context.Context, tx geltypes.Tx) {
 		var result struct {
 			Val CustomOptionalDuration `gel:"val"`
 		}
@@ -3376,7 +3377,7 @@ func TestReceiveOptionalRelativeDurationUnmarshaler(t *testing.T) {
 	ddl := `CREATE TYPE Sample {
 		CREATE PROPERTY val -> cal::relative_duration;
 	};`
-	inRolledBackTx(t, ddl, func(ctx context.Context, tx *Tx) {
+	inRolledBackTx(t, ddl, func(ctx context.Context, tx geltypes.Tx) {
 		var result struct {
 			Val CustomOptionalRelativeDuration `gel:"val"`
 		}
@@ -3704,7 +3705,7 @@ func TestReceiveOptionalDateDurationUnmarshaler(t *testing.T) {
 	ddl := `CREATE TYPE Sample {
 		CREATE PROPERTY val -> cal::date_duration;
 	};`
-	inRolledBackTx(t, ddl, func(ctx context.Context, tx *Tx) {
+	inRolledBackTx(t, ddl, func(ctx context.Context, tx geltypes.Tx) {
 		var result struct {
 			Val CustomOptionalDateDuration `gel:"val"`
 		}
@@ -4020,7 +4021,7 @@ func (m CustomOptionalLocalTime) Missing() bool { return !m.isSet }
 
 func TestReceiveOptionalLocalTimeUnmarshaler(t *testing.T) {
 	ddl := `CREATE TYPE Sample { CREATE PROPERTY val -> cal::local_time; };`
-	inRolledBackTx(t, ddl, func(ctx context.Context, tx *Tx) {
+	inRolledBackTx(t, ddl, func(ctx context.Context, tx geltypes.Tx) {
 		var result struct {
 			Val CustomOptionalLocalTime `gel:"val"`
 		}
@@ -4305,7 +4306,7 @@ func (m CustomOptionalLocalDate) Missing() bool { return !m.isSet }
 
 func TestReceiveOptionalLocalDateUnmarshaler(t *testing.T) {
 	ddl := `CREATE TYPE Sample { CREATE PROPERTY val -> cal::local_date; };`
-	inRolledBackTx(t, ddl, func(ctx context.Context, tx *Tx) {
+	inRolledBackTx(t, ddl, func(ctx context.Context, tx geltypes.Tx) {
 		var result struct {
 			Val CustomOptionalLocalDate `gel:"val"`
 		}
@@ -4610,7 +4611,7 @@ func TestReceiveOptionalLocalDateTimeUnmarshaler(t *testing.T) {
 	ddl := `CREATE TYPE Sample {
 		CREATE PROPERTY val -> cal::local_datetime;
 	};`
-	inRolledBackTx(t, ddl, func(ctx context.Context, tx *Tx) {
+	inRolledBackTx(t, ddl, func(ctx context.Context, tx geltypes.Tx) {
 		var result struct {
 			Val CustomOptionalLocalDateTime `gel:"val"`
 		}
@@ -4920,7 +4921,7 @@ func (m CustomOptionalDateTime) Missing() bool { return !m.isSet }
 
 func TestReceiveOptionalDateTimeUnmarshaler(t *testing.T) {
 	ddl := `CREATE TYPE Sample { CREATE PROPERTY val -> datetime; };`
-	inRolledBackTx(t, ddl, func(ctx context.Context, tx *Tx) {
+	inRolledBackTx(t, ddl, func(ctx context.Context, tx geltypes.Tx) {
 		var result struct {
 			Val CustomOptionalDateTime `gel:"val"`
 		}
@@ -5362,7 +5363,7 @@ func (m CustomOptionalBigInt) Missing() bool { return !m.isSet }
 
 func TestReceiveOptionalBigIntUnmarshaler(t *testing.T) {
 	ddl := `CREATE TYPE Sample { CREATE PROPERTY val -> bigint; };`
-	inRolledBackTx(t, ddl, func(ctx context.Context, tx *Tx) {
+	inRolledBackTx(t, ddl, func(ctx context.Context, tx geltypes.Tx) {
 		var result struct {
 			Val CustomOptionalBigInt `gel:"val"`
 		}
@@ -5620,7 +5621,7 @@ func (m CustomOptionalDecimal) Missing() bool { return !m.isSet }
 
 func TestReceiveOptionalDecimalUnmarshaler(t *testing.T) {
 	ddl := `CREATE TYPE Sample { CREATE PROPERTY val -> decimal; };`
-	inRolledBackTx(t, ddl, func(ctx context.Context, tx *Tx) {
+	inRolledBackTx(t, ddl, func(ctx context.Context, tx geltypes.Tx) {
 		var result struct {
 			Val CustomOptionalDecimal `gel:"val"`
 		}
@@ -5934,7 +5935,7 @@ func (m CustomOptionalUUID) Missing() bool { return !m.isSet }
 
 func TestReceiveOptionalUUIDUnmarshaler(t *testing.T) {
 	ddl := `CREATE TYPE Sample { CREATE PROPERTY val -> uuid; };`
-	inRolledBackTx(t, ddl, func(ctx context.Context, tx *Tx) {
+	inRolledBackTx(t, ddl, func(ctx context.Context, tx geltypes.Tx) {
 		var result struct {
 			Val CustomOptionalUUID `gel:"val"`
 		}
@@ -6085,7 +6086,7 @@ func TestSendAndReceiveCustomScalars(t *testing.T) {
 	}
 
 	ddl := `CREATE SCALAR TYPE CustomInt64 EXTENDING int64;`
-	inRolledBackTx(t, ddl, func(c context.Context, tx *Tx) {
+	inRolledBackTx(t, ddl, func(c context.Context, tx geltypes.Tx) {
 		var results []Result
 		err := tx.Query(c, query, &results, samples, strings)
 		require.NoError(t, err)
@@ -6107,7 +6108,7 @@ func TestSendAndReceiveCustomScalars(t *testing.T) {
 
 func TestReceiveCustomScalarUnmarshaler(t *testing.T) {
 	ddl := `CREATE SCALAR TYPE CustomInt64 EXTENDING int64;`
-	inRolledBackTx(t, ddl, func(ctx context.Context, tx *Tx) {
+	inRolledBackTx(t, ddl, func(ctx context.Context, tx geltypes.Tx) {
 		var result struct {
 			Val CustomInt64 `gel:"val"`
 		}
@@ -6140,7 +6141,7 @@ func TestReceiveCustomScalarUnmarshaler(t *testing.T) {
 
 func TestSendCustomScalarMarshaler(t *testing.T) {
 	ddl := `CREATE SCALAR TYPE CustomInt64 EXTENDING int64;`
-	inRolledBackTx(t, ddl, func(ctx context.Context, tx *Tx) {
+	inRolledBackTx(t, ddl, func(ctx context.Context, tx geltypes.Tx) {
 		var result struct {
 			Val types.OptionalInt64 `gel:"val"`
 		}
@@ -6194,7 +6195,7 @@ func TestReceiveOptionalCustomScalarUnmarshaler(t *testing.T) {
 			CREATE PROPERTY val -> CustomInt64;
 		};
 	`
-	inRolledBackTx(t, ddl, func(ctx context.Context, tx *Tx) {
+	inRolledBackTx(t, ddl, func(ctx context.Context, tx geltypes.Tx) {
 		var result struct {
 			Val CustomOptionalInt64 `gel:"val"`
 		}
@@ -6220,7 +6221,7 @@ func TestReceiveOptionalCustomScalarUnmarshaler(t *testing.T) {
 
 func TestSendOptionalCustomScalarMarshaler(t *testing.T) {
 	ddl := `CREATE SCALAR TYPE CustomInt64 EXTENDING int64;`
-	inRolledBackTx(t, ddl, func(ctx context.Context, tx *Tx) {
+	inRolledBackTx(t, ddl, func(ctx context.Context, tx geltypes.Tx) {
 		var result struct {
 			Val types.OptionalInt64 `gel:"val"`
 		}
@@ -6554,7 +6555,7 @@ func TestReceiveOptionalTuple(t *testing.T) {
 			CREATE PROPERTY val -> tuple<int64, int64>;
 		};
 	`
-	inRolledBackTx(t, ddl, func(ctx context.Context, tx *Tx) {
+	inRolledBackTx(t, ddl, func(ctx context.Context, tx geltypes.Tx) {
 		var result struct {
 			Val OptionalTuple `gel:"val"`
 		}
@@ -6590,10 +6591,10 @@ func (t *OptionalNamedTuple) SetMissing(missing bool) {
 func inRolledBackTx(
 	t *testing.T,
 	ddl string,
-	action func(context.Context, *Tx),
+	action func(context.Context, geltypes.Tx),
 ) {
 	ctx := context.Background()
-	err := client.Tx(ctx, func(ctx context.Context, tx *Tx) error {
+	err := client.Tx(ctx, func(ctx context.Context, tx geltypes.Tx) error {
 		e := tx.Execute(ctx, ddl)
 		assert.NoError(t, e)
 		if e == nil {
@@ -6610,7 +6611,7 @@ func TestReceiveOptionalNamedTuple(t *testing.T) {
 			CREATE PROPERTY val -> tuple<a: int64, b: int64>;
 		};
 	`
-	inRolledBackTx(t, ddl, func(ctx context.Context, tx *Tx) {
+	inRolledBackTx(t, ddl, func(ctx context.Context, tx geltypes.Tx) {
 		var result struct {
 			Val OptionalNamedTuple `gel:"val"`
 		}
@@ -6647,7 +6648,7 @@ func TestReceiveOptionalObject(t *testing.T) {
 			CREATE LINK val -> Nested;
 		};
 	`
-	inRolledBackTx(t, ddl, func(ctx context.Context, tx *Tx) {
+	inRolledBackTx(t, ddl, func(ctx context.Context, tx geltypes.Tx) {
 		type OptionalObject struct {
 			types.Optional
 			A types.OptionalInt64 `gel:"a"`
@@ -6684,7 +6685,7 @@ func TestReceiveOptionalObject(t *testing.T) {
 
 func TestReceiveOptionalArray(t *testing.T) {
 	ddl := `CREATE TYPE Sample { CREATE PROPERTY val -> array<int64>; };`
-	inRolledBackTx(t, ddl, func(ctx context.Context, tx *Tx) {
+	inRolledBackTx(t, ddl, func(ctx context.Context, tx geltypes.Tx) {
 		var result struct {
 			Val []int64 `gel:"val"`
 		}
@@ -6765,7 +6766,7 @@ func TestMissingObjectFields(t *testing.T) {
 		# all fields are missing
 		INSERT Sample;
 	`
-	inRolledBackTx(t, ddl, func(ctx context.Context, tx *Tx) {
+	inRolledBackTx(t, ddl, func(ctx context.Context, tx geltypes.Tx) {
 		type Sample struct {
 			SimpleScalar CustomOptionalInt64 `gel:"simple_scalar"`
 			Array        []int64             `gel:"array"`
@@ -7077,7 +7078,7 @@ func (m CustomOptionalMemory) Missing() bool { return !m.isSet }
 
 func TestReceiveOptionalMemoryUnmarshaler(t *testing.T) {
 	ddl := `CREATE TYPE Sample { CREATE PROPERTY val -> cfg::memory; };`
-	inRolledBackTx(t, ddl, func(ctx context.Context, tx *Tx) {
+	inRolledBackTx(t, ddl, func(ctx context.Context, tx geltypes.Tx) {
 		var result struct {
 			Val CustomOptionalMemory `gel:"val"`
 		}
@@ -7875,7 +7876,7 @@ func TestCustomSequenceTypeHandling(t *testing.T) {
 		CREATE SCALAR TYPE SampleSequence extending std::sequence;
 		CREATE TYPE Sample { CREATE PROPERTY val -> SampleSequence; };
 	`
-	inRolledBackTx(t, ddl, func(ctx context.Context, tx *Tx) {
+	inRolledBackTx(t, ddl, func(ctx context.Context, tx geltypes.Tx) {
 		var result struct {
 			Val types.OptionalInt64 `gel:"val"`
 		}

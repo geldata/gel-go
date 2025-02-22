@@ -1,4 +1,2 @@
 LogWarnings
-Tx
-TxBlock
 WarningsAsErrors

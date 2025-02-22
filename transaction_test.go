@@ -20,11 +20,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/rand"
 	"strings"
 	"testing"
 
 	"github.com/edgedb/edgedb-go/gelcfg"
 	"github.com/edgedb/edgedb-go/gelerr"
+	"github.com/edgedb/edgedb-go/geltypes"
 	types "github.com/edgedb/edgedb-go/geltypes"
 	gel "github.com/edgedb/edgedb-go/internal/client"
 	"github.com/edgedb/edgedb-go/internal/snc"
@@ -36,7 +38,7 @@ var rnd = snc.NewRand()
 
 func TestTxRollesBack(t *testing.T) {
 	ctx := context.Background()
-	err := client.Tx(ctx, func(ctx context.Context, tx *Tx) error {
+	err := client.Tx(ctx, func(ctx context.Context, tx geltypes.Tx) error {
 		query := "INSERT TxTest {name := 'Test Roll Back'};"
 		if e := tx.Execute(ctx, query); e != nil {
 			return e
@@ -71,7 +73,7 @@ func TestTxRollesBack(t *testing.T) {
 
 func TestTxRollesBackOnUserError(t *testing.T) {
 	ctx := context.Background()
-	err := client.Tx(ctx, func(ctx context.Context, tx *Tx) error {
+	err := client.Tx(ctx, func(ctx context.Context, tx geltypes.Tx) error {
 		query := "INSERT TxTest {name := 'Test Roll Back'};"
 		if e := tx.Execute(ctx, query); e != nil {
 			return e
@@ -99,7 +101,7 @@ func TestTxRollesBackOnUserError(t *testing.T) {
 
 func TestTxCommits(t *testing.T) {
 	ctx := context.Background()
-	err := client.Tx(ctx, func(ctx context.Context, tx *Tx) error {
+	err := client.Tx(ctx, func(ctx context.Context, tx geltypes.Tx) error {
 		return tx.Execute(ctx, "INSERT TxTest {name := 'Test Commit'};")
 	})
 	require.NoError(t, err)
@@ -166,7 +168,7 @@ func TestTxKinds(t *testing.T) {
 		gelcfg.NewTxOptions().WithDeferrable(false),
 	}
 
-	noOp := func(ctx context.Context, tx *Tx) error { return nil }
+	noOp := func(ctx context.Context, tx geltypes.Tx) error { return nil }
 
 	for _, opts := range combinations {
 		name := fmt.Sprintf("%#v", opts)
@@ -185,7 +187,7 @@ func TestWithConfigInTx(t *testing.T) {
 
 	ctx := context.Background()
 
-	err := client.Tx(ctx, func(ctx context.Context, tx *Tx) error {
+	err := client.Tx(ctx, func(ctx context.Context, tx geltypes.Tx) error {
 		var id types.UUID
 		_, e := rnd.Read(id[:])
 		assert.NoError(t, e)
@@ -214,7 +216,7 @@ func TestWithConfigInTx(t *testing.T) {
 	e = c.Execute(ctx, `insert User { id := <uuid>$0 }`, id)
 	assert.NoError(t, e)
 
-	err = c.Tx(ctx, func(ctx context.Context, tx *Tx) error {
+	err = c.Tx(ctx, func(ctx context.Context, tx geltypes.Tx) error {
 		var id types.UUID
 		_, e := rnd.Read(id[:])
 		assert.NoError(t, e)
@@ -227,20 +229,25 @@ func TestWithConfigInTx(t *testing.T) {
 	assert.EqualError(t, err, "rollback")
 }
 
-func TestSQLTx(t *testing.T) {
+func serverVersion(t *testing.T) int64 {
 	ctx := context.Background()
 
 	var version int64
 	err := client.QuerySingle(ctx, "SELECT sys::get_version().major", &version)
 	assert.NoError(t, err)
 
+	return version
+}
+
+func TestSQLTx(t *testing.T) {
+	ctx := context.Background()
 	rollback := errors.New("rollback")
 
-	if version >= 6 {
+	if serverVersion(t) >= 6 {
 		typename := "ExecuteSQL_01"
 		query := fmt.Sprintf("select %s.prop1 limit 1", typename)
 
-		err := client.Tx(ctx, func(ctx context.Context, tx *Tx) error {
+		err := client.Tx(ctx, func(ctx context.Context, tx geltypes.Tx) error {
 			if e := tx.Execute(ctx, fmt.Sprintf(`
 	 		  CREATE TYPE %s {
 	 			  CREATE REQUIRED PROPERTY prop1 -> std::str;
@@ -287,7 +294,7 @@ func TestSQLTx(t *testing.T) {
 		})
 		assert.Equal(t, rollback, err)
 	} else {
-		err := client.Tx(ctx, func(ctx context.Context, tx *Tx) error {
+		err := client.Tx(ctx, func(ctx context.Context, tx geltypes.Tx) error {
 			if e := tx.ExecuteSQL(ctx, "SELECT 1"); e != nil {
 				return e
 			}
@@ -301,4 +308,108 @@ func TestSQLTx(t *testing.T) {
 				"upgrade to 6.0 or newer",
 		)
 	}
+}
+
+func selectInTx(t *testing.T, cb func(context.Context, geltypes.Tx, string)) {
+	name := fmt.Sprintf("test%v", rand.Intn(10_000_000))
+	ctx := context.Background()
+	err := client.Tx(ctx, func(ctx context.Context, tx geltypes.Tx) error {
+		e := tx.Execute(ctx, "INSERT TxTest {name := <str>$0};", name)
+		require.NoError(t, e)
+
+		cb(ctx, tx, name)
+		return nil
+	})
+	require.NoError(t, err)
+
+	query := `
+		WITH removed := (DELETE TxTest FILTER .name = <str>$0)
+		SELECT removed.name LIMIT 1
+	`
+	var testNames []string
+	err = client.Query(ctx, query, &testNames, name)
+
+	require.NoError(t, err)
+	require.Equal(
+		t,
+		[]string{name},
+		testNames,
+		"The transaction wasn't commited",
+	)
+}
+
+func TestTxExerciseQuery(t *testing.T) {
+	selectInTx(t, func(ctx context.Context, tx geltypes.Tx, name string) {
+		var result []string
+		err := tx.Query(ctx, "SELECT name := TxTest.name FILTER name = <str>$0", &result, name)
+		require.NoError(t, err)
+		assert.Equal(t, []string{name}, result)
+	})
+}
+
+func TestTxExerciseQueryJSON(t *testing.T) {
+	selectInTx(t, func(ctx context.Context, tx geltypes.Tx, name string) {
+		var result []byte
+		err := tx.QueryJSON(ctx, "SELECT name := TxTest.name FILTER name = <str>$0", &result, name)
+		require.NoError(t, err)
+		assert.Equal(t, fmt.Sprintf(`["%s"]`, name), string(result))
+	})
+}
+
+func TestTxExerciseQuerySQL(t *testing.T) {
+	if serverVersion(t) < 6 {
+		t.Skipf("server version is too old to support SQL")
+	}
+
+	selectInTx(t, func(ctx context.Context, tx geltypes.Tx, name string) {
+		var result []struct {
+			Name string `gel:"name"`
+		}
+		err := tx.QuerySQL(ctx, `SELECT name FROM "TxTest" WHERE name = $1`, &result, name)
+		require.NoError(t, err)
+		require.Equal(t, 1, len(result))
+		assert.Equal(t, name, result[0].Name)
+	})
+}
+
+func TestTxQuerySQLMalformedQuery(t *testing.T) {
+	t.Skip("see https://github.com/geldata/gel-go/issues/335")
+	if serverVersion(t) < 6 {
+		t.Skip("server version is too old to support SQL")
+	}
+
+	selectInTx(t, func(ctx context.Context, tx geltypes.Tx, name string) {
+		var result []string
+		err := tx.QuerySQL(ctx, `malformed query`, &result, name)
+		require.NoError(t, err)
+		assert.Equal(t, []string{name}, result)
+	})
+}
+
+func TestTxExerciseQuerySingle(t *testing.T) {
+	if serverVersion(t) < 6 {
+		t.Skipf("server version is too old to support SQL")
+	}
+
+	selectInTx(t, func(ctx context.Context, tx geltypes.Tx, name string) {
+		var result string
+		query := "SELECT name := TxTest.name FILTER name = <str>$0 LIMIT 1"
+		err := tx.QuerySingle(ctx, query, &result, name)
+		require.NoError(t, err)
+		assert.Equal(t, name, result)
+	})
+}
+
+func TestTxExerciseQuerySingleJSON(t *testing.T) {
+	if serverVersion(t) < 6 {
+		t.Skipf("server version is too old to support SQL")
+	}
+
+	selectInTx(t, func(ctx context.Context, tx geltypes.Tx, name string) {
+		var result []byte
+		query := "SELECT name := TxTest.name FILTER name = <str>$0 LIMIT 1"
+		err := tx.QuerySingleJSON(ctx, query, &result, name)
+		require.NoError(t, err)
+		assert.Equal(t, fmt.Sprintf(`"%s"`, name), string(result))
+	})
 }

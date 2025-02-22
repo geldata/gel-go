@@ -20,6 +20,7 @@ import (
 	"context"
 
 	"github.com/edgedb/edgedb-go/gelcfg"
+	"github.com/edgedb/edgedb-go/geltypes"
 	gel "github.com/edgedb/edgedb-go/internal/client"
 )
 
@@ -259,7 +260,7 @@ func (c *Client) ExecuteSQL(
 // If either field is unset (see RetryRule) then the default rule is used.
 // If the object's default is unset the fall back is 3 attempts
 // and exponential backoff.
-func (c *Client) Tx(ctx context.Context, action TxBlock) error {
+func (c *Client) Tx(ctx context.Context, action func(context.Context, geltypes.Tx) error) error {
 	conn, err := c.pool.Acquire(ctx)
 	if err != nil {
 		return err

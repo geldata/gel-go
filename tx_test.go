@@ -22,6 +22,7 @@ import (
 
 	gel "github.com/edgedb/edgedb-go"
 	"github.com/edgedb/edgedb-go/gelcfg"
+	"github.com/edgedb/edgedb-go/geltypes"
 )
 
 // Transactions can be executed using the Tx() method. Note that queries are
@@ -38,7 +39,7 @@ func ExampleTx() {
 		log.Println(err)
 	}
 
-	err = client.Tx(ctx, func(ctx context.Context, tx *gel.Tx) error {
+	err = client.Tx(ctx, func(ctx context.Context, tx geltypes.Tx) error {
 		return tx.Execute(ctx, "INSERT User { name := 'Don' }")
 	})
 	if err != nil {

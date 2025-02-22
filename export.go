@@ -23,14 +23,6 @@ import (
 	gel "github.com/edgedb/edgedb-go/internal/client"
 )
 
-type (
-	// Tx is a transaction. Use Client.Tx() to get a transaction.
-	Tx = gel.Tx
-
-	// TxBlock is work to be done in a transaction.
-	TxBlock = gel.TxBlock
-)
-
 var (
 	// LogWarnings is an gel.WarningHandler that logs warnings.
 	LogWarnings = gel.LogWarnings

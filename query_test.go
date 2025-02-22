@@ -26,6 +26,7 @@ import (
 
 	"github.com/edgedb/edgedb-go/gelcfg"
 	"github.com/edgedb/edgedb-go/gelerr"
+	"github.com/edgedb/edgedb-go/geltypes"
 	types "github.com/edgedb/edgedb-go/geltypes"
 	gel "github.com/edgedb/edgedb-go/internal/client"
 	"github.com/stretchr/testify/assert"
@@ -35,7 +36,7 @@ import (
 func TestQueryCachingIncludesOutType(t *testing.T) {
 	ctx := context.Background()
 
-	err := client.Tx(ctx, func(ctx context.Context, tx *Tx) error {
+	err := client.Tx(ctx, func(ctx context.Context, tx geltypes.Tx) error {
 		var result struct {
 			Val OptionalTuple `gel:"val"`
 		}
@@ -52,7 +53,7 @@ func TestQueryCachingIncludesOutType(t *testing.T) {
 	})
 	assert.EqualError(t, err, "gel.NoDataError: zero results")
 
-	err = client.Tx(ctx, func(ctx context.Context, tx *Tx) error {
+	err = client.Tx(ctx, func(ctx context.Context, tx geltypes.Tx) error {
 		var result struct {
 			Val OptionalNamedTuple `gel:"val"`
 		}
@@ -395,7 +396,7 @@ func TestExecutWithArgs(t *testing.T) {
 	err := client.Execute(ctx, "select <int64>$0; select <int64>$0;", int64(1))
 	assert.NoError(t, err)
 
-	err = client.Tx(ctx, func(ctx context.Context, tx *Tx) error {
+	err = client.Tx(ctx, func(ctx context.Context, tx geltypes.Tx) error {
 		err = tx.Execute(ctx, "select <int64>$0; select <int64>$0;", int64(1))
 		assert.NoError(t, err)
 

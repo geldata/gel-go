@@ -24,9 +24,6 @@ import (
 	"github.com/edgedb/edgedb-go/internal/gelerr"
 )
 
-// TxBlock is work to be done in a transaction.
-type TxBlock func(context.Context, *Tx) error
-
 type txStatus int
 
 const (

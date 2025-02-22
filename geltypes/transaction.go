@@ -14,16 +14,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package gel
+package geltypes
 
 import "context"
 
-// Executor is a common interface between *Client and *Tx,
-// that can run queries on an Gel database.
+// TxBlock is work to be done in a transaction.
+type TxBlock func(context.Context, Tx) error
+
+// Executor is a common interface between *gel.Client and Tx,
+// that can run queries on a Gel database.
 type Executor interface {
 	Execute(context.Context, string, ...any) error
+	ExecuteSQL(context.Context, string, ...any) error
 	Query(context.Context, string, any, ...any) error
 	QueryJSON(context.Context, string, *[]byte, ...any) error
+	QuerySQL(context.Context, string, any, ...any) error
 	QuerySingle(context.Context, string, any, ...any) error
 	QuerySingleJSON(context.Context, string, any, ...any) error
+}
+
+// Tx is a transaction. Use gel.Client.Tx() to get a transaction.
+type Tx interface {
+	Executor
 }
