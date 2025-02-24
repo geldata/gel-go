@@ -29,7 +29,7 @@ import (
 // promote warnings to errors by returning them etc.
 type WarningHandler = func([]error) error
 
-// LogWarnings is a gel.WarningHandler that logs warnings.
+// LogWarnings is a gelcfg.WarningHandler that logs warnings.
 func LogWarnings(errors []error) error {
 	for _, err := range errors {
 		log.Println("Gel warning:", err.Error())
@@ -38,7 +38,7 @@ func LogWarnings(errors []error) error {
 	return nil
 }
 
-// WarningsAsErrors is a gel.WarningHandler that returns warnings as
+// WarningsAsErrors is a gelcfg.WarningHandler that returns warnings as
 // errors.
 func WarningsAsErrors(warnings []error) error {
 	return errors.Join(warnings...)
@@ -140,7 +140,7 @@ type Options struct {
 	SecretKey string
 
 	// WarningHandler is invoked when Gel returns warnings. Defaults to
-	// gel.LogWarnings.
+	// gelcfg.LogWarnings.
 	WarningHandler WarningHandler
 }
 

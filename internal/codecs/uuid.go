@@ -63,7 +63,7 @@ func (c *UUIDCodec) Encode(
 		return encodeOptional(w, !ok, required,
 			func() error { return c.encodeData(w, id) },
 			func() error {
-				return missingValueError("gel.OptionalUUID", path)
+				return missingValueError("geltypes.OptionalUUID", path)
 			})
 	case optionalUUIDMarshaler:
 		return encodeOptional(w, in.Missing(), required,
@@ -74,8 +74,8 @@ func (c *UUIDCodec) Encode(
 	case marshal.UUIDMarshaler:
 		return encodeMarshaler(w, in, in.MarshalEdgeDBUUID, 16, path)
 	default:
-		return fmt.Errorf("expected %v to be gel.UUID, "+
-			"gel.OptionalUUID or UUIDMarshaler got %T", path, val)
+		return fmt.Errorf("expected %v to be geltypes.UUID, "+
+			"geltypes.OptionalUUID or UUIDMarshaler got %T", path, val)
 	}
 }
 

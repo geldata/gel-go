@@ -153,7 +153,7 @@ func TestMissmatchedResultType(t *testing.T) {
 
 	expected := "gel.InvalidArgumentError: " +
 		"the \"out\" argument does not match query schema: " +
-		"expected gel.A.x.y.z to be int64 or gel.OptionalInt64 got int"
+		"expected gel.A.x.y.z to be int64 or geltypes.OptionalInt64 got int"
 	assert.EqualError(t, err, expected)
 }
 
@@ -201,7 +201,7 @@ func TestArgumentTypeMissmatch(t *testing.T) {
 	require.NotNil(t, err)
 	assert.EqualError(t, err,
 		"gel.InvalidArgumentError: expected args[0] to be int16, "+
-			"gel.OptionalInt16 or Int16Marshaler got int")
+			"geltypes.OptionalInt16 or Int16Marshaler got int")
 }
 
 func TestNamedQueryArguments(t *testing.T) {
@@ -500,7 +500,7 @@ func TestInvalidWithConfig(t *testing.T) {
 	assert.EqualError(t, err, "gel.BinaryProtocolError: "+
 		"invalid connection state: "+
 		"expected state.config.query_execution_timeout to be "+
-		"gel.Duration, gel.OptionalDuration or DurationMarshaler "+
+		"geltypes.Duration, geltypes.OptionalDuration or DurationMarshaler "+
 		"got string")
 
 	err = client.QuerySingle(ctx, "select 1", &result)
@@ -1075,7 +1075,7 @@ func TestInvalidWithGlobals(t *testing.T) {
 	assert.EqualError(t, err, "gel.BinaryProtocolError: "+
 		"invalid connection state: "+
 		"expected state.globals.default::global_str to be "+
-		"string, gel.OptionalStr or StrMarshaler "+
+		"string, geltypes.OptionalStr or StrMarshaler "+
 		"got int")
 }
 

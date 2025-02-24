@@ -334,7 +334,7 @@ func (r *configResolver) resolveOptions(
 ) (err error) {
 	defer func() {
 		if err != nil {
-			err = fmt.Errorf("invalid gel.Options: %w", err)
+			err = fmt.Errorf("invalid gelcfg.Options: %w", err)
 		}
 	}()
 
@@ -1166,15 +1166,15 @@ func newConfigResolver(
 		names = append(names, "dsn")
 	}
 	if opts.Credentials != nil {
-		names = append(names, "gel.Options.Credentials")
+		names = append(names, "gelcfg.Options.Credentials")
 	}
 	if opts.CredentialsFile != "" {
-		names = append(names, "gel.Options.CredentialsFile")
+		names = append(names, "gelcfg.Options.CredentialsFile")
 	}
 	if opts.Host != "" {
-		names = append(names, "gel.Options.Host")
+		names = append(names, "gelcfg.Options.Host")
 	} else if opts.Port != 0 {
-		names = append(names, "gel.Options.Port")
+		names = append(names, "gelcfg.Options.Port")
 	}
 	if len(names) > 1 {
 		return nil, fmt.Errorf(

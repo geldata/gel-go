@@ -181,7 +181,7 @@ func (c Client) WithoutGlobals(globals ...string) *Client { // nolint:gocritic
 }
 
 // WithWarningHandler sets the warning handler for the returned client. If
-// warningHandler is nil gel.LogWarnings is used.
+// warningHandler is nil gelcfg.LogWarnings is used.
 func (c Client) WithWarningHandler( // nolint:gocritic
 	warningHandler gelcfg.WarningHandler,
 ) *Client {

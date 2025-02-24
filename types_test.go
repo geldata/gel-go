@@ -51,7 +51,7 @@ func TestMissmatchedUnmarshalerType(t *testing.T) {
 	assert.EqualError(t, err, "gel.InvalidArgumentError: "+
 		"the \"out\" argument does not match query schema: expected "+
 		"struct { Val gel.CustomInt32 \"gel:\\\"val\\\"\" }.val "+
-		"to be int64 or gel.OptionalInt64 got gel.CustomInt32")
+		"to be int64 or geltypes.OptionalInt64 got gel.CustomInt32")
 	assert.Equal(t, []byte(nil), wrongType.Val.data)
 }
 
@@ -689,7 +689,7 @@ func TestSendAndReceiveOptionalInt32(t *testing.T) {
 			types.OptionalInt32{},
 		)
 		assert.EqualError(t, e, "gel.InvalidArgumentError: "+
-			"cannot encode gel.OptionalInt32 at args[0] "+
+			"cannot encode geltypes.OptionalInt32 at args[0] "+
 			"because its value is missing")
 
 		return errors.New("rollback")
@@ -1023,7 +1023,7 @@ func TestSendAndReceiveOptionalInt16(t *testing.T) {
 			types.OptionalInt16{},
 		)
 		assert.EqualError(t, e, "gel.InvalidArgumentError: "+
-			"cannot encode gel.OptionalInt16 at args[0] "+
+			"cannot encode geltypes.OptionalInt16 at args[0] "+
 			"because its value is missing")
 
 		return errors.New("rollback")
@@ -1608,7 +1608,7 @@ func TestSendAndReceiveOptionalFloat64(t *testing.T) {
 			types.OptionalFloat64{},
 		)
 		assert.EqualError(t, e, "gel.InvalidArgumentError: "+
-			"cannot encode gel.OptionalFloat64 at args[0] "+
+			"cannot encode geltypes.OptionalFloat64 at args[0] "+
 			"because its value is missing")
 
 		return errors.New("rollback")
@@ -2369,7 +2369,7 @@ func TestSendAndReceiveOptionalStr(t *testing.T) {
 			types.OptionalStr{},
 		)
 		assert.EqualError(t, e, "gel.InvalidArgumentError: "+
-			"cannot encode gel.OptionalStr at args[0] "+
+			"cannot encode geltypes.OptionalStr at args[0] "+
 			"because its value is missing")
 
 		return errors.New("rollback")
@@ -6867,7 +6867,7 @@ func TestMissingObjectFields(t *testing.T) {
 		assert.EqualError(t, err, "gel.InvalidArgumentError: "+
 			`the "out" argument does not match query schema: `+
 			`expected int64 at gel.WrongType.simple_scalar to be `+
-			`gel.OptionalInt64 because the field is not required`)
+			`geltypes.OptionalInt64 because the field is not required`)
 	})
 }
 

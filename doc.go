@@ -27,11 +27,12 @@
 //	    "log"
 //
 //	    "github.com/geldata/gel-go"
+//	    "github.com/geldata/gel-go/gelcfg"
 //	)
 //
 //	func main() {
 //	    ctx := context.Background()
-//	    client, err := gel.CreateClient(ctx, gel.Options{})
+//	    client, err := gel.CreateClient(ctx, gelcfg.Options{})
 //	    if err != nil {
 //	        log.Fatal(err)
 //	    }
@@ -40,7 +41,7 @@
 //	    var (
 //	        age   int64 = 21
 //	        users []struct {
-//	            ID   gel.UUID `gel:"id"`
+//	            ID   geltypes.UUID `gel:"id"`
 //	            Name string   `gel:"name"`
 //	        }
 //	    )
@@ -60,7 +61,7 @@
 //
 // Or you can use Option fields.
 //
-//	opts := gel.Options{
+//	opts := gelcfg.Options{
 //	    Database:    "edgedb",
 //	    User:        "edgedb",
 //	    Concurrency: 4,
@@ -77,13 +78,13 @@
 //	err := client.Query(...)
 //	if errors.Is(err, context.Canceled) { ... }
 //
-// Most errors returned by the gel package will satisfy the gel.Error
+// Most errors returned by the gel package will satisfy the gelerr.Error
 // interface which has methods for introspecting.
 //
 //	err := client.Query(...)
 //
-//	var gelErr gel.Error
-//	if errors.As(err, &gelErr) && gelErr.Category(gel.NoDataError){
+//	var gelErr gelerr.Error
+//	if errors.As(err, &gelErr) && gelErr.Category(gelcfg.NoDataError){
 //	    ...
 //	}
 //
@@ -99,26 +100,26 @@
 //	tuple                    struct
 //	named tuple              struct
 //	Object                   struct
-//	bool                     bool, gel.OptionalBool
-//	bytes                    []byte, gel.OptionalBytes
-//	str                      string, gel.OptionalStr
-//	anyenum                  string, gel.OptionalStr
-//	datetime                 time.Time, gel.OptionalDateTime
-//	cal::local_datetime      gel.LocalDateTime,
-//	                         gel.OptionalLocalDateTime
-//	cal::local_date          gel.LocalDate, gel.OptionalLocalDate
-//	cal::local_time          gel.LocalTime, gel.OptionalLocalTime
-//	duration                 gel.Duration, gel.OptionalDuration
-//	cal::relative_duration   gel.RelativeDuration,
-//	                         gel.OptionalRelativeDuration
-//	float32                  float32, gel.OptionalFloat32
-//	float64                  float64, gel.OptionalFloat64
-//	int16                    int16, gel.OptionalFloat16
-//	int32                    int32, gel.OptionalInt16
-//	int64                    int64, gel.OptionalInt64
-//	uuid                     gel.UUID, gel.OptionalUUID
-//	json                     []byte, gel.OptionalBytes
-//	bigint                   *big.Int, gel.OptionalBigInt
+//	bool                     bool, geltypes.OptionalBool
+//	bytes                    []byte, geltypes.OptionalBytes
+//	str                      string, geltypes.OptionalStr
+//	anyenum                  string, geltypes.OptionalStr
+//	datetime                 time.Time, geltypes.OptionalDateTime
+//	cal::local_datetime      geltypes.LocalDateTime,
+//	                         geltypes.OptionalLocalDateTime
+//	cal::local_date          geltypes.LocalDate, geltypes.OptionalLocalDate
+//	cal::local_time          geltypes.LocalTime, geltypes.OptionalLocalTime
+//	duration                 geltypes.Duration, geltypes.OptionalDuration
+//	cal::relative_duration   geltypes.RelativeDuration,
+//	                         geltypes.OptionalRelativeDuration
+//	float32                  float32, geltypes.OptionalFloat32
+//	float64                  float64, geltypes.OptionalFloat64
+//	int16                    int16, geltypes.OptionalFloat16
+//	int32                    int32, geltypes.OptionalInt16
+//	int64                    int64, geltypes.OptionalInt64
+//	uuid                     geltypes.UUID, geltypes.OptionalUUID
+//	json                     []byte, geltypes.OptionalBytes
+//	bigint                   *big.Int, geltypes.OptionalBigInt
 //
 //	decimal                  user defined (see Custom Marshalers)
 //
@@ -127,11 +128,11 @@
 // one directly to the other.
 //
 // Shape fields that are not required must use optional types for receiving
-// query results. The gel.Optional struct can be embedded to make structs
+// query results. The gelcfg.Optional struct can be embedded to make structs
 // optional.
 //
 //	type User struct {
-//	    gel.Optional
+//	    gelcfg.Optional
 //	    Email string `gel:"email"`
 //	}
 //
@@ -149,7 +150,7 @@
 // using sets as parameters.
 //
 //	query := `select User filter .id in array_unpack(<array<uuid>>$1)`
-//	client.QuerySingle(ctx, query, $user, []gel.UUID{...})
+//	client.QuerySingle(ctx, query, $user, []geltypes.UUID{...})
 //
 // Nested structures are also not directly allowed but you can use [json]
 // instead.
@@ -159,7 +160,7 @@
 // tag the embedded struct with `gel:"$inline"`.
 //
 //	type Object struct {
-//	    ID gel.UUID
+//	    ID geltypes.UUID
 //	}
 //
 //	type User struct {

@@ -24,7 +24,7 @@ import (
 // Optional is embedded in structs to make them optional. For example:
 //
 //	type User struct {
-//	    gel.Optional
+//	    geltypes.Optional
 //	    Name string `gel:"name"`
 //	}
 type Optional struct {

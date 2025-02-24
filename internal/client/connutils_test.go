@@ -296,7 +296,7 @@ func TestConUtils(t *testing.T) {
 				err: gelerrint.NewConfigurationError("", nil),
 				errMessage: `gel.ConfigurationError: ` +
 					`mutually exclusive connection options specified: ` +
-					`dsn and gel.Options.Host`,
+					`dsn and gelcfg.Options.Host`,
 			},
 		},
 		{

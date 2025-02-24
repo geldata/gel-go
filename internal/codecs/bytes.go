@@ -73,7 +73,7 @@ func (c *BytesCodec) Encode(
 		return encodeOptional(w, !ok, required,
 			func() error { return c.encodeData(w, data) },
 			func() error {
-				return missingValueError("gel.OptionalBytes", path)
+				return missingValueError("geltypes.OptionalBytes", path)
 			})
 	case optionalBytesMarshaler:
 		return encodeOptional(w, in.Missing(), required,
@@ -82,8 +82,8 @@ func (c *BytesCodec) Encode(
 	case marshal.BytesMarshaler:
 		return c.encodeMarshaler(w, in, path)
 	default:
-		return fmt.Errorf("expected %v to be []byte, gel.OptionalBytes or "+
-			"BytesMarshaler got %T", path, val)
+		return fmt.Errorf("expected %v to be []byte, "+
+			"geltypes.OptionalBytes or BytesMarshaler got %T", path, val)
 	}
 }
 
