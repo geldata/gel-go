@@ -39,9 +39,3 @@ errors:
 
 gen:
 	go generate ./...
-
-gendocs:
-	go run internal/cmd/gendocs/*.go
-
-gendocs-lint:
-	go run internal/cmd/gendocs/*.go --lint

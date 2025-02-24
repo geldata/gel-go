@@ -14,7 +14,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:generate go run internal/cmd/export/main.go
 //go:generate gofmt -s -w .
 
 package gel
