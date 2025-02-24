@@ -23,10 +23,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/edgedb/edgedb-go/gelcfg"
-	"github.com/edgedb/edgedb-go/gelerr"
-	types "github.com/edgedb/edgedb-go/geltypes"
-	gel "github.com/edgedb/edgedb-go/internal/client"
+	"github.com/geldata/gel-go/gelcfg"
+	"github.com/geldata/gel-go/gelerr"
+	types "github.com/geldata/gel-go/geltypes"
+	gel "github.com/geldata/gel-go/internal/client"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

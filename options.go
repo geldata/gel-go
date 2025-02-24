@@ -17,8 +17,8 @@
 package gel
 
 import (
-	"github.com/edgedb/edgedb-go/gelcfg"
-	gel "github.com/edgedb/edgedb-go/internal/client"
+	"github.com/geldata/gel-go/gelcfg"
+	gel "github.com/geldata/gel-go/internal/client"
 )
 
 // WithTxOptions returns a shallow copy of the client
@@ -190,5 +190,12 @@ func (c Client) WithWarningHandler( // nolint:gocritic
 	}
 
 	c.warningHandler = warningHandler
+	return &c
+}
+
+func (c Client) WithQueryOptions(
+	options gelcfg.QueryOptions,
+) *Client { // nolint:gocritic
+	c.queryOptions = options
 	return &c
 }

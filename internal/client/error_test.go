@@ -20,7 +20,7 @@ import (
 	"errors"
 	"testing"
 
-	gelerrint "github.com/edgedb/edgedb-go/internal/gelerr"
+	gelerrint "github.com/geldata/gel-go/internal/gelerr"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

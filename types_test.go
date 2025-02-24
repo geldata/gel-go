@@ -30,9 +30,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/edgedb/edgedb-go/geltypes"
-	types "github.com/edgedb/edgedb-go/geltypes"
-	gel "github.com/edgedb/edgedb-go/internal/client"
+	"github.com/geldata/gel-go/geltypes"
+	types "github.com/geldata/gel-go/geltypes"
+	gel "github.com/geldata/gel-go/internal/client"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

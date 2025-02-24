@@ -22,11 +22,11 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/edgedb/edgedb-go/gelcfg"
-	"github.com/edgedb/edgedb-go/gelerr"
-	types "github.com/edgedb/edgedb-go/geltypes"
-	gelerrint "github.com/edgedb/edgedb-go/internal/gelerr"
-	"github.com/edgedb/edgedb-go/internal/introspect"
+	"github.com/geldata/gel-go/gelcfg"
+	"github.com/geldata/gel-go/gelerr"
+	types "github.com/geldata/gel-go/geltypes"
+	gelerrint "github.com/geldata/gel-go/internal/gelerr"
+	"github.com/geldata/gel-go/internal/introspect"
 )
 
 type query struct {
@@ -40,8 +40,17 @@ type query struct {
 	args           []interface{}
 	capabilities   uint64
 	state          map[string]interface{}
+	queryOpts      gelcfg.QueryOptions
 	parse          bool
 	warningHandler gelcfg.WarningHandler
+}
+
+func (q *query) getCapabilities() uint64 {
+	capabilities := q.capabilities
+	if q.queryOpts.ReadOnly() {
+		capabilities &^= capabilitiesModifications
+	}
+	return capabilities
 }
 
 func (q *query) flat() bool {
@@ -65,6 +74,7 @@ func NewQuery(
 	out interface{},
 	parse bool,
 	warningHandler gelcfg.WarningHandler,
+	queryOpts gelcfg.QueryOptions,
 ) (*query, error) { // nolint:revive
 	var (
 		expCard Cardinality
@@ -87,6 +97,7 @@ func NewQuery(
 			args:           args,
 			capabilities:   capabilities,
 			state:          state,
+			queryOpts:      queryOpts,
 			parse:          parse,
 			warningHandler: warningHandler,
 		}, nil
@@ -119,6 +130,7 @@ func NewQuery(
 		args:           args,
 		capabilities:   capabilities,
 		state:          state,
+		queryOpts:      queryOpts,
 		parse:          parse,
 		warningHandler: warningHandler,
 	}
@@ -164,6 +176,7 @@ func RunQuery(
 	args []interface{},
 	state map[string]interface{},
 	warningHandler gelcfg.WarningHandler,
+	queryOpts gelcfg.QueryOptions,
 ) error {
 	if method == "QuerySingleJSON" {
 		switch out.(type) {
@@ -184,6 +197,7 @@ func RunQuery(
 		out,
 		true,
 		warningHandler,
+		queryOpts,
 	)
 	if err != nil {
 		return err

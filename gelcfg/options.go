@@ -21,7 +21,7 @@ import (
 	"log"
 	"time"
 
-	types "github.com/edgedb/edgedb-go/geltypes"
+	types "github.com/geldata/gel-go/geltypes"
 )
 
 // WarningHandler takes an error slice that represent warnings and optionally

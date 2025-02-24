@@ -24,9 +24,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/edgedb/edgedb-go/gelcfg"
-	"github.com/edgedb/edgedb-go/internal/cache"
-	gelerrint "github.com/edgedb/edgedb-go/internal/gelerr"
+	"github.com/geldata/gel-go/gelcfg"
+	"github.com/geldata/gel-go/internal/cache"
+	gelerrint "github.com/geldata/gel-go/internal/gelerr"
 )
 
 const defaultIdleConnectionTimeout = 30 * time.Second

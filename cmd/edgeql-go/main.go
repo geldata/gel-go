@@ -36,9 +36,9 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/edgedb/edgedb-go/gelcfg"
-	gelint "github.com/edgedb/edgedb-go/internal/client"
-	"github.com/edgedb/edgedb-go/internal/descriptor"
+	"github.com/geldata/gel-go/gelcfg"
+	gelint "github.com/geldata/gel-go/internal/client"
+	"github.com/geldata/gel-go/internal/descriptor"
 	toml "github.com/pelletier/go-toml/v2"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"

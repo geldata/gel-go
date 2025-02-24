@@ -20,9 +20,9 @@ import (
 	"context"
 	"log"
 
-	gel "github.com/edgedb/edgedb-go"
-	"github.com/edgedb/edgedb-go/gelcfg"
-	"github.com/edgedb/edgedb-go/geltypes"
+	gel "github.com/geldata/gel-go"
+	"github.com/geldata/gel-go/gelcfg"
+	"github.com/geldata/gel-go/geltypes"
 )
 
 // Transactions can be executed using the Tx() method. Note that queries are

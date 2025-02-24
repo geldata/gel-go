@@ -24,7 +24,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/edgedb/edgedb-go/internal/errgen"
+	"github.com/geldata/gel-go/internal/errgen"
 )
 
 func printCategories(types []*errgen.Type) {
@@ -84,8 +84,6 @@ func main() {
 // This file is auto generated. Do not edit!
 // run 'make errors' to regenerate
 
-// internal/cmd/export should ignore this file
-//go:build !export
 `)
 
 	fmt.Println()

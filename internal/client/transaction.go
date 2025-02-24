@@ -20,8 +20,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/edgedb/edgedb-go/gelcfg"
-	"github.com/edgedb/edgedb-go/internal/gelerr"
+	"github.com/geldata/gel-go/gelcfg"
+	"github.com/geldata/gel-go/internal/gelerr"
 )
 
 type txStatus int
@@ -79,6 +79,7 @@ type Tx struct {
 	options        gelcfg.TxOptions
 	state          map[string]interface{}
 	warningHandler gelcfg.WarningHandler
+	queryOpts      gelcfg.QueryOptions
 }
 
 func (t *Tx) execute(
@@ -95,6 +96,7 @@ func (t *Tx) execute(
 		nil,
 		false,
 		t.warningHandler,
+		t.queryOpts,
 	)
 	if err != nil {
 		return err
@@ -201,6 +203,7 @@ func (t *Tx) Execute(
 		nil,
 		true,
 		t.warningHandler,
+		t.queryOpts,
 	)
 	if err != nil {
 		return err
@@ -225,6 +228,7 @@ func (t *Tx) Query(
 		args,
 		t.state,
 		t.warningHandler,
+		t.queryOpts,
 	)
 }
 
@@ -247,6 +251,7 @@ func (t *Tx) QuerySingle(
 		args,
 		t.state,
 		t.warningHandler,
+		t.queryOpts,
 	)
 }
 
@@ -266,6 +271,7 @@ func (t *Tx) QueryJSON(
 		args,
 		t.state,
 		t.warningHandler,
+		t.queryOpts,
 	)
 }
 
@@ -287,6 +293,7 @@ func (t *Tx) QuerySingleJSON(
 		args,
 		t.state,
 		t.warningHandler,
+		t.queryOpts,
 	)
 }
 
@@ -305,6 +312,7 @@ func (t *Tx) ExecuteSQL(
 		nil,
 		true,
 		t.warningHandler,
+		t.queryOpts,
 	)
 	if err != nil {
 		return err
@@ -329,5 +337,6 @@ func (t *Tx) QuerySQL(
 		args,
 		t.state,
 		t.warningHandler,
+		t.queryOpts,
 	)
 }

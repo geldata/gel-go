@@ -22,9 +22,9 @@ import (
 	"log"
 	"time"
 
-	gel "github.com/edgedb/edgedb-go"
-	"github.com/edgedb/edgedb-go/gelcfg"
-	"github.com/edgedb/edgedb-go/geltypes"
+	gel "github.com/geldata/gel-go"
+	"github.com/geldata/gel-go/gelcfg"
+	"github.com/geldata/gel-go/geltypes"
 )
 
 type User struct {

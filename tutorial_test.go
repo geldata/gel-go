@@ -22,8 +22,8 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/edgedb/edgedb-go/gelcfg"
-	types "github.com/edgedb/edgedb-go/geltypes"
+	"github.com/geldata/gel-go/gelcfg"
+	types "github.com/geldata/gel-go/geltypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

@@ -19,7 +19,7 @@ package buff
 import (
 	"encoding/binary"
 
-	types "github.com/edgedb/edgedb-go/geltypes"
+	types "github.com/geldata/gel-go/geltypes"
 )
 
 // Writer is a write buffer.

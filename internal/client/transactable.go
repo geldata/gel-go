@@ -21,10 +21,10 @@ import (
 	"errors"
 	"time"
 
-	"github.com/edgedb/edgedb-go/gelcfg"
-	"github.com/edgedb/edgedb-go/gelerr"
-	types "github.com/edgedb/edgedb-go/geltypes"
-	gelerrint "github.com/edgedb/edgedb-go/internal/gelerr"
+	"github.com/geldata/gel-go/gelcfg"
+	"github.com/geldata/gel-go/gelerr"
+	types "github.com/geldata/gel-go/geltypes"
+	gelerrint "github.com/geldata/gel-go/internal/gelerr"
 )
 
 type transactableConn struct {
@@ -84,6 +84,7 @@ func (c *transactableConn) Tx(
 	action types.TxBlock,
 	state map[string]interface{},
 	warningHandler gelcfg.WarningHandler,
+	queryOpts gelcfg.QueryOptions,
 ) (err error) {
 	conn, err := c.borrow("transaction")
 	if err != nil {
@@ -108,6 +109,7 @@ func (c *transactableConn) Tx(
 				txState:        &txState{},
 				options:        c.txOpts,
 				state:          state,
+				queryOpts:      queryOpts,
 				warningHandler: warningHandler,
 			}
 			err = tx.start(ctx)

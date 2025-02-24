@@ -19,9 +19,9 @@ package gel
 import (
 	"context"
 
-	"github.com/edgedb/edgedb-go/gelcfg"
-	"github.com/edgedb/edgedb-go/geltypes"
-	gel "github.com/edgedb/edgedb-go/internal/client"
+	"github.com/geldata/gel-go/gelcfg"
+	"github.com/geldata/gel-go/geltypes"
+	gel "github.com/geldata/gel-go/internal/client"
 )
 
 // CreateClient returns a new client. The client connects lazily. Call
@@ -62,6 +62,7 @@ func CreateClientDSN(_ context.Context, dsn string, opts gelcfg.Options) (*Clien
 type Client struct {
 	pool           *gel.Pool
 	warningHandler gelcfg.WarningHandler
+	queryOptions   gelcfg.QueryOptions
 }
 
 // EnsureConnected forces the client to connect if it hasn't already.
@@ -94,6 +95,7 @@ func (c *Client) Execute(
 		nil,
 		true,
 		c.warningHandler,
+		c.queryOptions,
 	)
 	if err != nil {
 		return err
@@ -116,7 +118,16 @@ func (c *Client) Query(
 	}
 
 	err = gel.RunQuery(
-		ctx, conn, "Query", cmd, out, args, c.pool.State, c.warningHandler)
+		ctx,
+		conn,
+		"Query",
+		cmd,
+		out,
+		args,
+		c.pool.State,
+		c.warningHandler,
+		c.queryOptions,
+	)
 	return gel.FirstError(err, c.pool.Release(conn, err))
 }
 
@@ -144,6 +155,7 @@ func (c *Client) QuerySingle(
 		args,
 		c.pool.State,
 		c.warningHandler,
+		c.queryOptions,
 	)
 	return gel.FirstError(err, c.pool.Release(conn, err))
 }
@@ -169,6 +181,7 @@ func (c *Client) QueryJSON(
 		args,
 		c.pool.State,
 		c.warningHandler,
+		c.queryOptions,
 	)
 	return gel.FirstError(err, c.pool.Release(conn, err))
 }
@@ -196,6 +209,7 @@ func (c *Client) QuerySingleJSON(
 		args,
 		c.pool.State,
 		c.warningHandler,
+		c.queryOptions,
 	)
 	return gel.FirstError(err, c.pool.Release(conn, err))
 }
@@ -213,7 +227,16 @@ func (c *Client) QuerySQL(
 	}
 
 	err = gel.RunQuery(
-		ctx, conn, "QuerySQL", cmd, out, args, c.pool.State, c.warningHandler)
+		ctx,
+		conn,
+		"QuerySQL",
+		cmd,
+		out,
+		args,
+		c.pool.State,
+		c.warningHandler,
+		c.queryOptions,
+	)
 	return gel.FirstError(err, c.pool.Release(conn, err))
 }
 
@@ -237,6 +260,7 @@ func (c *Client) ExecuteSQL(
 		nil,
 		true,
 		c.warningHandler,
+		c.queryOptions,
 	)
 	if err != nil {
 		return err
@@ -266,6 +290,12 @@ func (c *Client) Tx(ctx context.Context, action geltypes.TxBlock) error {
 		return err
 	}
 
-	err = conn.Tx(ctx, action, c.pool.State, c.warningHandler)
+	err = conn.Tx(
+		ctx,
+		action,
+		c.pool.State,
+		c.warningHandler,
+		c.queryOptions,
+	)
 	return gel.FirstError(err, c.pool.Release(conn, err))
 }

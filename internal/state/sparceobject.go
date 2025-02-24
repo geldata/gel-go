@@ -20,10 +20,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/edgedb/edgedb-go/geltypes"
-	"github.com/edgedb/edgedb-go/internal/buff"
-	"github.com/edgedb/edgedb-go/internal/codecs"
-	"github.com/edgedb/edgedb-go/internal/descriptor"
+	"github.com/geldata/gel-go/geltypes"
+	"github.com/geldata/gel-go/internal/buff"
+	"github.com/geldata/gel-go/internal/codecs"
+	"github.com/geldata/gel-go/internal/descriptor"
 )
 
 func buildSparceObjectEncoder(

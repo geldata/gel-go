@@ -22,11 +22,10 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/edgedb/edgedb-go/gelcfg"
-	"github.com/edgedb/edgedb-go/gelerr"
-	"github.com/edgedb/edgedb-go/geltypes"
-	types "github.com/edgedb/edgedb-go/geltypes"
-	gel "github.com/edgedb/edgedb-go/internal/client"
+	"github.com/geldata/gel-go/gelcfg"
+	"github.com/geldata/gel-go/gelerr"
+	"github.com/geldata/gel-go/geltypes"
+	gel "github.com/geldata/gel-go/internal/client"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -151,7 +150,7 @@ func TestQuerySingleMissingResult(t *testing.T) {
 	err := client.QuerySingle(ctx, "SELECT <str>{}", &result)
 	assert.EqualError(t, err, "gel.NoDataError: zero results")
 
-	optionalResult := types.NewOptionalStr("this should be set to missing")
+	optionalResult := geltypes.NewOptionalStr("this should be set to missing")
 	err = client.QuerySingle(ctx, "SELECT <str>{}", &optionalResult)
 	assert.NoError(t, err)
 	assert.Equal(t, geltypes.OptionalStr{}, optionalResult)
@@ -186,7 +185,7 @@ func TestQuerySingleJSONMissingResult(t *testing.T) {
 	err := client.QuerySingleJSON(ctx, "SELECT <str>{}", &result)
 	assert.EqualError(t, err, "gel.NoDataError: zero results")
 
-	optionalResult := types.NewOptionalBytes(
+	optionalResult := geltypes.NewOptionalBytes(
 		[]byte("this should be set to missing"),
 	)
 	err = client.QuerySingleJSON(ctx, "SELECT <str>{}", &optionalResult)
@@ -265,11 +264,11 @@ func TestQuerySQL(t *testing.T) {
 // 	p, err := CreateClient(ctx, opts)
 // 	require.NoError(t, err)
 
-// 	var result types.Duration
+// 	var result geltypes.Duration
 // 	err = p.QuerySingle(ctx,
 // 		"SELECT assert_single(cfg::Config.session_idle_timeout)", &result)
 // 	require.NoError(t, err)
-// 	require.Equal(t, types.Duration(1_000_000), result)
+// 	require.Equal(t, geltypes.Duration(1_000_000), result)
 
 // 	// The client keeps one connection in the pool.
 // 	// Get a reference to that connection.

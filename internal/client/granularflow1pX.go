@@ -20,11 +20,11 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/edgedb/edgedb-go/internal/buff"
-	"github.com/edgedb/edgedb-go/internal/codecs"
-	"github.com/edgedb/edgedb-go/internal/descriptor"
-	"github.com/edgedb/edgedb-go/internal/gelerr"
-	"github.com/edgedb/edgedb-go/internal/state"
+	"github.com/geldata/gel-go/internal/buff"
+	"github.com/geldata/gel-go/internal/codecs"
+	"github.com/geldata/gel-go/internal/descriptor"
+	"github.com/geldata/gel-go/internal/gelerr"
+	"github.com/geldata/gel-go/internal/state"
 )
 
 func (c *protocolConnection) execGranularFlow1pX(
@@ -67,9 +67,9 @@ func (c *protocolConnection) parse1pX(
 	w := buff.NewWriter(c.writeMemory[:0])
 	w.BeginMessage(uint8(Parse))
 	w.PushUint16(0) // no headers
-	w.PushUint64(q.capabilities)
+	w.PushUint64(q.getCapabilities())
 	w.PushUint64(0) // no compilation_flags
-	w.PushUint64(0) // no implicit limit
+	w.PushUint64(q.queryOpts.ImplicitLimit())
 	w.PushUint8(uint8(q.fmt))
 	w.PushUint8(uint8(q.expCard))
 	w.PushString(q.cmd)
@@ -186,9 +186,9 @@ func (c *protocolConnection) execute1pX(
 	w := buff.NewWriter(c.writeMemory[:0])
 	w.BeginMessage(uint8(Execute))
 	w.PushUint16(0) // no headers
-	w.PushUint64(q.capabilities)
+	w.PushUint64(q.getCapabilities())
 	w.PushUint64(0) // no compilation_flags
-	w.PushUint64(0) // no implicit limit
+	w.PushUint64(q.queryOpts.ImplicitLimit())
 	w.PushUint8(uint8(q.fmt))
 	w.PushUint8(uint8(q.expCard))
 	w.PushString(q.cmd)

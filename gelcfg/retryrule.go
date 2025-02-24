@@ -21,7 +21,7 @@ import (
 	"math"
 	"time"
 
-	"github.com/edgedb/edgedb-go/internal/snc"
+	"github.com/geldata/gel-go/internal/snc"
 )
 
 var rnd = snc.NewRand()

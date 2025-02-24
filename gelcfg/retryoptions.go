@@ -19,8 +19,8 @@ package gelcfg
 import (
 	"fmt"
 
-	"github.com/edgedb/edgedb-go/gelerr"
-	gelerrint "github.com/edgedb/edgedb-go/internal/gelerr"
+	"github.com/geldata/gel-go/gelerr"
+	gelerrint "github.com/geldata/gel-go/internal/gelerr"
 )
 
 // RetryCondition represents scenarios that can cause a transaction

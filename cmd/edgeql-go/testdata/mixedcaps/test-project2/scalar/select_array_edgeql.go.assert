@@ -6,7 +6,7 @@ import (
 	"context"
 	_ "embed"
 
-	gel "github.com/edgedb/edgedb-go"
+	gel "github.com/geldata/gel-go"
 )
 
 //go:embed select_array.edgeql

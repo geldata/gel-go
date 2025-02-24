@@ -23,7 +23,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/edgedb/edgedb-go/internal/gelerr"
+	"github.com/geldata/gel-go/internal/gelerr"
 )
 
 func connectAutoClosingSocket(

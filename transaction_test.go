@@ -24,12 +24,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/edgedb/edgedb-go/gelcfg"
-	"github.com/edgedb/edgedb-go/gelerr"
-	"github.com/edgedb/edgedb-go/geltypes"
-	types "github.com/edgedb/edgedb-go/geltypes"
-	gel "github.com/edgedb/edgedb-go/internal/client"
-	"github.com/edgedb/edgedb-go/internal/snc"
+	"github.com/geldata/gel-go/gelcfg"
+	"github.com/geldata/gel-go/gelerr"
+	"github.com/geldata/gel-go/geltypes"
+	types "github.com/geldata/gel-go/geltypes"
+	gel "github.com/geldata/gel-go/internal/client"
+	"github.com/geldata/gel-go/internal/snc"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

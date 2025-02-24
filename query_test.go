@@ -24,11 +24,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/edgedb/edgedb-go/gelcfg"
-	"github.com/edgedb/edgedb-go/gelerr"
-	"github.com/edgedb/edgedb-go/geltypes"
-	types "github.com/edgedb/edgedb-go/geltypes"
-	gel "github.com/edgedb/edgedb-go/internal/client"
+	"github.com/geldata/gel-go/gelcfg"
+	"github.com/geldata/gel-go/gelerr"
+	"github.com/geldata/gel-go/geltypes"
+	types "github.com/geldata/gel-go/geltypes"
+	gel "github.com/geldata/gel-go/internal/client"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -1196,4 +1196,75 @@ func TestWithWarningHandler(t *testing.T) {
 	err = a.QuerySingleJSON(ctx, `SELECT _warn_on_call()`, &resultJSON)
 	require.NoError(t, err)
 	require.Greater(t, len(seen), 0)
+}
+
+func TestWithQueryOptionsReadonly(t *testing.T) {
+	ctx := context.Background()
+
+	err := client.Execute(ctx, `create type QueryOptsTest {
+		create property name -> str;
+	};`)
+	assert.NoError(t, err)
+	defer (func() {
+		err = client.Execute(ctx, `drop type QueryOptsTest;`)
+		assert.NoError(t, err)
+	})()
+
+	var res struct {
+		ID types.UUID `edgedb:"id"`
+	}
+	err = client.QuerySingle(ctx,
+		"insert QueryOptsTest {name := 'abc'}", &res)
+	assert.NoError(t, err)
+
+	readOnly := gelcfg.NewQueryOptions().WithReadOnly(true)
+	readonlyClient := client.WithQueryOptions(readOnly)
+
+	err = readonlyClient.QuerySingle(ctx,
+		"insert QueryOptsTest {name := 'def'}", &res)
+	assert.EqualError(t, err,
+		"gel.DisabledCapabilityError: "+
+			"cannot execute data modification queries: disabled by the client",
+	)
+
+	err = client.QuerySingle(ctx,
+		"select QueryOptsTest {id} limit 1", &res)
+	assert.NoError(t, err)
+
+	// check we didn't modify the original client
+	err = client.QuerySingle(ctx,
+		"insert QueryOptsTest {name := 'abc'}", &res)
+	assert.NoError(t, err)
+}
+
+func TestWithQueryOptionsImplicitLimit(t *testing.T) {
+	ctx := context.Background()
+
+	var res []struct {
+		Name string `edgedb:"name"`
+	}
+	err := client.Query(ctx,
+		"select schema::ObjectType {name}", &res)
+	assert.NoError(t, err)
+	assert.Greater(t, len(res), 10)
+
+	limit := gelcfg.NewQueryOptions().WithImplicitLimit(10)
+	limitClient := client.WithQueryOptions(limit)
+
+	var limitRes []struct {
+		Name string `edgedb:"name"`
+	}
+	err = limitClient.Query(ctx,
+		"select schema::ObjectType {name}", &limitRes)
+	assert.NoError(t, err)
+	assert.Equal(t, len(limitRes), 10)
+
+	// check we didn't modify the original client
+	var res2 []struct {
+		Name string `edgedb:"name"`
+	}
+	err = client.Query(ctx,
+		"select schema::ObjectType {name}", &res2)
+	assert.NoError(t, err)
+	assert.Equal(t, len(res2), len(res))
 }

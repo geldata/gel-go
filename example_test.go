@@ -20,8 +20,8 @@ import (
 	"context"
 	"testing"
 
-	gel "github.com/edgedb/edgedb-go"
-	"github.com/edgedb/edgedb-go/geltypes"
+	gel "github.com/geldata/gel-go"
+	"github.com/geldata/gel-go/geltypes"
 )
 
 var (

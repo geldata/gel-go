@@ -20,7 +20,7 @@ import (
 	"context"
 	"fmt"
 
-	gelerrint "github.com/edgedb/edgedb-go/internal/gelerr"
+	gelerrint "github.com/geldata/gel-go/internal/gelerr"
 )
 
 type borrowableConn struct {

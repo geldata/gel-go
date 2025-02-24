@@ -21,9 +21,9 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/edgedb/edgedb-go/gelerr"
-	gel "github.com/edgedb/edgedb-go/internal/client"
-	gelerrint "github.com/edgedb/edgedb-go/internal/gelerr"
+	"github.com/geldata/gel-go/gelerr"
+	gel "github.com/geldata/gel-go/internal/client"
+	gelerrint "github.com/geldata/gel-go/internal/gelerr"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

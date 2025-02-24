@@ -21,9 +21,9 @@ import (
 	"reflect"
 	"unsafe"
 
-	types "github.com/edgedb/edgedb-go/geltypes"
-	"github.com/edgedb/edgedb-go/internal/buff"
-	"github.com/edgedb/edgedb-go/internal/descriptor"
+	types "github.com/geldata/gel-go/geltypes"
+	"github.com/geldata/gel-go/internal/buff"
+	"github.com/geldata/gel-go/internal/descriptor"
 )
 
 func buildSetDecoder(

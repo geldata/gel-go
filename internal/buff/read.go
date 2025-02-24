@@ -20,8 +20,8 @@ import (
 	"encoding/binary"
 	"fmt"
 
-	types "github.com/edgedb/edgedb-go/geltypes"
-	"github.com/edgedb/edgedb-go/internal/soc"
+	types "github.com/geldata/gel-go/geltypes"
+	"github.com/geldata/gel-go/internal/soc"
 )
 
 // Reader is a buffer reader.

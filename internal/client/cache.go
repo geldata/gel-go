@@ -46,8 +46,8 @@ Optimistic execute flow:
 import (
 	"reflect"
 
-	types "github.com/edgedb/edgedb-go/geltypes"
-	"github.com/edgedb/edgedb-go/internal/codecs"
+	types "github.com/geldata/gel-go/geltypes"
+	"github.com/geldata/gel-go/internal/codecs"
 )
 
 type codecKey struct {

@@ -21,8 +21,8 @@ import (
 	"errors"
 	"time"
 
-	"github.com/edgedb/edgedb-go/gelerr"
-	gelerrint "github.com/edgedb/edgedb-go/internal/gelerr"
+	"github.com/geldata/gel-go/gelerr"
+	gelerrint "github.com/geldata/gel-go/internal/gelerr"
 )
 
 type reconnectingConn struct {

@@ -21,7 +21,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/edgedb/edgedb-go/internal/gelerr"
+	"github.com/geldata/gel-go/internal/gelerr"
 )
 
 // Warning is used to decode warnings in the protocol.

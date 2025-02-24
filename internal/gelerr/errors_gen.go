@@ -17,15 +17,11 @@
 // This file is auto generated. Do not edit!
 // run 'make errors' to regenerate
 
-// internal/cmd/export should ignore this file
-//go:build !export
-
 package gelerr
 
 import (
 	"fmt"
-
-	"github.com/edgedb/edgedb-go/gelerr"
+	"github.com/geldata/gel-go/gelerr"
 )
 
 func NewInternalServerError(msg string, err error) error {

@@ -17,9 +17,6 @@
 // This file is auto generated. Do not edit!
 // run 'make errors' to regenerate
 
-// internal/cmd/export should ignore this file
-//go:build !export
-
 package gelerr
 
 const (

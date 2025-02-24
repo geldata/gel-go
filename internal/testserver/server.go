@@ -33,9 +33,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/edgedb/edgedb-go/gelcfg"
-	"github.com/edgedb/edgedb-go/geltypes"
-	gelint "github.com/edgedb/edgedb-go/internal/client"
+	"github.com/geldata/gel-go/gelcfg"
+	"github.com/geldata/gel-go/geltypes"
+	gelint "github.com/geldata/gel-go/internal/client"
 )
 
 var (
