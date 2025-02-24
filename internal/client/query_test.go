@@ -1205,7 +1205,7 @@ func TestWithQueryOptionsReadonly(t *testing.T) {
 	err = readonlyClient.QuerySingle(ctx,
 		"insert QueryOptsTest {name := 'def'}", &res)
 	assert.EqualError(t, err,
-		"edgedb.DisabledCapabilityError: "+
+		"gel.DisabledCapabilityError: "+
 			"cannot execute data modification queries: disabled by the client",
 	)
 
