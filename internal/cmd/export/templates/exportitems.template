@@ -1,4 +1,0 @@
-{{range .}}
-{{range .Comment.List}}	{{.Text}}
-{{end}} {{.Name}} = {{.PkgName}}.{{.Name}}
-{{end}}

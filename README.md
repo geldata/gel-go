@@ -24,12 +24,13 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/geldata/gel-go"
+	gel "github.com/geldata/gel-go"
+	"github.com/geldata/gel-go/gelcfg"
 )
 
 func main() {
 	ctx := context.Background()
-	client, err := gel.CreateClient(ctx, gel.Options{})
+	client, err := gel.CreateClient(ctx, gelcfg.Options{})
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -20,18 +20,23 @@ import (
 	"context"
 	"errors"
 	"time"
+
+	"github.com/geldata/gel-go/gelcfg"
+	"github.com/geldata/gel-go/gelerr"
+	types "github.com/geldata/gel-go/geltypes"
+	gelerrint "github.com/geldata/gel-go/internal/gelerr"
 )
 
 type transactableConn struct {
 	*reconnectingConn
-	txOpts    TxOptions
-	retryOpts RetryOptions
+	txOpts    gelcfg.TxOptions
+	retryOpts gelcfg.RetryOptions
 }
 
 func (c *transactableConn) granularFlow(ctx context.Context, q *query) error {
 	var (
 		err    error
-		edbErr Error
+		edbErr gelerr.Error
 	)
 
 	for i := 1; true; i++ {
@@ -52,41 +57,42 @@ func (c *transactableConn) granularFlow(ctx context.Context, q *query) error {
 		capabilities, ok := c.getCachedCapabilities(q)
 		if ok &&
 			errors.As(err, &edbErr) &&
-			edbErr.HasTag(ShouldRetry) &&
-			(capabilities == 0 || edbErr.Category(TransactionConflictError)) {
-			rule, e := c.retryOpts.ruleForException(edbErr)
+			edbErr.HasTag(gelerr.ShouldRetry) &&
+			(capabilities == 0 ||
+				edbErr.Category(gelerr.TransactionConflictError)) {
+			rule, e := c.retryOpts.RuleForException(edbErr)
 			if e != nil {
 				return e
 			}
 
-			if i >= rule.attempts {
+			if i >= rule.Attempts() {
 				return err
 			}
 
-			time.Sleep(rule.backoff(i))
+			time.Sleep(rule.Backoff()(i))
 			continue
 		}
 
 		return err
 	}
 
-	return &clientError{msg: "unreachable"}
+	return gelerrint.NewClientError("unreachable", nil)
 }
 
-func (c *transactableConn) tx(
+func (c *transactableConn) Tx(
 	ctx context.Context,
-	action TxBlock,
+	action types.TxBlock,
 	state map[string]interface{},
-	queryOpts QueryOptions,
-	warningHandler WarningHandler,
+	warningHandler gelcfg.WarningHandler,
+	queryOpts gelcfg.QueryOptions,
 ) (err error) {
 	conn, err := c.borrow("transaction")
 	if err != nil {
 		return err
 	}
-	defer func() { err = firstError(err, c.unborrow()) }()
+	defer func() { err = FirstError(err, c.unborrow()) }()
 
-	var edbErr Error
+	var edbErr gelerr.Error
 	for i := 1; true; i++ {
 		if errors.As(err, &edbErr) && c.conn.soc.Closed() {
 			err = c.reconnect(ctx, true)
@@ -115,8 +121,8 @@ func (c *transactableConn) tx(
 			if err == nil {
 				err = tx.commit(ctx)
 				if errors.As(err, &edbErr) &&
-					edbErr.Category(TransactionError) &&
-					edbErr.HasTag(ShouldRetry) {
+					edbErr.Category(gelerr.TransactionError) &&
+					edbErr.HasTag(gelerr.ShouldRetry) {
 					goto Error
 				}
 				return err
@@ -130,22 +136,22 @@ func (c *transactableConn) tx(
 		}
 
 	Error:
-		if errors.As(err, &edbErr) && edbErr.HasTag(ShouldRetry) {
-			rule, e := c.retryOpts.ruleForException(edbErr)
+		if errors.As(err, &edbErr) && edbErr.HasTag(gelerr.ShouldRetry) {
+			rule, e := c.retryOpts.RuleForException(edbErr)
 			if e != nil {
 				return e
 			}
 
-			if i >= rule.attempts {
+			if i >= rule.Attempts() {
 				return err
 			}
 
-			time.Sleep(rule.backoff(i))
+			time.Sleep(rule.Backoff()(i))
 			continue
 		}
 
 		return err
 	}
 
-	return &clientError{msg: "unreachable"}
+	return gelerrint.NewClientError("unreachable", nil)
 }

@@ -44,12 +44,10 @@ Optimistic execute flow:
 */
 
 import (
-	"encoding/binary"
 	"reflect"
 
+	types "github.com/geldata/gel-go/geltypes"
 	"github.com/geldata/gel-go/internal/codecs"
-	types "github.com/geldata/gel-go/internal/geltypes"
-	"github.com/geldata/gel-go/internal/header"
 )
 
 type codecKey struct {
@@ -96,22 +94,6 @@ func (c *protocolConnection) getCachedTypeIDs(q *query) (*idPair, bool) {
 
 func (c *protocolConnection) cacheTypeIDs(q *query, ids idPair) {
 	c.typeIDCache.Put(makeKey(q), ids)
-}
-
-func (c *protocolConnection) cacheCapabilities0pX(
-	q *query,
-	headers header.Header0pX,
-) {
-	if capabilities, ok := headers[header.Capabilities]; ok {
-		x := binary.BigEndian.Uint64(capabilities)
-		if x&capabilitiesDDL != 0 {
-			c.typeIDCache.Invalidate()
-			c.inCodecCache.Invalidate()
-			c.outCodecCache.Invalidate()
-			c.capabilitiesCache.Invalidate()
-		}
-		c.capabilitiesCache.Put(makeKey(q), x)
-	}
 }
 
 func (c *protocolConnection) cacheCapabilities1pX(

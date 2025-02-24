@@ -21,16 +21,23 @@ import (
 	"log"
 	"time"
 
+	types "github.com/geldata/gel-go/geltypes"
 	"github.com/geldata/gel-go/internal"
 	"github.com/geldata/gel-go/internal/buff"
 	"github.com/geldata/gel-go/internal/cache"
 	"github.com/geldata/gel-go/internal/codecs"
+	"github.com/geldata/gel-go/internal/gelerr"
 	"github.com/geldata/gel-go/internal/snc"
 	"github.com/geldata/gel-go/internal/soc"
 )
 
+type systemConfig struct {
+	ID                 types.OptionalUUID     `gel:"id"`
+	SessionIdleTimeout types.OptionalDuration `gel:"session_idle_timeout"`
+}
+
 type cacheCollection struct {
-	serverSettings    *snc.ServerSettings
+	ServerSettings    *snc.ServerSettings
 	typeIDCache       *cache.Cache
 	inCodecCache      *cache.Cache
 	outCodecCache     *cache.Cache
@@ -46,7 +53,7 @@ type protocolConnection struct {
 	protocolVersion internal.ProtocolVersion
 	cacheCollection
 
-	systemConfig systemConfig
+	SystemConfig systemConfig
 	stateCodec   codecs.Encoder
 }
 
@@ -95,17 +102,17 @@ func (c *protocolConnection) acquireReader(
 	ctx context.Context,
 ) (*buff.Reader, error) {
 	if c.isClosed() {
-		return nil, &clientConnectionClosedError{}
+		return nil, gelerr.NewClientConnectionClosedError("", nil)
 	}
 
 	c.acquireReaderSignal <- struct{}{}
 	select {
 	case r := <-c.readerChan:
 		if r.Err != nil {
-			return nil, &clientConnectionClosedError{err: r.Err}
+			return nil, gelerr.NewClientConnectionClosedError("", r.Err)
 		}
 		if c.soc.Closed() {
-			return nil, &clientConnectionClosedError{}
+			return nil, gelerr.NewClientConnectionClosedError("", nil)
 		}
 		return r, nil
 	case <-ctx.Done():
@@ -115,7 +122,7 @@ func (c *protocolConnection) acquireReader(
 
 func (c *protocolConnection) releaseReader(r *buff.Reader) error {
 	if c.isClosed() {
-		return &clientConnectionClosedError{}
+		return gelerr.NewClientConnectionClosedError("", nil)
 	}
 
 	if err := c.soc.SetDeadline(time.Time{}); err != nil {
@@ -158,7 +165,10 @@ func (c *protocolConnection) releaseReader(r *buff.Reader) error {
 // Close the db connection
 func (c *protocolConnection) close() error {
 	if c.soc == nil {
-		return &interfaceError{msg: "connection closed more than once"}
+		return gelerr.NewInterfaceError(
+			"connection closed more than once",
+			nil,
+		)
 	}
 
 	_, err := c.acquireReader(context.Background())
@@ -182,12 +192,13 @@ func (c *protocolConnection) isClosed() bool {
 	return false
 }
 
-func (c *protocolConnection) scriptFlow(ctx context.Context, q *query) error {
+func (c *protocolConnection) ScriptFlow(ctx context.Context, q *query) error {
 	if q.lang == SQL && c.protocolVersion.LT(protocolVersion3p0) {
-		return &unsupportedFeatureError{
-			msg: "the server does not support SQL queries, " +
+		return gelerr.NewUnsupportedFeatureError(
+			"the server does not support SQL queries, "+
 				"upgrade to 6.0 or newer",
-		}
+			nil,
+		)
 	}
 
 	r, err := c.acquireReader(ctx)
@@ -204,13 +215,11 @@ func (c *protocolConnection) scriptFlow(ctx context.Context, q *query) error {
 	switch {
 	case c.protocolVersion.GTE(protocolVersion2p0):
 		err = c.execGranularFlow2pX(r, q)
-	case c.protocolVersion.GTE(protocolVersion1p0):
-		err = c.execGranularFlow1pX(r, q)
 	default:
-		err = c.execScriptFlow(r, q)
+		err = c.execGranularFlow1pX(r, q)
 	}
 
-	return firstError(err, c.releaseReader(r))
+	return FirstError(err, c.releaseReader(r))
 }
 
 func (c *protocolConnection) granularFlow(
@@ -218,10 +227,11 @@ func (c *protocolConnection) granularFlow(
 	q *query,
 ) error {
 	if q.lang == SQL && c.protocolVersion.LT(protocolVersion3p0) {
-		return &unsupportedFeatureError{
-			msg: "the server does not support SQL queries, " +
+		return gelerr.NewUnsupportedFeatureError(
+			"the server does not support SQL queries, "+
 				"upgrade to 6.0 or newer",
-		}
+			nil,
+		)
 	}
 
 	r, err := c.acquireReader(ctx)
@@ -238,11 +248,9 @@ func (c *protocolConnection) granularFlow(
 	switch {
 	case c.protocolVersion.GTE(protocolVersion2p0):
 		err = c.execGranularFlow2pX(r, q)
-	case c.protocolVersion.GTE(protocolVersion1p0):
-		err = c.execGranularFlow1pX(r, q)
 	default:
-		err = c.execGranularFlow0pX(r, q)
+		err = c.execGranularFlow1pX(r, q)
 	}
 
-	return firstError(err, c.releaseReader(r))
+	return FirstError(err, c.releaseReader(r))
 }

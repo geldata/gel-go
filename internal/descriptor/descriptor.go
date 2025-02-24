@@ -21,9 +21,9 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/geldata/gel-go/geltypes"
 	"github.com/geldata/gel-go/internal"
 	"github.com/geldata/gel-go/internal/buff"
-	"github.com/geldata/gel-go/internal/geltypes"
 )
 
 // IDZero is descriptor ID 00000000-0000-0000-0000-000000000000

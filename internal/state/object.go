@@ -19,10 +19,10 @@ package state
 import (
 	"fmt"
 
+	"github.com/geldata/gel-go/geltypes"
 	"github.com/geldata/gel-go/internal/buff"
 	"github.com/geldata/gel-go/internal/codecs"
 	"github.com/geldata/gel-go/internal/descriptor"
-	"github.com/geldata/gel-go/internal/geltypes"
 )
 
 func buildObjectOrNamedTupleEncoder(

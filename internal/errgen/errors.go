@@ -29,11 +29,6 @@ type Type struct {
 	Tags      []Tag
 }
 
-// PrivateName returns the private go name for this error type.
-func (t *Type) PrivateName() string {
-	return strings.ToLower(t.Name[0:1]) + t.Name[1:]
-}
-
 func parseType(typ []interface{}, lookup map[string]string) *Type {
 	name := typ[0].(string)
 	errType := &Type{

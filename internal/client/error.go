@@ -25,39 +25,20 @@ import (
 	"strconv"
 	"syscall"
 
+	"github.com/geldata/gel-go/gelerr"
 	"github.com/geldata/gel-go/internal/buff"
+	gelerrint "github.com/geldata/gel-go/internal/gelerr"
 )
 
 var (
-	errNoTOMLFound             = errors.New("no gel.toml found")
-	errZeroResults       error = &noDataError{msg: "zero results"}
-	errStateNotSupported       = &interfaceError{msg: "client methods " +
-		"WithConfig, WithGlobals, and WithModuleAliases " +
-		"are not supported by the server. " +
-		"Upgrade your server to version 2.0 or greater " +
-		"to use these features."}
+	errNoTOMLFound = errors.New("no gel.toml found")
+
+	// ErrZeroResults is returned when a query didn't return any data.
+	ErrZeroResults error = gelerrint.NewNoDataError("zero results", nil)
 )
 
-// ErrorTag is the argument type to Error.HasTag().
-type ErrorTag string
-
-// ErrorCategory values represent Gel's error types.
-type ErrorCategory string
-
-// Error is the error type returned from gel.
-type Error interface {
-	Error() string
-	Unwrap() error
-
-	// HasTag returns true if the error is marked with the supplied tag.
-	HasTag(ErrorTag) bool
-
-	// Category returns true if the error is in the provided category.
-	Category(ErrorCategory) bool
-}
-
-// firstError returns the first non nil error or nil.
-func firstError(a, b error) error {
+// FirstError returns the first non nil error or nil.
+func FirstError(a, b error) error {
 	if a != nil {
 		return a
 	}
@@ -84,15 +65,13 @@ func positionFromHeaders(headers map[uint16]string) (*int, *int, error) {
 
 	lineNo, err := strconv.Atoi(lineNoRaw)
 	if err != nil {
-		return nil, nil, &binaryProtocolError{
-			err: fmt.Errorf("decode lineNo: %q: %w", lineNoRaw, err),
-		}
+		return nil, nil, gelerrint.NewBinaryProtocolError(
+			"", fmt.Errorf("decode lineNo: %q: %w", lineNoRaw, err))
 	}
 	byteNo, err := strconv.Atoi(byteNoRaw)
 	if err != nil {
-		return nil, nil, &binaryProtocolError{
-			err: fmt.Errorf("decode byteNo: %q: %w", byteNoRaw, err),
-		}
+		return nil, nil, gelerrint.NewBinaryProtocolError(
+			"", fmt.Errorf("decode byteNo: %q: %w", byteNoRaw, err))
 	}
 
 	return &lineNo, &byteNo, nil
@@ -177,12 +156,13 @@ func wrapAll(errs ...error) error {
 }
 
 func isClientConnectionError(err error) bool {
-	var edbErr Error
-	return errors.As(err, &edbErr) && edbErr.Category(ClientConnectionError)
+	var edbErr gelerr.Error
+	return errors.As(err, &edbErr) &&
+		edbErr.Category(gelerr.ClientConnectionError)
 }
 
 func wrapNetError(err error) error {
-	var errEDB Error
+	var errEDB gelerr.Error
 	var errNetOp *net.OpError
 	var errDSN *net.DNSError
 
@@ -197,7 +177,7 @@ func wrapNetError(err error) error {
 	case errors.Is(err, context.DeadlineExceeded):
 		fallthrough
 	case errors.As(err, &errNetOp) && errNetOp.Timeout():
-		return &clientConnectionTimeoutError{err: err}
+		return gelerrint.NewClientConnectionTimeoutError("", err)
 
 	case errors.Is(err, io.EOF):
 		fallthrough
@@ -212,13 +192,13 @@ func wrapNetError(err error) error {
 	case errors.As(err, &errDSN):
 		fallthrough
 	case errors.Is(err, syscall.ENOENT):
-		return &clientConnectionFailedTemporarilyError{err: err}
+		return gelerrint.NewClientConnectionFailedTemporarilyError("", err)
 
 	case errors.Is(err, net.ErrClosed):
-		return &clientConnectionClosedError{err: err}
+		return gelerrint.NewClientConnectionClosedError("", err)
 
 	default:
-		return &clientConnectionFailedError{err: err}
+		return gelerrint.NewClientConnectionFailedError("", err)
 	}
 }
 

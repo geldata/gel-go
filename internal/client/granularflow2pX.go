@@ -19,10 +19,12 @@ package gel
 import (
 	"fmt"
 	"reflect"
+	"unsafe"
 
 	"github.com/geldata/gel-go/internal/buff"
 	"github.com/geldata/gel-go/internal/codecs"
 	"github.com/geldata/gel-go/internal/descriptor"
+	"github.com/geldata/gel-go/internal/gelerr"
 	"github.com/geldata/gel-go/internal/state"
 )
 
@@ -74,7 +76,7 @@ func (c *protocolConnection) parse2pX(
 	w.PushUint16(0) // no headers
 	w.PushUint64(q.getCapabilities())
 	w.PushUint64(0) // no compilation_flags
-	w.PushUint64(q.queryOpts.ImplicitLimit)
+	w.PushUint64(q.queryOpts.ImplicitLimit())
 	if c.protocolVersion.GTE(protocolVersion3p0) {
 		w.PushUint8(uint8(q.lang))
 	}
@@ -85,8 +87,8 @@ func (c *protocolConnection) parse2pX(
 	w.PushUUID(c.stateCodec.DescriptorID())
 	err := c.stateCodec.Encode(w, q.state, codecs.Path("state"), false)
 	if err != nil {
-		return nil, &binaryProtocolError{err: fmt.Errorf(
-			"invalid connection state: %w", err)}
+		return nil, gelerr.NewBinaryProtocolError("", fmt.Errorf(
+			"invalid connection state: %w", err))
 	}
 	w.EndMessage()
 
@@ -94,7 +96,7 @@ func (c *protocolConnection) parse2pX(
 	w.EndMessage()
 
 	if e := c.soc.WriteAll(w.Unwrap()); e != nil {
-		return nil, &clientConnectionClosedError{err: e}
+		return nil, gelerr.NewClientConnectionClosedError("", e)
 	}
 
 	var desc *CommandDescriptionV2
@@ -151,10 +153,10 @@ func (c *protocolConnection) decodeCommandDataDescriptionMsg2pX(
 	if err != nil {
 		return nil, err
 	} else if descs.In.ID != id {
-		return nil, &clientError{msg: fmt.Sprintf(
+		return nil, gelerr.NewClientError(fmt.Sprintf(
 			"unexpected in descriptor id: %v",
 			descs.In.ID,
-		)}
+		), nil)
 	}
 
 	id = r.PopUUID()
@@ -165,19 +167,19 @@ func (c *protocolConnection) decodeCommandDataDescriptionMsg2pX(
 	if err != nil {
 		return nil, err
 	} else if descs.Out.ID != id {
-		return nil, &clientError{msg: fmt.Sprintf(
+		return nil, gelerr.NewClientError(fmt.Sprintf(
 			"unexpected out descriptor id: got %v but expected %v",
 			descs.Out.ID,
 			id,
-		)}
+		), nil)
 	}
 
 	if q.expCard == AtMostOne && descs.Card == Many {
-		return nil, &resultCardinalityMismatchError{msg: fmt.Sprintf(
+		return nil, gelerr.NewResultCardinalityMismatchError(fmt.Sprintf(
 			"the query has cardinality %v "+
 				"which does not match the expected cardinality %v",
 			descs.Card,
-			q.expCard)}
+			q.expCard), nil)
 	}
 
 	c.cacheTypeIDs(q, idPair{in: descs.In.ID, out: descs.Out.ID})
@@ -196,7 +198,7 @@ func (c *protocolConnection) execute2pX(
 	w.PushUint16(0) // no headers
 	w.PushUint64(q.getCapabilities())
 	w.PushUint64(0) // no compilation_flags
-	w.PushUint64(q.queryOpts.ImplicitLimit)
+	w.PushUint64(q.queryOpts.ImplicitLimit())
 	if c.protocolVersion.GTE(protocolVersion3p0) {
 		w.PushUint8(uint8(q.lang))
 	}
@@ -206,14 +208,14 @@ func (c *protocolConnection) execute2pX(
 	w.PushUUID(c.stateCodec.DescriptorID())
 	err := c.stateCodec.Encode(w, q.state, codecs.Path("state"), false)
 	if err != nil {
-		return &binaryProtocolError{err: fmt.Errorf(
-			"invalid connection state: %w", err)}
+		return gelerr.NewBinaryProtocolError("", fmt.Errorf(
+			"invalid connection state: %w", err))
 	}
 
 	w.PushUUID(cdcs.in.DescriptorID())
 	w.PushUUID(cdcs.out.DescriptorID())
 	if e := cdcs.in.Encode(w, q.args, codecs.Path("args"), true); e != nil {
-		return &invalidArgumentError{msg: e.Error()}
+		return gelerr.NewInvalidArgumentError(e.Error(), nil)
 	}
 	w.EndMessage()
 
@@ -221,12 +223,12 @@ func (c *protocolConnection) execute2pX(
 	w.EndMessage()
 
 	if e := c.soc.WriteAll(w.Unwrap()); e != nil {
-		return &clientConnectionClosedError{err: e}
+		return gelerr.NewClientConnectionClosedError("", e)
 	}
 
 	tmp := q.out
 	if q.expCard == AtMostOne {
-		err = errZeroResults
+		err = ErrZeroResults
 	}
 	done := buff.NewSignal()
 
@@ -244,7 +246,7 @@ func (c *protocolConnection) execute2pX(
 		case Data:
 			val, ok, e := decodeDataMsg(r, q, cdcs)
 			if e != nil {
-				if err == errZeroResults {
+				if err == ErrZeroResults {
 					err = e
 				} else {
 					err = wrapAll(err, e)
@@ -254,7 +256,7 @@ func (c *protocolConnection) execute2pX(
 				tmp = reflect.Append(tmp, val)
 			}
 
-			if err == errZeroResults {
+			if err == ErrZeroResults {
 				err = nil
 			}
 		case CommandComplete:
@@ -265,7 +267,7 @@ func (c *protocolConnection) execute2pX(
 			decodeReadyForCommandMsg(r)
 			done.Signal()
 		case ErrorResponse:
-			if err == errZeroResults {
+			if err == ErrZeroResults {
 				err = nil
 			}
 
@@ -305,7 +307,7 @@ func (c *protocolConnection) codecsFromIDsV2(
 		d := desc.(descriptor.V2)
 		in, err = codecs.BuildEncoderV2(&d, c.protocolVersion)
 		if err != nil {
-			return nil, &invalidArgumentError{msg: err.Error()}
+			return nil, gelerr.NewInvalidArgumentError(err.Error(), nil)
 		}
 	}
 
@@ -320,8 +322,10 @@ func (c *protocolConnection) codecsFromIDsV2(
 		path := codecs.Path(q.outType.String())
 		out, err = codecs.BuildDecoderV2(&d, q.outType, path)
 		if err != nil {
-			return nil, &invalidArgumentError{msg: fmt.Sprintf(
-				"the \"out\" argument does not match query schema: %v", err)}
+			return nil, gelerr.NewInvalidArgumentError(fmt.Sprintf(
+				"the \"out\" argument does not match query schema: %v",
+				err,
+			), nil)
 		}
 	}
 
@@ -336,7 +340,7 @@ func (c *protocolConnection) codecsFromDescriptors2pX(
 	var err error
 	cdcs.in, err = codecs.BuildEncoderV2(&descs.In, c.protocolVersion)
 	if err != nil {
-		return nil, &invalidArgumentError{msg: err.Error()}
+		return nil, gelerr.NewInvalidArgumentError(err.Error(), nil)
 	}
 
 	if q.fmt == JSON {
@@ -356,7 +360,7 @@ func (c *protocolConnection) codecsFromDescriptors2pX(
 				"the \"out\" argument does not match query schema: %v",
 				err,
 			)
-			return nil, &invalidArgumentError{msg: err.Error()}
+			return nil, gelerr.NewInvalidArgumentError(err.Error(), nil)
 		}
 	}
 
@@ -373,7 +377,7 @@ func (c *protocolConnection) decodeCommandCompleteMsg2pX(
 	q *query,
 	r *buff.Reader,
 ) error {
-	discardHeaders0pX(r)
+	discardHeaders2pX(r)
 	c.cacheCapabilities1pX(q, r.PopUint64())
 	r.Discard(int(r.PopUint32())) // discard command status
 	if r.PopUUID() == descriptor.IDZero {
@@ -395,20 +399,60 @@ func (c *protocolConnection) decodeStateDataDescription2pX(
 		c.protocolVersion,
 	)
 	if err != nil {
-		return &binaryProtocolError{err: fmt.Errorf(
-			"decoding ParameterStatus state_description: %w", err)}
+		return gelerr.NewBinaryProtocolError("", fmt.Errorf(
+			"decoding ParameterStatus state_description: %w", err))
 	} else if desc.ID != id {
-		return &binaryProtocolError{err: fmt.Errorf(
-			"state_description ids don't match: %v != %v", id, desc.ID)}
+		return gelerr.NewBinaryProtocolError("", fmt.Errorf(
+			"state_description ids don't match: %v != %v", id, desc.ID))
 	}
 
 	codec, err := state.BuildEncoderV2(&desc, codecs.Path("state"))
 	if err != nil {
-		return &binaryProtocolError{err: fmt.Errorf(
+		return gelerr.NewBinaryProtocolError("", fmt.Errorf(
 			"building decoder from ParameterStatus state_description: %w",
-			err)}
+			err))
 	}
 
 	c.stateCodec = codec
 	return nil
+}
+
+func decodeReadyForCommandMsg(r *buff.Reader) {
+	ignoreHeaders(r)
+	r.Discard(1) // transaction state
+}
+
+func decodeDataMsg(
+	r *buff.Reader,
+	q *query,
+	cdcs *codecPair,
+) (reflect.Value, bool, error) {
+	elmCount := r.PopUint16()
+	if elmCount != 1 {
+		return reflect.Value{}, false, fmt.Errorf(
+			"unexpected number of elements: expected 1, got %v", elmCount)
+	}
+	elmLen := r.PopUint32()
+
+	if !q.flat() {
+		val := reflect.New(q.outType).Elem()
+		err := cdcs.out.Decode(
+			r.PopSlice(elmLen),
+			unsafe.Pointer(val.UnsafeAddr()),
+		)
+		if err != nil {
+			return reflect.Value{}, false, err
+		}
+		return val, true, nil
+	}
+
+	err := cdcs.out.Decode(
+		r.PopSlice(elmLen),
+		unsafe.Pointer(q.out.UnsafeAddr()),
+	)
+	if err != nil {
+		return reflect.Value{}, false, err
+	}
+
+	return reflect.Value{}, false, nil
 }

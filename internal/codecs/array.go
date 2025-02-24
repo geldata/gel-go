@@ -21,10 +21,10 @@ import (
 	"reflect"
 	"unsafe"
 
+	types "github.com/geldata/gel-go/geltypes"
 	"github.com/geldata/gel-go/internal"
 	"github.com/geldata/gel-go/internal/buff"
 	"github.com/geldata/gel-go/internal/descriptor"
-	types "github.com/geldata/gel-go/internal/geltypes"
 )
 
 func buildArrayEncoder(

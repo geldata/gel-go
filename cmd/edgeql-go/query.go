@@ -26,10 +26,10 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/geldata/gel-go/geltypes"
 	"github.com/geldata/gel-go/internal"
-	gel "github.com/geldata/gel-go/internal/client"
+	gelint "github.com/geldata/gel-go/internal/client"
 	"github.com/geldata/gel-go/internal/descriptor"
-	"github.com/geldata/gel-go/internal/geltypes"
 )
 
 var (
@@ -59,13 +59,13 @@ type querySetup interface {
 		qryFile,
 		outFile string,
 		cfg *cmdConfig,
-		c *gel.Client,
+		c *gelint.Pool,
 	) (*queryConfig, error)
 }
 
 func newQuery(
 	ctx context.Context,
-	c *gel.Client,
+	p *gelint.Pool,
 	qryFile,
 	outFile string,
 	cfg *cmdConfig,
@@ -81,7 +81,7 @@ func newQuery(
 		log.Fatalf("error reading %q: %s", qryFile, err)
 	}
 
-	v, err := gel.ProtocolVersion(ctx, c)
+	v, err := gelint.ProtocolVersion(ctx, p)
 	if err != nil {
 		log.Fatalf("error determining the protocol version: %s", err)
 	}
@@ -94,7 +94,7 @@ func newQuery(
 		qs = &queryConfigV1{}
 	}
 
-	q, err := qs.setup(ctx, string(queryBytes), qryFile, outFile, cfg, c)
+	q, err := qs.setup(ctx, string(queryBytes), qryFile, outFile, cfg, p)
 	if err != nil {
 		log.Fatalf("failed to setup query: %s", err)
 	}
@@ -117,9 +117,9 @@ func (r *queryConfigV1) setup(
 	qryFile,
 	outFile string,
 	cmdCfg *cmdConfig,
-	c *gel.Client,
+	p *gelint.Pool,
 ) (*queryConfig, error) {
-	description, err := gel.Describe(ctx, c, cmd)
+	description, err := gelint.Describe(ctx, p, cmd)
 
 	if err != nil {
 		return nil, fmt.Errorf("error introspecting query %q: %s", qryFile,
@@ -176,9 +176,9 @@ func (r *queryConfigV2) setup(
 	qryFile,
 	outFile string,
 	cmdCfg *cmdConfig,
-	c *gel.Client,
+	p *gelint.Pool,
 ) (*queryConfig, error) {
-	description, err := gel.DescribeV2(ctx, c, cmd)
+	description, err := gelint.DescribeV2(ctx, p, cmd)
 
 	if err != nil {
 		return nil, fmt.Errorf("error introspecting query %q: %s", qryFile,
@@ -259,7 +259,7 @@ func typeName(qryFile string, cmdCfg *cmdConfig) string {
 }
 
 func signatureTypes(
-	description *gel.CommandDescription,
+	description *gelint.CommandDescription,
 	cmdCfg *cmdConfig,
 ) (*goStruct, []string, error) {
 	types, imports, err := generateType(description.In, true, nil, cmdCfg)
@@ -271,7 +271,7 @@ func signatureTypes(
 }
 
 func signatureTypesV2(
-	description *gel.CommandDescriptionV2,
+	description *gelint.CommandDescriptionV2,
 	cmdCfg *cmdConfig,
 ) (*goStruct, []string, error) {
 	types, imports, err := generateTypeV2(&description.In,
@@ -285,13 +285,13 @@ func signatureTypesV2(
 
 func resultTypes(
 	qryFile string,
-	description *gel.CommandDescription,
+	description *gelint.CommandDescription,
 	cmdCfg *cmdConfig,
 ) ([]goType, []string, error) {
 	outDesc := description.Out
 	var required bool
 	switch description.Card {
-	case gel.Many, gel.AtLeastOne:
+	case gelint.Many, gelint.AtLeastOne:
 		id, err := randomID()
 		if err != nil {
 			return nil, nil, err
@@ -305,7 +305,7 @@ func resultTypes(
 				Desc: description.Out,
 			}},
 		}
-	case gel.One:
+	case gelint.One:
 		required = true
 	}
 
@@ -320,13 +320,13 @@ func resultTypes(
 
 func resultTypesV2(
 	qryFile string,
-	description *gel.CommandDescriptionV2,
+	description *gelint.CommandDescriptionV2,
 	cmdCfg *cmdConfig,
 ) ([]goType, []string, error) {
 	outDesc := description.Out
 	var required bool
 	switch description.Card {
-	case gel.Many, gel.AtLeastOne:
+	case gelint.Many, gelint.AtLeastOne:
 		id, err := randomID()
 		if err != nil {
 			return nil, nil, err
@@ -340,7 +340,7 @@ func resultTypesV2(
 				Desc: description.Out,
 			}},
 		}
-	case gel.One:
+	case gelint.One:
 		required = true
 	}
 
@@ -359,22 +359,22 @@ func randomID() (geltypes.UUID, error) {
 	return id, err
 }
 
-func method(description *gel.CommandDescription) (string, error) {
+func method(description *gelint.CommandDescription) (string, error) {
 	switch description.Card {
-	case gel.AtMostOne, gel.One:
+	case gelint.AtMostOne, gelint.One:
 		return "QuerySingle", nil
-	case gel.NoResult, gel.Many, gel.AtLeastOne:
+	case gelint.NoResult, gelint.Many, gelint.AtLeastOne:
 		return "Query", nil
 	default:
 		return "", errors.New("unreachable 20135")
 	}
 }
 
-func methodV2(description *gel.CommandDescriptionV2) (string, error) {
+func methodV2(description *gelint.CommandDescriptionV2) (string, error) {
 	switch description.Card {
-	case gel.AtMostOne, gel.One:
+	case gelint.AtMostOne, gelint.One:
 		return "QuerySingle", nil
-	case gel.NoResult, gel.Many, gel.AtLeastOne:
+	case gelint.NoResult, gelint.Many, gelint.AtLeastOne:
 		return "Query", nil
 	default:
 		return "", errors.New("unreachable 20135")

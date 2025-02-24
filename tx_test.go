@@ -20,7 +20,9 @@ import (
 	"context"
 	"log"
 
-	gel "github.com/geldata/gel-go/internal/client"
+	gel "github.com/geldata/gel-go"
+	"github.com/geldata/gel-go/gelcfg"
+	"github.com/geldata/gel-go/geltypes"
 )
 
 // Transactions can be executed using the Tx() method. Note that queries are
@@ -32,12 +34,12 @@ import (
 // RetryOptions.
 func ExampleTx() {
 	ctx := context.Background()
-	client, err := gel.CreateClient(ctx, gel.Options{})
+	client, err := gel.CreateClient(ctx, gelcfg.Options{})
 	if err != nil {
 		log.Println(err)
 	}
 
-	err = client.Tx(ctx, func(ctx context.Context, tx *gel.Tx) error {
+	err = client.Tx(ctx, func(ctx context.Context, tx geltypes.Tx) error {
 		return tx.Execute(ctx, "INSERT User { name := 'Don' }")
 	})
 	if err != nil {

@@ -19,7 +19,7 @@ package gel
 import (
 	"testing"
 
-	types "github.com/geldata/gel-go/internal/geltypes"
+	types "github.com/geldata/gel-go/geltypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
