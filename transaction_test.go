@@ -341,7 +341,8 @@ func selectInTx(t *testing.T, cb func(context.Context, geltypes.Tx, string)) {
 func TestTxExerciseQuery(t *testing.T) {
 	selectInTx(t, func(ctx context.Context, tx geltypes.Tx, name string) {
 		var result []string
-		err := tx.Query(ctx, "SELECT name := TxTest.name FILTER name = <str>$0", &result, name)
+		query := "SELECT name := TxTest.name FILTER name = <str>$0"
+		err := tx.Query(ctx, query, &result, name)
 		require.NoError(t, err)
 		assert.Equal(t, []string{name}, result)
 	})
@@ -350,7 +351,8 @@ func TestTxExerciseQuery(t *testing.T) {
 func TestTxExerciseQueryJSON(t *testing.T) {
 	selectInTx(t, func(ctx context.Context, tx geltypes.Tx, name string) {
 		var result []byte
-		err := tx.QueryJSON(ctx, "SELECT name := TxTest.name FILTER name = <str>$0", &result, name)
+		query := "SELECT name := TxTest.name FILTER name = <str>$0"
+		err := tx.QueryJSON(ctx, query, &result, name)
 		require.NoError(t, err)
 		assert.Equal(t, fmt.Sprintf(`["%s"]`, name), string(result))
 	})
@@ -365,7 +367,8 @@ func TestTxExerciseQuerySQL(t *testing.T) {
 		var result []struct {
 			Name string `gel:"name"`
 		}
-		err := tx.QuerySQL(ctx, `SELECT name FROM "TxTest" WHERE name = $1`, &result, name)
+		query := `SELECT name FROM "TxTest" WHERE name = $1`
+		err := tx.QuerySQL(ctx, query, &result, name)
 		require.NoError(t, err)
 		require.Equal(t, 1, len(result))
 		assert.Equal(t, name, result[0].Name)

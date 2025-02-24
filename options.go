@@ -193,6 +193,7 @@ func (c Client) WithWarningHandler( // nolint:gocritic
 	return &c
 }
 
+// WithQueryOptions sets the gelcfg.Queryoptions for the returned Client.
 func (c Client) WithQueryOptions(
 	options gelcfg.QueryOptions,
 ) *Client { // nolint:gocritic

@@ -16,10 +16,14 @@
 
 package gelcfg
 
+// NewQueryOptions returns the default QueryOptions value with readOnly set to
+// false, and implicitLimit set to 0.
 func NewQueryOptions() QueryOptions {
 	return QueryOptions{fromFactory: true}
 }
 
+// QueryOptions controls some limitations that the server can impose on
+// queries.
 type QueryOptions struct {
 	fromFactory bool
 
@@ -27,15 +31,21 @@ type QueryOptions struct {
 	implicitLimit uint64
 }
 
+// WithReadOnly enables read only mode if readOnly is true.
 func (o QueryOptions) WithReadOnly(readOnly bool) QueryOptions {
 	o.readOnly = readOnly
 	return o
 }
 
+// WithImplicitLimit sets the max number of results that the server will
+// return. If set to 0 the server will return all results. Defaults to 0.
 func (o QueryOptions) WithImplicitLimit(limit uint64) QueryOptions {
 	o.implicitLimit = limit
 	return o
 }
 
-func (o QueryOptions) ReadOnly() bool        { return o.readOnly }
+// ReadOnly returns true if read only mode is enabled.
+func (o QueryOptions) ReadOnly() bool { return o.readOnly }
+
+// ImplicitLimit  returns the configured implicit limit.
 func (o QueryOptions) ImplicitLimit() uint64 { return o.implicitLimit }
