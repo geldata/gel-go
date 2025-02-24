@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	gel "github.com/geldata/gel-go"
+	"github.com/geldata/gel-go/geltypes"
 )
 
 var (
@@ -36,8 +37,8 @@ func Example_linkProperty() {
 	var result []struct {
 		Name    string `gel:"name"`
 		Friends []struct {
-			Name     string              `gel:"name"`
-			Strength gel.OptionalFloat64 `gel:"strength"`
+			Name     string                   `gel:"name"`
+			Strength geltypes.OptionalFloat64 `gel:"strength"`
 		} `gel:"friends"`
 	}
 

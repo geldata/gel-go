@@ -19,9 +19,9 @@ package codecs
 import (
 	"unsafe"
 
+	types "github.com/geldata/gel-go/geltypes"
 	"github.com/geldata/gel-go/internal/buff"
 	"github.com/geldata/gel-go/internal/descriptor"
-	types "github.com/geldata/gel-go/internal/geltypes"
 )
 
 var (

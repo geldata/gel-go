@@ -19,10 +19,10 @@ package gel
 import (
 	"context"
 	"fmt"
-)
 
-// TxBlock is work to be done in a transaction.
-type TxBlock func(context.Context, *Tx) error
+	"github.com/geldata/gel-go/gelcfg"
+	"github.com/geldata/gel-go/internal/gelerr"
+)
 
 type txStatus int
 
@@ -42,17 +42,17 @@ type txState struct {
 func (s *txState) assertNotDone(opName string) error {
 	switch s.txStatus {
 	case committedTx:
-		return &interfaceError{msg: fmt.Sprintf(
+		return gelerr.NewInterfaceError(fmt.Sprintf(
 			"cannot %v; the transaction is already committed", opName,
-		)}
+		), nil)
 	case rolledBackTx:
-		return &interfaceError{msg: fmt.Sprintf(
+		return gelerr.NewInterfaceError(fmt.Sprintf(
 			"cannot %v; the transaction is already rolled back", opName,
-		)}
+		), nil)
 	case failedTx:
-		return &interfaceError{msg: fmt.Sprintf(
+		return gelerr.NewInterfaceError(fmt.Sprintf(
 			"cannot %v; the transaction is in error state", opName,
-		)}
+		), nil)
 	default:
 		return nil
 	}
@@ -64,9 +64,9 @@ func (s *txState) assertStarted(opName string) error {
 	case startedTx:
 		return nil
 	case newTx:
-		return &interfaceError{msg: fmt.Sprintf(
+		return gelerr.NewInterfaceError(fmt.Sprintf(
 			"cannot %v; the transaction is not yet started", opName,
-		)}
+		), nil)
 	default:
 		return s.assertNotDone(opName)
 	}
@@ -76,10 +76,10 @@ func (s *txState) assertStarted(opName string) error {
 type Tx struct {
 	borrowableConn
 	*txState
-	options        TxOptions
+	options        gelcfg.TxOptions
 	state          map[string]interface{}
-	queryOpts      QueryOptions
-	warningHandler WarningHandler
+	warningHandler gelcfg.WarningHandler
+	queryOpts      gelcfg.QueryOptions
 }
 
 func (t *Tx) execute(
@@ -87,22 +87,22 @@ func (t *Tx) execute(
 	cmd string,
 	sucessState txStatus,
 ) error {
-	q, err := newQuery(
+	q, err := NewQuery(
 		"Execute",
 		cmd,
 		nil,
 		txCapabilities,
 		t.state,
-		t.queryOpts,
 		nil,
 		false,
 		t.warningHandler,
+		t.queryOpts,
 	)
 	if err != nil {
 		return err
 	}
 
-	err = t.borrowableConn.scriptFlow(ctx, q)
+	err = t.borrowableConn.ScriptFlow(ctx, q)
 
 	switch err {
 	case nil:
@@ -114,18 +114,45 @@ func (t *Tx) execute(
 	return err
 }
 
+func startTxQuery(o gelcfg.TxOptions) string { // nolint:gocritic
+	query := "START TRANSACTION"
+
+	switch o.IsolationLevel() {
+	case gelcfg.Serializable:
+		query += " ISOLATION SERIALIZABLE"
+	default:
+		panic(fmt.Sprintf("unknown isolation level: %q", o.IsolationLevel()))
+	}
+
+	if o.ReadOnly() {
+		query += ", READ ONLY"
+	} else {
+		query += ", READ WRITE"
+	}
+
+	if o.Deferrable() {
+		query += ", DEFERRABLE"
+	} else {
+		query += ", NOT DEFERRABLE"
+	}
+
+	query += ";"
+	return query
+}
+
 func (t *Tx) start(ctx context.Context) error {
 	if e := t.assertNotDone("start"); e != nil {
 		return e
 	}
 
 	if t.txStatus == startedTx {
-		return &interfaceError{
-			msg: "cannot start; the transaction is already started",
-		}
+		return gelerr.NewInterfaceError(
+			"cannot start; the transaction is already started",
+			nil,
+		)
 	}
 
-	query := t.options.startTxQuery()
+	query := startTxQuery(t.options)
 	return t.execute(ctx, query, startedTx)
 }
 
@@ -150,7 +177,7 @@ func (t *Tx) scriptFlow(ctx context.Context, q *query) error {
 		return e
 	}
 
-	return t.borrowableConn.scriptFlow(ctx, q)
+	return t.borrowableConn.ScriptFlow(ctx, q)
 }
 
 func (t *Tx) granularFlow(ctx context.Context, q *query) error {
@@ -167,16 +194,16 @@ func (t *Tx) Execute(
 	cmd string,
 	args ...interface{},
 ) error {
-	q, err := newQuery(
+	q, err := NewQuery(
 		"Execute",
 		cmd,
 		args,
-		t.capabilities1pX(),
+		t.Capabilities1pX(),
 		t.state,
-		t.queryOpts,
 		nil,
 		true,
 		t.warningHandler,
+		t.queryOpts,
 	)
 	if err != nil {
 		return err
@@ -192,7 +219,7 @@ func (t *Tx) Query(
 	out interface{},
 	args ...interface{},
 ) error {
-	return runQuery(
+	return RunQuery(
 		ctx,
 		t,
 		"Query",
@@ -200,8 +227,8 @@ func (t *Tx) Query(
 		out,
 		args,
 		t.state,
-		t.queryOpts,
 		t.warningHandler,
+		t.queryOpts,
 	)
 }
 
@@ -215,7 +242,7 @@ func (t *Tx) QuerySingle(
 	out interface{},
 	args ...interface{},
 ) error {
-	return runQuery(
+	return RunQuery(
 		ctx,
 		t,
 		"QuerySingle",
@@ -223,8 +250,8 @@ func (t *Tx) QuerySingle(
 		out,
 		args,
 		t.state,
-		t.queryOpts,
 		t.warningHandler,
+		t.queryOpts,
 	)
 }
 
@@ -235,7 +262,7 @@ func (t *Tx) QueryJSON(
 	out *[]byte,
 	args ...interface{},
 ) error {
-	return runQuery(
+	return RunQuery(
 		ctx,
 		t,
 		"QueryJSON",
@@ -243,8 +270,8 @@ func (t *Tx) QueryJSON(
 		out,
 		args,
 		t.state,
-		t.queryOpts,
 		t.warningHandler,
+		t.queryOpts,
 	)
 }
 
@@ -257,7 +284,7 @@ func (t *Tx) QuerySingleJSON(
 	out interface{},
 	args ...interface{},
 ) error {
-	return runQuery(
+	return RunQuery(
 		ctx,
 		t,
 		"QuerySingleJSON",
@@ -265,8 +292,8 @@ func (t *Tx) QuerySingleJSON(
 		out,
 		args,
 		t.state,
-		t.queryOpts,
 		t.warningHandler,
+		t.queryOpts,
 	)
 }
 
@@ -276,16 +303,16 @@ func (t *Tx) ExecuteSQL(
 	cmd string,
 	args ...interface{},
 ) error {
-	q, err := newQuery(
+	q, err := NewQuery(
 		"ExecuteSQL",
 		cmd,
 		args,
-		t.capabilities1pX(),
+		t.Capabilities1pX(),
 		t.state,
-		t.queryOpts,
 		nil,
 		true,
 		t.warningHandler,
+		t.queryOpts,
 	)
 	if err != nil {
 		return err
@@ -301,7 +328,7 @@ func (t *Tx) QuerySQL(
 	out interface{},
 	args ...interface{},
 ) error {
-	return runQuery(
+	return RunQuery(
 		ctx,
 		t,
 		"QuerySQL",
@@ -309,7 +336,7 @@ func (t *Tx) QuerySQL(
 		out,
 		args,
 		t.state,
-		t.queryOpts,
 		t.warningHandler,
+		t.queryOpts,
 	)
 }

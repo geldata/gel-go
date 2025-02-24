@@ -22,8 +22,8 @@ import (
 	"time"
 	"unsafe"
 
+	types "github.com/geldata/gel-go/geltypes"
 	"github.com/geldata/gel-go/internal/buff"
-	types "github.com/geldata/gel-go/internal/geltypes"
 	"github.com/geldata/gel-go/internal/marshal"
 )
 
@@ -68,7 +68,7 @@ func (c *DateTimeCodec) Encode(
 		return encodeOptional(w, !ok, required,
 			func() error { return c.encodeData(w, data) },
 			func() error {
-				return missingValueError("gel.OptionalDateTime", path)
+				return missingValueError("geltypes.OptionalDateTime", path)
 			})
 	case optionalDateTimeMarshaler:
 		return encodeOptional(w, in.Missing(), required,
@@ -78,7 +78,7 @@ func (c *DateTimeCodec) Encode(
 		return c.encodeMarshaler(w, in, path)
 	default:
 		return fmt.Errorf("expected %v to be time.Time, "+
-			"gel.OptionalDateTime or DateTimeMarshaler got %T", path, val)
+			"geltypes.OptionalDateTime or DateTimeMarshaler got %T", path, val)
 	}
 }
 
@@ -174,7 +174,10 @@ func (c *LocalDateTimeCodec) Encode(
 		return encodeOptional(w, !ok, required,
 			func() error { return c.encodeData(w, data) },
 			func() error {
-				return missingValueError("gel.OptionalLocalDateTime", path)
+				return missingValueError(
+					"geltypes.OptionalLocalDateTime",
+					path,
+				)
 			})
 	case optionalLocalDateTimeMarshaler:
 		return encodeOptional(w, in.Missing(), required,
@@ -183,8 +186,8 @@ func (c *LocalDateTimeCodec) Encode(
 	case marshal.LocalDateTimeMarshaler:
 		return c.encodeMarshaler(w, in, path)
 	default:
-		return fmt.Errorf("expected %v to be gel.LocalDateTime, "+
-			"gel.OptionalLocalDateTime or LocalDateTimeMarshaler got %T",
+		return fmt.Errorf("expected %v to be geltypes.LocalDateTime, "+
+			"geltypes.OptionalLocalDateTime or LocalDateTimeMarshaler got %T",
 			path, val)
 	}
 }
@@ -274,7 +277,7 @@ func (c *LocalDateCodec) Encode(
 		return encodeOptional(w, !ok, required,
 			func() error { return c.encodeData(w, data) },
 			func() error {
-				return missingValueError("gel.OptionalLocalDate", path)
+				return missingValueError("geltypes.OptionalLocalDate", path)
 			})
 	case optionalLocalDateMarshaler:
 		return encodeOptional(w, in.Missing(), required,
@@ -283,8 +286,9 @@ func (c *LocalDateCodec) Encode(
 	case marshal.LocalDateMarshaler:
 		return c.encodeMarshaler(w, in, path)
 	default:
-		return fmt.Errorf("expected %v to be gel.LocalDate, "+
-			"gel.OptionalLocalDate or LocalDateMarshaler got %T", path, val)
+		return fmt.Errorf("expected %v to be geltypes.LocalDate, "+
+			"geltypes.OptionalLocalDate or "+
+			"LocalDateMarshaler got %T", path, val)
 	}
 }
 
@@ -372,7 +376,7 @@ func (c *LocalTimeCodec) Encode(
 		return encodeOptional(w, !ok, required,
 			func() error { return c.encodeData(w, data) },
 			func() error {
-				return missingValueError("gel.OptionalLocalTime", path)
+				return missingValueError("geltypes.OptionalLocalTime", path)
 			})
 	case optionalLocalTimeMarshaler:
 		return encodeOptional(w, in.Missing(), required,
@@ -381,8 +385,9 @@ func (c *LocalTimeCodec) Encode(
 	case marshal.LocalTimeMarshaler:
 		return c.encodeMarshaler(w, in, path)
 	default:
-		return fmt.Errorf("expected %v to be gel.LocalTime, "+
-			"gel.OptionalLocalTime or LocalTimeMarshaler got %T", path, val)
+		return fmt.Errorf("expected %v to be geltypes.LocalTime, "+
+			"geltypes.OptionalLocalTime or "+
+			"LocalTimeMarshaler got %T", path, val)
 	}
 }
 
@@ -472,7 +477,7 @@ func (c *DurationCodec) Encode(
 		return encodeOptional(w, !ok, required,
 			func() error { return c.encodeData(w, data) },
 			func() error {
-				return missingValueError("gel.OptionalDuration", path)
+				return missingValueError("geltypes.OptionalDuration", path)
 			})
 	case optionalDurationMarshaler:
 		return encodeOptional(w, in.Missing(), required,
@@ -481,8 +486,8 @@ func (c *DurationCodec) Encode(
 	case marshal.DurationMarshaler:
 		return c.encodeMarshaler(w, in, path)
 	default:
-		return fmt.Errorf("expected %v to be gel.Duration, "+
-			"gel.OptionalDuration or DurationMarshaler got %T", path, val)
+		return fmt.Errorf("expected %v to be geltypes.Duration, "+
+			"geltypes.OptionalDuration or DurationMarshaler got %T", path, val)
 	}
 }
 
@@ -582,7 +587,7 @@ func (c *RelativeDurationCodec) Encode(
 			func() error { return c.encodeData(w, data) },
 			func() error {
 				return missingValueError(
-					"gel.OptionalRelativeDuration",
+					"geltypes.OptionalRelativeDuration",
 					path,
 				)
 			})
@@ -593,8 +598,8 @@ func (c *RelativeDurationCodec) Encode(
 	case marshal.RelativeDurationMarshaler:
 		return c.encodeMarshaler(w, in, path)
 	default:
-		return fmt.Errorf("expected %v to be gel.RelativeDuration, "+
-			"gel.OptionalRelativeDuration or "+
+		return fmt.Errorf("expected %v to be geltypes.RelativeDuration, "+
+			"geltypes.OptionalRelativeDuration or "+
 			"RelativeDurationMarshaler got %T", path, val)
 	}
 }
@@ -699,7 +704,7 @@ func (c *DateDurationCodec) Encode(
 			func() error { return c.encodeData(w, data) },
 			func() error {
 				return missingValueError(
-					"gel.OptionalDateDuration",
+					"geltypes.OptionalDateDuration",
 					path,
 				)
 			})
@@ -710,8 +715,8 @@ func (c *DateDurationCodec) Encode(
 	case marshal.DateDurationMarshaler:
 		return c.encodeMarshaler(w, in, path)
 	default:
-		return fmt.Errorf("expected %v to be gel.DateDuration, "+
-			"gel.OptionalDateDuration or "+
+		return fmt.Errorf("expected %v to be geltypes.DateDuration, "+
+			"geltypes.OptionalDateDuration or "+
 			"DateDurationMarshaler got %T", path, val)
 	}
 }

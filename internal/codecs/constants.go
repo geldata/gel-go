@@ -21,7 +21,7 @@ import (
 	"reflect"
 	"time"
 
-	types "github.com/geldata/gel-go/internal/geltypes"
+	types "github.com/geldata/gel-go/geltypes"
 	"github.com/geldata/gel-go/internal/marshal"
 )
 

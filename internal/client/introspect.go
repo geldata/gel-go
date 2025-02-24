@@ -42,10 +42,10 @@ type CommandDescriptionV2 struct {
 // Describe returns CommandDescription for the provided cmd.
 func Describe(
 	ctx context.Context,
-	c *Client,
+	c *Pool,
 	cmd string,
 ) (*CommandDescription, error) {
-	conn, err := c.acquire(ctx)
+	conn, err := c.Acquire(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -80,10 +80,10 @@ func Describe(
 // DescribeV2 returns CommandDescription for the provided cmd.
 func DescribeV2(
 	ctx context.Context,
-	c *Client,
+	c *Pool,
 	cmd string,
 ) (*CommandDescriptionV2, error) {
-	conn, err := c.acquire(ctx)
+	conn, err := c.Acquire(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -120,15 +120,15 @@ func DescribeV2(
 // ProtocolVersion returns the protocol version used by c.
 func ProtocolVersion(
 	ctx context.Context,
-	c *Client,
+	c *Pool,
 ) (internal.ProtocolVersion, error) {
-	conn, err := c.acquire(ctx)
+	conn, err := c.Acquire(ctx)
 	if err != nil {
 		return internal.ProtocolVersion{}, err
 	}
 
 	protocolVersion := conn.conn.protocolVersion
-	err = c.release(conn, nil)
+	err = c.Release(conn, nil)
 	if err != nil {
 		return internal.ProtocolVersion{}, err
 	}

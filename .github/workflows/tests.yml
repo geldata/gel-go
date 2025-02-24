@@ -32,7 +32,7 @@ jobs:
       - name: Lint
         run: |
           go install
-          make lint && make gendocs-lint
+          make lint
           make gen
           if [[ "$(git status --porcelain)" != "" ]]; then
             echo "Generated code is out of sync. Run make gen."

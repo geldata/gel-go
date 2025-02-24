@@ -22,8 +22,8 @@ import (
 	"reflect"
 	"unsafe"
 
+	types "github.com/geldata/gel-go/geltypes"
 	"github.com/geldata/gel-go/internal/buff"
-	types "github.com/geldata/gel-go/internal/geltypes"
 	"github.com/geldata/gel-go/internal/marshal"
 )
 
@@ -80,7 +80,7 @@ func (c *JSONCodec) Encode(
 		return encodeOptional(w, !ok, required,
 			func() error { return c.encodeData(w, data) },
 			func() error {
-				return missingValueError("gel.OptionalBytes", path)
+				return missingValueError("geltypes.OptionalBytes", path)
 			})
 	case optionalJSONMarshaler:
 		return encodeOptional(w, in.Missing(), required,
@@ -89,7 +89,8 @@ func (c *JSONCodec) Encode(
 	case marshal.JSONMarshaler:
 		return c.encodeMarshaler(w, in, path)
 	default:
-		return fmt.Errorf("expected %v to be []byte, gel.OptionalBytes or "+
+		return fmt.Errorf("expected %v to be []byte, "+
+			"geltypes.OptionalBytes or "+
 			"JSONMarshaler got %T", path, val)
 	}
 }

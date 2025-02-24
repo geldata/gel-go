@@ -20,12 +20,15 @@ import (
 	"context"
 	"errors"
 	"time"
+
+	"github.com/geldata/gel-go/gelerr"
+	gelerrint "github.com/geldata/gel-go/internal/gelerr"
 )
 
 type reconnectingConn struct {
 	borrowableConn
 	cacheCollection
-	cfg *connConfig
+	Cfg *connConfig
 
 	// isClosed is true when the connection has been closed by a user.
 	isClosed bool
@@ -39,17 +42,17 @@ func (c *reconnectingConn) reconnect(
 	single bool,
 ) error {
 	if c.isClosed {
-		return &interfaceError{msg: "Connection is closed"}
+		return gelerrint.NewInterfaceError("Connection is closed", nil)
 	}
 
-	maxTime := time.Now().Add(c.cfg.waitUntilAvailable)
+	maxTime := time.Now().Add(c.Cfg.waitUntilAvailable)
 	if deadline, ok := ctx.Deadline(); ok && deadline.Before(maxTime) {
 		maxTime = deadline
 	}
 
-	var edbErr Error
+	var edbErr gelerr.Error
 	for {
-		conn, err := connectWithTimeout(ctx, c.cfg, c.cacheCollection)
+		conn, err := connectWithTimeout(ctx, c.Cfg, c.cacheCollection)
 		if err == nil {
 			c.conn = conn
 			return nil
@@ -58,8 +61,8 @@ func (c *reconnectingConn) reconnect(
 			errors.Is(err, context.Canceled) ||
 			errors.Is(err, context.DeadlineExceeded) ||
 			!errors.As(err, &edbErr) ||
-			!edbErr.Category(ClientConnectionError) ||
-			!edbErr.HasTag(ShouldReconnect) ||
+			!edbErr.Category(gelerr.ClientConnectionError) ||
+			!edbErr.HasTag(gelerr.ShouldReconnect) ||
 			time.Now().After(maxTime) {
 			return err
 		}
@@ -77,12 +80,12 @@ func (c *reconnectingConn) ensureConnection(ctx context.Context) error {
 	return c.reconnect(ctx, false)
 }
 
-func (c *reconnectingConn) scriptFlow(ctx context.Context, q *query) error {
+func (c *reconnectingConn) ScriptFlow(ctx context.Context, q *query) error {
 	if e := c.ensureConnection(ctx); e != nil {
 		return e
 	}
 
-	return c.borrowableConn.scriptFlow(ctx, q)
+	return c.borrowableConn.ScriptFlow(ctx, q)
 }
 
 func (c *reconnectingConn) granularFlow(
@@ -100,7 +103,10 @@ func (c *reconnectingConn) granularFlow(
 // closed.
 func (c *reconnectingConn) Close() (err error) {
 	if c.isClosed {
-		return &interfaceError{msg: "connection released more than once"}
+		return gelerrint.NewInterfaceError(
+			"connection released more than once",
+			nil,
+		)
 	}
 
 	c.isClosed = true

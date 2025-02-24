@@ -22,6 +22,8 @@ import (
 	"net"
 	"sync"
 	"time"
+
+	"github.com/geldata/gel-go/internal/gelerr"
 )
 
 func connectAutoClosingSocket(
@@ -60,9 +62,9 @@ func connectTLS(
 	protocol := conn.(*tls.Conn).ConnectionState().NegotiatedProtocol
 	if protocol != "edgedb-binary" {
 		_ = conn.Close()
-		return nil, &clientConnectionFailedError{
-			msg: "The server doesn't support the edgedb-binary protocol.",
-		}
+		return nil, gelerr.NewClientConnectionFailedError(
+			"The server doesn't support the edgedb-binary protocol.", nil,
+		)
 	}
 
 	return conn, nil

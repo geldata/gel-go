@@ -36,7 +36,8 @@ import (
 	"text/template"
 	"time"
 
-	gel "github.com/geldata/gel-go/internal/client"
+	"github.com/geldata/gel-go/gelcfg"
+	gelint "github.com/geldata/gel-go/internal/client"
 	"github.com/geldata/gel-go/internal/descriptor"
 	toml "github.com/pelletier/go-toml/v2"
 	"golang.org/x/text/cases"
@@ -89,8 +90,7 @@ func main() {
 	})
 	defer timer.Stop()
 
-	ctx := context.Background()
-	c, err := gel.CreateClient(ctx, gel.Options{})
+	c, err := gelint.NewPool("", gelcfg.Options{})
 	if err != nil {
 		log.Fatalf("creating client: %s", err) // nolint:gocritic
 	}
@@ -102,6 +102,7 @@ func main() {
 		log.Fatal(err)
 	}
 
+	ctx := context.Background()
 	var wg sync.WaitGroup
 	for queryFile := range fileQueue {
 		wg.Add(1)

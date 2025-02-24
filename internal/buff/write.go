@@ -19,7 +19,7 @@ package buff
 import (
 	"encoding/binary"
 
-	types "github.com/geldata/gel-go/internal/geltypes"
+	types "github.com/geldata/gel-go/geltypes"
 )
 
 // Writer is a write buffer.

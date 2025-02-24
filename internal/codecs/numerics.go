@@ -22,8 +22,8 @@ import (
 	"reflect"
 	"unsafe"
 
+	types "github.com/geldata/gel-go/geltypes"
 	"github.com/geldata/gel-go/internal/buff"
-	types "github.com/geldata/gel-go/internal/geltypes"
 	"github.com/geldata/gel-go/internal/marshal"
 )
 
@@ -90,7 +90,7 @@ func (c *BigIntCodec) Encode(
 		return encodeOptional(w, !ok, required,
 			func() error { return c.encodeData(w, data) },
 			func() error {
-				return missingValueError("gel.OptionalBigInt", path)
+				return missingValueError("geltypes.OptionalBigInt", path)
 			})
 	case optionalBigIntMarshaler:
 		return encodeOptional(w, in.Missing(), required,
@@ -99,7 +99,8 @@ func (c *BigIntCodec) Encode(
 	case marshal.BigIntMarshaler:
 		return c.encodeMarshaler(w, in, path)
 	default:
-		return fmt.Errorf("expected %v to be *big.Int, gel.OptionalBitInt "+
+		return fmt.Errorf("expected %v to be *big.Int, "+
+			"geltypes.OptionalBitInt "+
 			"or BigIntMarshaler got %T", path, val)
 	}
 }

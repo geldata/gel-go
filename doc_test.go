@@ -23,16 +23,18 @@ import (
 	"time"
 
 	gel "github.com/geldata/gel-go"
+	"github.com/geldata/gel-go/gelcfg"
+	"github.com/geldata/gel-go/geltypes"
 )
 
 type User struct {
-	ID   gel.UUID  `gel:"id"`
-	Name string    `gel:"name"`
-	DOB  time.Time `gel:"dob"`
+	ID   geltypes.UUID `gel:"id"`
+	Name string        `gel:"name"`
+	DOB  time.Time     `gel:"dob"`
 }
 
 func Example() {
-	opts := gel.Options{Concurrency: 4}
+	opts := gelcfg.Options{Concurrency: 4}
 	ctx := context.Background()
 	db, err := gel.CreateClientDSN(ctx, "gel://edgedb@localhost/test", opts)
 	if err != nil {
@@ -52,7 +54,7 @@ func Example() {
 	}
 
 	// Insert a new user.
-	var inserted struct{ id gel.UUID }
+	var inserted struct{ id geltypes.UUID }
 	err = db.QuerySingle(ctx, `
 		INSERT User {
 			name := <str>$0,

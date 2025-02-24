@@ -22,10 +22,10 @@ import (
 	"reflect"
 	"unsafe"
 
+	types "github.com/geldata/gel-go/geltypes"
 	"github.com/geldata/gel-go/internal"
 	"github.com/geldata/gel-go/internal/buff"
 	"github.com/geldata/gel-go/internal/descriptor"
-	types "github.com/geldata/gel-go/internal/geltypes"
 	"github.com/geldata/gel-go/internal/introspect"
 )
 
@@ -55,7 +55,7 @@ func buildRangeDecoder(
 	}
 
 	return nil, fmt.Errorf(
-		"expected %v to be an gel.Range type got %v",
+		"expected %v to be a geltypes.Range type got %v",
 		path, typ)
 }
 
@@ -85,7 +85,7 @@ func buildRangeDecoderV2(
 	}
 
 	return nil, fmt.Errorf(
-		"expected %v to be an gel.Range type got %v",
+		"expected %v to be a geltypes.Range type got %v",
 		path, typ)
 }
 
@@ -474,7 +474,7 @@ func (c *rangeEncoder) Encode(
 			func() error { return c.encode(w, data, path) },
 			func() error {
 				return missingValueError(
-					"gel.OptionalRangeInt32",
+					"geltypes.OptionalRangeInt32",
 					path,
 				)
 			},
@@ -485,7 +485,7 @@ func (c *rangeEncoder) Encode(
 			func() error { return c.encode(w, data, path) },
 			func() error {
 				return missingValueError(
-					"gel.OptionalRangeInt64",
+					"geltypes.OptionalRangeInt64",
 					path,
 				)
 			},
@@ -496,7 +496,7 @@ func (c *rangeEncoder) Encode(
 			func() error { return c.encode(w, data, path) },
 			func() error {
 				return missingValueError(
-					"gel.OptionalRangeFloat32",
+					"geltypes.OptionalRangeFloat32",
 					path,
 				)
 			},
@@ -507,7 +507,7 @@ func (c *rangeEncoder) Encode(
 			func() error { return c.encode(w, data, path) },
 			func() error {
 				return missingValueError(
-					"gel.OptionalRangeFloat64",
+					"geltypes.OptionalRangeFloat64",
 					path,
 				)
 			},
@@ -518,7 +518,7 @@ func (c *rangeEncoder) Encode(
 			func() error { return c.encode(w, data, path) },
 			func() error {
 				return missingValueError(
-					"gel.OptionalRangeDateTime",
+					"geltypes.OptionalRangeDateTime",
 					path,
 				)
 			},
@@ -529,7 +529,7 @@ func (c *rangeEncoder) Encode(
 			func() error { return c.encode(w, data, path) },
 			func() error {
 				return missingValueError(
-					"gel.OptionalRangeLocalDateTime",
+					"geltypes.OptionalRangeLocalDateTime",
 					path,
 				)
 			},
@@ -540,7 +540,7 @@ func (c *rangeEncoder) Encode(
 			func() error { return c.encode(w, data, path) },
 			func() error {
 				return missingValueError(
-					"gel.OptionalRangeLocalDate",
+					"geltypes.OptionalRangeLocalDate",
 					path,
 				)
 			},

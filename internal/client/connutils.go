@@ -36,7 +36,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/geldata/gel-go/internal/geltypes"
+	"github.com/geldata/gel-go/gelcfg"
+	"github.com/geldata/gel-go/geltypes"
+	"github.com/geldata/gel-go/internal/gelerr"
 	"github.com/geldata/gel-go/internal/snc"
 	"github.com/sigurn/crc16"
 )
@@ -68,7 +70,7 @@ type connConfig struct {
 	tlsCAData          []byte
 	tlsSecurity        string
 	tlsServerName      string
-	serverSettings     *snc.ServerSettings
+	ServerSettings     *snc.ServerSettings
 	secretKey          string
 }
 
@@ -327,12 +329,12 @@ func (r *configResolver) addServerSettingsStr(s map[string]string) {
 }
 
 func (r *configResolver) resolveOptions(
-	opts *Options,
+	opts *gelcfg.Options,
 	paths *cfgPaths,
 ) (err error) {
 	defer func() {
 		if err != nil {
-			err = fmt.Errorf("invalid gel.Options: %w", err)
+			err = fmt.Errorf("invalid gelcfg.Options: %w", err)
 		}
 	}()
 
@@ -348,8 +350,12 @@ func (r *configResolver) resolveOptions(
 		}
 	}
 
-	if opts.Database != "" {
-		if e := r.setDatabase(opts.Database, "Database options"); e != nil {
+	if opts.Database != "" { // nolint:staticcheck
+		e := r.setDatabase(
+			opts.Database, // nolint:staticcheck
+			"Database options",
+		)
+		if e != nil {
 			return e
 		}
 	}
@@ -989,7 +995,7 @@ func lookupGelOrEdgedbEnv(name string) (string, string, bool) {
 	return "", "", false
 }
 
-func (r *configResolver) config(opts *Options) (*connConfig, error) {
+func (r *configResolver) config(opts *gelcfg.Options) (*connConfig, error) {
 	host := "localhost"
 	if r.host.val != nil {
 		host = r.host.val.(string)
@@ -1091,7 +1097,7 @@ func (r *configResolver) config(opts *Options) (*connConfig, error) {
 		branch:             branch,
 		connectTimeout:     opts.ConnectTimeout,
 		waitUntilAvailable: waitUntilAvailable,
-		serverSettings:     r.serverSettings,
+		ServerSettings:     r.serverSettings,
 		tlsCAData:          certData,
 		tlsSecurity:        tlsSecurity,
 		tlsServerName:      tlsServerName,
@@ -1137,7 +1143,7 @@ func englishList(items []string, conjunction string) string {
 
 func newConfigResolver(
 	dsn string,
-	opts *Options,
+	opts *gelcfg.Options,
 	paths *cfgPaths,
 ) (*configResolver, error) {
 	cfg := &configResolver{serverSettings: snc.NewServerSettings()}
@@ -1160,15 +1166,15 @@ func newConfigResolver(
 		names = append(names, "dsn")
 	}
 	if opts.Credentials != nil {
-		names = append(names, "gel.Options.Credentials")
+		names = append(names, "gelcfg.Options.Credentials")
 	}
 	if opts.CredentialsFile != "" {
-		names = append(names, "gel.Options.CredentialsFile")
+		names = append(names, "gelcfg.Options.CredentialsFile")
 	}
 	if opts.Host != "" {
-		names = append(names, "gel.Options.Host")
+		names = append(names, "gelcfg.Options.Host")
 	} else if opts.Port != 0 {
-		names = append(names, "gel.Options.Port")
+		names = append(names, "gelcfg.Options.Port")
 	}
 	if len(names) > 1 {
 		return nil, fmt.Errorf(
@@ -1243,17 +1249,17 @@ func newConfigResolver(
 
 func parseConnectDSNAndArgs(
 	dsn string,
-	opts *Options,
+	opts *gelcfg.Options,
 	paths *cfgPaths,
 ) (*connConfig, error) {
 	resolver, err := newConfigResolver(dsn, opts, paths)
 	if err != nil {
-		return nil, &configurationError{err: err}
+		return nil, gelerr.NewConfigurationError("", err)
 	}
 
 	c, err := resolver.config(opts)
 	if err != nil {
-		return nil, &configurationError{err: err}
+		return nil, gelerr.NewConfigurationError("", err)
 	}
 
 	return c, nil
@@ -1512,7 +1518,7 @@ func findEdgeDBTOML(paths *cfgPaths) (string, error) {
 	// symbolic links), Getwd may return any one of them.
 	dir, err := paths.Cwd()
 	if err != nil {
-		return "", &clientConnectionError{err: err}
+		return "", gelerr.NewClientConnectionError("", err)
 	}
 
 	dev, err := device(dir)

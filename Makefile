@@ -6,8 +6,18 @@ lint:
 	go run github.com/golangci/golangci-lint/cmd/golangci-lint@v1.61.0 run --sort-results
 
 test:
+	# The test server shuts it self down after 10 seconds of inactivity.  If
+	# the server is still running when a subsequent test run is started the old
+	# server will be reused.  This saves developer time at the expense of
+	# repeatability.  You can set EDGEDB_SERVER_AUTO_SHUTDOWN_AFTER_SECONDS to
+	# extend the timeout. Use make kill-test-server to stop the currently
+	# running test server.
+	
 	# temporarily skip edgeql-go tests until a gel-go version is published
 	go test -v -count=1 -race -bench=$$^ -timeout=20m $(shell go list ./... | grep -v edgeql-go)
+
+kill-test-server:
+	kill $(shell jq -r '.pid' /tmp/edgedb-go-test-server-info)
 
 bench:
 	go test -run=^$$ -bench=. -benchmem -timeout=10m ./...
@@ -22,16 +32,10 @@ errors:
 		exit 1 \
 		)
 	edb gen-errors-json --client | \
-		go run internal/cmd/generrdefinition/main.go > internal/client/errors_gen.go
+		go run internal/cmd/generrconst/main.go > gelerr/errors_gen.go
 	edb gen-errors-json --client | \
-		go run internal/cmd/generrexport/main.go > errors_gen.go
+		go run internal/cmd/generrtype/main.go > internal/gelerr/errors_gen.go
 	make format
 
 gen:
 	go generate ./...
-
-gendocs:
-	go run internal/cmd/gendocs/*.go
-
-gendocs-lint:
-	go run internal/cmd/gendocs/*.go --lint

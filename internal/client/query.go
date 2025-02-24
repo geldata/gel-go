@@ -18,20 +18,16 @@ package gel
 
 import (
 	"context"
-	"encoding/binary"
 	"errors"
 	"fmt"
 	"reflect"
 
-	types "github.com/geldata/gel-go/internal/geltypes"
-	"github.com/geldata/gel-go/internal/header"
+	"github.com/geldata/gel-go/gelcfg"
+	"github.com/geldata/gel-go/gelerr"
+	types "github.com/geldata/gel-go/geltypes"
+	gelerrint "github.com/geldata/gel-go/internal/gelerr"
 	"github.com/geldata/gel-go/internal/introspect"
 )
-
-// WarningHandler takes a slice of gel.Error that represent warnings and
-// optionally returns an error. This can be used to log warnings, increment
-// metrics, promote warnings to errors by returning them etc.
-type WarningHandler = func([]error) error
 
 type query struct {
 	out            reflect.Value
@@ -44,14 +40,14 @@ type query struct {
 	args           []interface{}
 	capabilities   uint64
 	state          map[string]interface{}
-	queryOpts      QueryOptions
+	queryOpts      gelcfg.QueryOptions
 	parse          bool
-	warningHandler WarningHandler
+	warningHandler gelcfg.WarningHandler
 }
 
 func (q *query) getCapabilities() uint64 {
 	capabilities := q.capabilities
-	if q.queryOpts.ReadOnly {
+	if q.queryOpts.ReadOnly() {
 		capabilities &^= capabilitiesModifications
 	}
 	return capabilities
@@ -69,24 +65,17 @@ func (q *query) flat() bool {
 	return false
 }
 
-func (q *query) headers0pX() header.Header0pX {
-	bts := make([]byte, 8)
-	binary.BigEndian.PutUint64(bts, q.capabilities)
-
-	return header.Header0pX{header.AllowCapabilities: bts}
-}
-
-// newQuery returns a new granular flow query.
-func newQuery(
+// NewQuery returns a new granular flow query.
+func NewQuery(
 	method, cmd string,
 	args []interface{},
 	capabilities uint64,
 	state map[string]interface{},
-	queryOpts QueryOptions,
 	out interface{},
 	parse bool,
-	warningHandler WarningHandler,
-) (*query, error) {
+	warningHandler gelcfg.WarningHandler,
+	queryOpts gelcfg.QueryOptions,
+) (*query, error) { // nolint:revive
 	var (
 		expCard Cardinality
 		frmt    Format
@@ -158,7 +147,7 @@ func newQuery(
 	}
 
 	if err != nil {
-		return &query{}, &interfaceError{err: err}
+		return &query{}, gelerrint.NewInterfaceError("", err)
 	}
 
 	q.outType = q.out.Type()
@@ -170,7 +159,7 @@ func newQuery(
 }
 
 type queryable interface {
-	capabilities1pX() uint64
+	Capabilities1pX() uint64
 	granularFlow(context.Context, *query) error
 }
 
@@ -178,36 +167,37 @@ type unseter interface {
 	Unset()
 }
 
-func runQuery(
+// RunQuery runs a query.
+func RunQuery(
 	ctx context.Context,
 	c queryable,
 	method, cmd string,
 	out interface{},
 	args []interface{},
 	state map[string]interface{},
-	queryOpts QueryOptions,
-	warningHandler WarningHandler,
+	warningHandler gelcfg.WarningHandler,
+	queryOpts gelcfg.QueryOptions,
 ) error {
 	if method == "QuerySingleJSON" {
 		switch out.(type) {
 		case *[]byte, *types.OptionalBytes:
 		default:
-			return &interfaceError{msg: fmt.Sprintf(
+			return gelerrint.NewInterfaceError(fmt.Sprintf(
 				`the "out" argument must be *[]byte or *OptionalBytes, got %T`,
-				out)}
+				out), nil)
 		}
 	}
 
-	q, err := newQuery(
+	q, err := NewQuery(
 		method,
 		cmd,
 		args,
-		c.capabilities1pX(),
+		c.Capabilities1pX(),
 		state,
-		queryOpts,
 		out,
 		true,
 		warningHandler,
+		queryOpts,
 	)
 	if err != nil {
 		return err
@@ -215,9 +205,9 @@ func runQuery(
 
 	err = c.granularFlow(ctx, q)
 
-	var edbErr Error
+	var edbErr gelerr.Error
 	if errors.As(err, &edbErr) &&
-		edbErr.Category(NoDataError) &&
+		edbErr.Category(gelerr.NoDataError) &&
 		(q.method == "QuerySingle" || q.method == "QuerySingleJSON") {
 		if opt, ok := out.(unseter); ok {
 			opt.Unset()
@@ -228,13 +218,14 @@ func runQuery(
 	return err
 }
 
-func copyState(in map[string]interface{}) map[string]interface{} {
+// CopyState makes a copy of the state.
+func CopyState(in map[string]interface{}) map[string]interface{} {
 	out := make(map[string]interface{}, len(in))
 
 	for k, v := range in {
 		switch val := v.(type) {
 		case map[string]interface{}:
-			out[k] = copyState(val)
+			out[k] = CopyState(val)
 		case []interface{}:
 			out[k] = copyStateSlice(val)
 		default:
@@ -251,7 +242,7 @@ func copyStateSlice(in []interface{}) []interface{} {
 	for i, v := range in {
 		switch val := v.(type) {
 		case map[string]interface{}:
-			out[i] = copyState(val)
+			out[i] = CopyState(val)
 		case []interface{}:
 			out[i] = copyStateSlice(val)
 		default:

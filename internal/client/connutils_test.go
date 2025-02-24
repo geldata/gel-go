@@ -18,13 +18,11 @@ package gel
 
 import (
 	"bytes"
-	"context"
 	"crypto/sha1"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
-	"net"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -34,7 +32,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/geldata/gel-go/internal/geltypes"
+	"github.com/geldata/gel-go/gelcfg"
+	"github.com/geldata/gel-go/geltypes"
+	gelerrint "github.com/geldata/gel-go/internal/gelerr"
 	"github.com/geldata/gel-go/internal/snc"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -97,12 +97,12 @@ func TestConUtils(t *testing.T) {
 		name     string
 		env      map[string]string
 		dsn      string
-		opts     Options
+		opts     gelcfg.Options
 		expected Result
 	}{
 		{
 			name: "host and user options",
-			opts: Options{
+			opts: gelcfg.Options{
 				User: "user",
 				Host: "localhost",
 			},
@@ -112,7 +112,7 @@ func TestConUtils(t *testing.T) {
 					user:               "user",
 					database:           "edgedb",
 					branch:             "__default__",
-					serverSettings:     snc.NewServerSettings(),
+					ServerSettings:     snc.NewServerSettings(),
 					waitUntilAvailable: 30 * time.Second,
 					tlsSecurity:        "strict",
 				},
@@ -134,7 +134,7 @@ func TestConUtils(t *testing.T) {
 					password:           "passw",
 					database:           "testdb",
 					branch:             "testdb",
-					serverSettings:     snc.NewServerSettings(),
+					ServerSettings:     snc.NewServerSettings(),
 					waitUntilAvailable: 30 * time.Second,
 					tlsSecurity:        "strict",
 				},
@@ -149,7 +149,7 @@ func TestConUtils(t *testing.T) {
 				"EDGEDB_HOST":     "host",
 				"EDGEDB_PORT":     "123",
 			},
-			opts: Options{
+			opts: gelcfg.Options{
 				Host:     "host2",
 				Port:     456,
 				User:     "user2",
@@ -163,7 +163,7 @@ func TestConUtils(t *testing.T) {
 					password:           "passw2",
 					database:           "db2",
 					branch:             "db2",
-					serverSettings:     snc.NewServerSettings(),
+					ServerSettings:     snc.NewServerSettings(),
 					waitUntilAvailable: 30 * time.Second,
 					tlsSecurity:        "strict",
 				},
@@ -180,7 +180,7 @@ func TestConUtils(t *testing.T) {
 				"PGSSLMODE":       "prefer",
 			},
 			dsn: "edgedb://user3:123123@localhost/abcdef",
-			opts: Options{
+			opts: gelcfg.Options{
 				User:           "user2",
 				Password:       geltypes.NewOptionalStr("passw2"),
 				Database:       "db2",
@@ -193,7 +193,7 @@ func TestConUtils(t *testing.T) {
 					password: "passw2",
 					database: "db2",
 					branch:   "db2",
-					serverSettings: newServerSettingValues(map[string][]byte{
+					ServerSettings: newServerSettingValues(map[string][]byte{
 						"ssl": []byte("False"),
 					}),
 					waitUntilAvailable: 30 * time.Second,
@@ -218,7 +218,7 @@ func TestConUtils(t *testing.T) {
 					password:           "123123",
 					database:           "abcdef",
 					branch:             "abcdef",
-					serverSettings:     snc.NewServerSettings(),
+					ServerSettings:     snc.NewServerSettings(),
 					waitUntilAvailable: 30 * time.Second,
 					tlsSecurity:        "strict",
 				},
@@ -234,7 +234,7 @@ func TestConUtils(t *testing.T) {
 					password:           "123123",
 					database:           "abcdef",
 					branch:             "abcdef",
-					serverSettings:     snc.NewServerSettings(),
+					ServerSettings:     snc.NewServerSettings(),
 					waitUntilAvailable: 30 * time.Second,
 					tlsSecurity:        "strict",
 				},
@@ -244,7 +244,7 @@ func TestConUtils(t *testing.T) {
 			name: "DSN with multiple hosts",
 			dsn:  "edgedb://user@host1,host2/db",
 			expected: Result{
-				err: &configurationError{},
+				err: gelerrint.NewConfigurationError("", nil),
 				errMessage: `gel.ConfigurationError: invalid DSN: ` +
 					`invalid host: "host1,host2"`,
 			},
@@ -253,7 +253,7 @@ func TestConUtils(t *testing.T) {
 			name: "DSN with multiple hosts and ports",
 			dsn:  "edgedb://user@host1:1111,host2:2222/db",
 			expected: Result{
-				err: &configurationError{},
+				err: gelerrint.NewConfigurationError("", nil),
 				errMessage: `gel.ConfigurationError: invalid DSN: ` +
 					`invalid host: "host1:1111,host2"`,
 			},
@@ -266,7 +266,7 @@ func TestConUtils(t *testing.T) {
 			},
 			dsn: "",
 			expected: Result{
-				err: &configurationError{},
+				err: gelerrint.NewConfigurationError("", nil),
 				errMessage: `gel.ConfigurationError: ` +
 					`invalid host: "host1:1111,host2:2222"`,
 			},
@@ -278,7 +278,7 @@ func TestConUtils(t *testing.T) {
 			},
 			dsn: "edgedb:///db?host=host1:1111,host2:2222",
 			expected: Result{
-				err: &configurationError{},
+				err: gelerrint.NewConfigurationError("", nil),
 				errMessage: `gel.ConfigurationError: invalid DSN: ` +
 					`invalid host: "host1:1111,host2:2222"`,
 			},
@@ -289,21 +289,21 @@ func TestConUtils(t *testing.T) {
 				"EDGEDB_USER": "foo",
 			},
 			dsn: "edgedb:///db",
-			opts: Options{
+			opts: gelcfg.Options{
 				Host: "host1,host2",
 			},
 			expected: Result{
-				err: &configurationError{},
+				err: gelerrint.NewConfigurationError("", nil),
 				errMessage: `gel.ConfigurationError: ` +
 					`mutually exclusive connection options specified: ` +
-					`dsn and gel.Options.Host`,
+					`dsn and gelcfg.Options.Host`,
 			},
 		},
 		{
 			name: "DSN with server settings",
 			dsn: "edgedb://?param=123&host=testhost&user=testuser" +
 				"&port=2222&database=testdb",
-			opts: Options{
+			opts: gelcfg.Options{
 				User:     "me",
 				Password: geltypes.NewOptionalStr("ask"),
 				Database: "db",
@@ -311,7 +311,7 @@ func TestConUtils(t *testing.T) {
 			expected: Result{
 				cfg: connConfig{
 					addr: dialArgs{"tcp", "testhost:2222"},
-					serverSettings: newServerSettingValues(map[string][]byte{
+					ServerSettings: newServerSettingValues(map[string][]byte{
 						"param": []byte("123"),
 					}),
 					user:               "me",
@@ -327,7 +327,7 @@ func TestConUtils(t *testing.T) {
 			name: "DSN and options server settings are merged",
 			dsn: "edgedb://?param=123&host=testhost&user=testuser" +
 				"&port=2222&database=testdb",
-			opts: Options{
+			opts: gelcfg.Options{
 				User:           "me",
 				Password:       geltypes.NewOptionalStr("ask"),
 				Database:       "db",
@@ -336,7 +336,7 @@ func TestConUtils(t *testing.T) {
 			expected: Result{
 				cfg: connConfig{
 					addr: dialArgs{"tcp", "testhost:2222"},
-					serverSettings: newServerSettingValues(map[string][]byte{
+					ServerSettings: newServerSettingValues(map[string][]byte{
 						"aa":    []byte("bb"),
 						"param": []byte("123"),
 					}),
@@ -353,7 +353,7 @@ func TestConUtils(t *testing.T) {
 			name: "DSN with unix socket",
 			dsn:  "edgedb:///dbname?host=/unix_sock/test&user=spam",
 			expected: Result{
-				err: &configurationError{},
+				err: gelerrint.NewConfigurationError("", nil),
 				errMessage: `gel.ConfigurationError: invalid DSN: ` +
 					`invalid host: unix socket paths not supported, ` +
 					`got "/unix_sock/test"`,
@@ -363,7 +363,7 @@ func TestConUtils(t *testing.T) {
 			name: "DSN requires edgedb scheme",
 			dsn:  "pq:///dbname?host=/unix_sock/test&user=spam",
 			expected: Result{
-				err: &configurationError{},
+				err: gelerrint.NewConfigurationError("", nil),
 				errMessage: "gel.ConfigurationError: " +
 					`invalid DSN: scheme is expected to be "gel", got "pq"`,
 			},
@@ -372,7 +372,7 @@ func TestConUtils(t *testing.T) {
 			name: "DSN query parameter with unix socket",
 			dsn:  "edgedb://user@?port=56226&host=%2Ftmp",
 			expected: Result{
-				err: &configurationError{},
+				err: gelerrint.NewConfigurationError("", nil),
 				errMessage: `gel.ConfigurationError: invalid DSN: ` +
 					`invalid host: unix socket paths not supported, ` +
 					`got "/tmp"`,
@@ -602,7 +602,7 @@ func TestConnectionParameterResolution(t *testing.T) {
 			}
 
 			var dsn string
-			var options Options
+			var options gelcfg.Options
 
 			if opts, ok := testcase["opts"].(map[string]interface{}); ok {
 				if inst, ok := opts["instance"]; ok {
@@ -623,7 +623,11 @@ func TestConnectionParameterResolution(t *testing.T) {
 						t.Skip("unusable port value")
 					}
 				}
-				options.Database = getStr(t, opts, "database")
+				options.Database = getStr( // nolint:staticcheck
+					t,
+					opts,
+					"database",
+				)
 				options.Branch = getStr(t, opts, "branch")
 				options.User = getStr(t, opts, "user")
 				if opts["password"] != nil {
@@ -634,7 +638,7 @@ func TestConnectionParameterResolution(t *testing.T) {
 					options.TLSOptions.CAFile = filepath.Join(tmpDir, file)
 				}
 				options.TLSOptions.CA = getBytes(t, opts, "tlsCA")
-				options.TLSOptions.SecurityMode = TLSSecurityMode(
+				options.TLSOptions.SecurityMode = gelcfg.TLSSecurityMode(
 					getStr(t, opts, "tlsSecurity"))
 				options.TLSOptions.ServerName = getStr(
 					t, opts, "tlsServerName")
@@ -657,7 +661,7 @@ func TestConnectionParameterResolution(t *testing.T) {
 			}
 
 			expectedResult := connConfig{
-				serverSettings:     snc.NewServerSettings(),
+				ServerSettings:     snc.NewServerSettings(),
 				waitUntilAvailable: 30 * time.Second,
 			}
 
@@ -691,7 +695,7 @@ func TestConnectionParameterResolution(t *testing.T) {
 
 				ss := res["serverSettings"].(map[string]interface{})
 				for k, v := range ss {
-					expectedResult.serverSettings.Set(k, []byte(v.(string)))
+					expectedResult.ServerSettings.Set(k, []byte(v.(string)))
 				}
 
 				expectedResult.waitUntilAvailable = getDuration(
@@ -730,7 +734,7 @@ func TestConnectionParameterResolution(t *testing.T) {
 			}
 
 			if testcase["error"] != nil {
-				errType := &configurationError{}
+				errType := gelerrint.NewConfigurationError("", nil)
 				require.IsType(t, errType, err)
 				e := testcase["error"].(map[string]interface{})
 				id := e["type"].(string)
@@ -744,118 +748,4 @@ func TestConnectionParameterResolution(t *testing.T) {
 			}
 		})
 	}
-}
-
-func TestConnectTimeout(t *testing.T) {
-	ctx := context.Background()
-	p, err := CreateClient(ctx, Options{
-		Host:               opts.Host,
-		Port:               opts.Port,
-		User:               opts.User,
-		Password:           opts.Password,
-		Database:           opts.Database,
-		ConnectTimeout:     2 * time.Nanosecond,
-		WaitUntilAvailable: 1 * time.Nanosecond,
-	})
-
-	if p != nil {
-		err = p.EnsureConnected(ctx)
-		_ = p.Close()
-	}
-
-	require.NotNil(t, err, "connection didn't timeout")
-
-	var edbErr Error
-
-	require.True(t, errors.As(err, &edbErr), "wrong error: %v", err)
-	assert.True(
-		t,
-		edbErr.Category(ClientConnectionTimeoutError),
-		"wrong error: %v",
-		err,
-	)
-}
-
-func TestConnectRefused(t *testing.T) {
-	ctx := context.Background()
-	p, err := CreateClient(ctx, Options{
-		Host:               "localhost",
-		Port:               23456,
-		WaitUntilAvailable: 1 * time.Nanosecond,
-	})
-
-	if p != nil {
-		err = p.EnsureConnected(ctx)
-		_ = p.Close()
-	}
-
-	require.NotNil(t, err, "connection wasn't refused")
-
-	msg := "wrong error: " + err.Error()
-	var edbErr Error
-	require.True(t, errors.As(err, &edbErr), msg)
-	assert.True(
-		t,
-		edbErr.Category(ClientConnectionFailedError),
-		msg,
-	)
-}
-
-func TestConnectInvalidName(t *testing.T) {
-	ctx := context.Background()
-	p, err := CreateClient(ctx, Options{
-		Host:               "invalid.example.org",
-		Port:               23456,
-		WaitUntilAvailable: 1 * time.Nanosecond,
-	})
-
-	if p != nil {
-		err = p.EnsureConnected(ctx)
-		_ = p.Close()
-	}
-
-	require.NotNil(t, err, "name was resolved")
-
-	var edbErr Error
-	require.True(t, errors.As(err, &edbErr), "wrong error: %v", err)
-	assert.True(
-		t,
-		edbErr.Category(ClientConnectionFailedTemporarilyError),
-		"wrong error: %v",
-		err,
-	)
-	// Match lookup error agnostic to OS. Examples:
-	// dial tcp: lookup invalid.example.org: no such host
-	// dial tcp: lookup invalid.example.org on 127.0.0.1:53: no such host
-	assert.Contains(t, err.Error(),
-		"gel.ClientConnectionFailedTemporarilyError: "+
-			"dial tcp: lookup invalid.example.org")
-	assert.Contains(t, err.Error(), "no such host")
-
-	var errNotFound *net.DNSError
-	assert.True(t, errors.As(err, &errNotFound))
-}
-
-func TestConnectRefusedUnixSocket(t *testing.T) {
-	ctx := context.Background()
-	p, err := CreateClient(ctx, Options{
-		Host:               "/tmp/non-existent",
-		WaitUntilAvailable: 1 * time.Nanosecond,
-	})
-
-	if p != nil {
-		err = p.EnsureConnected(ctx)
-		_ = p.Close()
-	}
-
-	require.NotNil(t, err, "connection wasn't refused")
-
-	var edbErr Error
-	require.True(t, errors.As(err, &edbErr), "wrong error: %v", err)
-	assert.True(
-		t,
-		edbErr.Category(ConfigurationError),
-		"wrong error: %v",
-		err,
-	)
 }

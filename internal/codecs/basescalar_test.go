@@ -20,8 +20,8 @@ import (
 	"testing"
 	"unsafe"
 
+	types "github.com/geldata/gel-go/geltypes"
 	"github.com/geldata/gel-go/internal/buff"
-	types "github.com/geldata/gel-go/internal/geltypes"
 )
 
 func BenchmarkDecodeUUID(b *testing.B) {

@@ -21,8 +21,8 @@ import (
 	"reflect"
 	"unsafe"
 
+	types "github.com/geldata/gel-go/geltypes"
 	"github.com/geldata/gel-go/internal/buff"
-	types "github.com/geldata/gel-go/internal/geltypes"
 	"github.com/geldata/gel-go/internal/marshal"
 )
 
@@ -61,7 +61,7 @@ func (c *BoolCodec) Encode(
 		return encodeOptional(w, !ok, required,
 			func() error { return c.encodeData(w, data) },
 			func() error {
-				return missingValueError("gel.OptionalBool", path)
+				return missingValueError("geltypes.OptionalBool", path)
 			})
 	case optionalBoolMarshaler:
 		return encodeOptional(w, in.Missing(), required,
@@ -70,7 +70,7 @@ func (c *BoolCodec) Encode(
 	case marshal.BoolMarshaler:
 		return c.encodeMarshaler(w, in, path)
 	default:
-		return fmt.Errorf("expected %v to be bool, gel.OptionalBool or "+
+		return fmt.Errorf("expected %v to be bool, geltypes.OptionalBool or "+
 			"BoolMarshaler got %T", path, val)
 	}
 }
