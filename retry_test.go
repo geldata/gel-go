@@ -1,3 +1,19 @@
+// This source file is part of the EdgeDB open source project.
+//
+// Copyright EdgeDB Inc. and the EdgeDB authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package gel
 
 import (
@@ -138,17 +154,19 @@ func assertRetryTx(
 
 	for i := 0; i < 2; i++ {
 		go func() {
-			errors <- client.Tx(ctx, func(ctx context.Context, tx geltypes.Tx) error {
-				iterMtx.Lock()
-				iterations += 1
-				iterMtx.Unlock()
+			errors <- client.Tx(
+				ctx,
+				func(ctx context.Context, tx geltypes.Tx) error {
+					iterMtx.Lock()
+					iterations += 1
+					iterMtx.Unlock()
 
-				require.NoError(t, tx.Execute(ctx, "SELECT 1"))
+					require.NoError(t, tx.Execute(ctx, "SELECT 1"))
 
-				barrier.Done()
-				barrier.Wait()
+					barrier.Done()
+					barrier.Wait()
 
-				query := `
+					query := `
 					SELECT (
 						INSERT Counter {
 							name := <str>$0,
@@ -162,12 +180,13 @@ func assertRetryTx(
 					).value
 				`
 
-				err := cb(ctx, tx, query, name)
-				if err != nil {
-					barrier.Add(1)
-				}
-				return err
-			})
+					err := cb(ctx, tx, query, name)
+					if err != nil {
+						barrier.Add(1)
+					}
+					return err
+				},
+			)
 		}()
 	}
 
