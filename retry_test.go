@@ -158,7 +158,7 @@ func assertRetryTx(
 				ctx,
 				func(ctx context.Context, tx geltypes.Tx) error {
 					iterMtx.Lock()
-					iterations += 1
+					iterations++
 					iterMtx.Unlock()
 
 					require.NoError(t, tx.Execute(ctx, "SELECT 1"))
