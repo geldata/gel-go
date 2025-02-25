@@ -270,8 +270,7 @@ func (c *Client) ExecuteSQL(
 	return gel.FirstError(err, c.pool.Release(conn, err))
 }
 
-// Tx runs an action in a transaction retrying failed actions
-// if they might succeed on a subsequent attempt.
+// Tx runs a [geltypes.TxBlock] in a transaction retrying failed attempts.
 //
 // Retries are governed by retry rules.
 // The default rule can be set with WithRetryRule().
