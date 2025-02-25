@@ -45,8 +45,18 @@ func NewRetryRule() RetryRule {
 	}
 }
 
-// RetryRule determines how transactions should be retried when run in Tx()
-// methods. See Client.Tx() for details.
+// RetryRule determines how transactions or queries outside of transactions
+// should be retried.
+//
+// Retries are governed by retry rules.
+// The default rule can be set with [RetryOptions.WithDefault].
+// For more fine grained control a RetryRule can be set
+// for each defined RetryCondition using [RetryOptions.WithCondition].
+// When a transaction fails but [gelerr.Error.HasTag] [gelerr.ShouldRetry]
+// the rule for the failure condition is used to determine if the transaction
+// should be tried again based on [RetryRule.Attempts] and the amount of time
+// to wait before retrying is determined by [RetryRule.Backoff].
+// The default retry rule is 3 attempts and exponential backoff with jitter.
 type RetryRule struct {
 	// fromFactory indicates that a RetryOptions value was created using
 	// NewRetryOptions() and not created directly. Requiring users to use the

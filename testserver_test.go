@@ -88,59 +88,50 @@ func initServer() {
 	`)
 
 	log.Println("running migration")
-	if protocolVersion.GTE(gelint.ProtocolVersion1p0) {
-		execOrFatal(`
-			START MIGRATION TO {
-				module default {
-					global global_id -> uuid;
-					required global global_str -> str {
-						default := "default";
-					};
-					global global_bytes -> bytes;
-					global global_int16 -> int16;
-					global global_int32 -> int32;
-					global global_int64 -> int64;
-					global global_float32 -> float32;
-					global global_float64 -> float64;
-					global global_bool -> bool;
-					global global_datetime -> datetime;
-					global global_duration -> duration;
-					global global_json -> json;
-					global global_local_datetime -> cal::local_datetime;
-					global global_local_date -> cal::local_date;
-					global global_local_time -> cal::local_time;
-					global global_bigint -> bigint;
-					global global_relative_duration -> cal::relative_duration;
-					global global_date_duration -> cal::date_duration;
-					global global_memory -> cfg::memory;
+	execOrFatal(`
+		START MIGRATION TO {
+			module default {
+				global global_id -> uuid;
+				required global global_str -> str {
+					default := "default";
+				};
+				global global_bytes -> bytes;
+				global global_int16 -> int16;
+				global global_int32 -> int32;
+				global global_int64 -> int64;
+				global global_float32 -> float32;
+				global global_float64 -> float64;
+				global global_bool -> bool;
+				global global_datetime -> datetime;
+				global global_duration -> duration;
+				global global_json -> json;
+				global global_local_datetime -> cal::local_datetime;
+				global global_local_date -> cal::local_date;
+				global global_local_time -> cal::local_time;
+				global global_bigint -> bigint;
+				global global_relative_duration -> cal::relative_duration;
+				global global_date_duration -> cal::date_duration;
+				global global_memory -> cfg::memory;
 
-					type User {
-						property name -> str;
-					}
-					type TxTest {
-						required property name -> str;
+				type User {
+					property name -> str;
+				}
+				type TxTest {
+					required property name -> str;
+				}
+				type Counter {
+					name: str {
+						constraint exclusive;
+					};
+					value: int32 {
+						default := 0;
 					}
 				}
-			};
-			POPULATE MIGRATION;
-			COMMIT MIGRATION;
-		`)
-	} else {
-		execOrFatal(`
-			START MIGRATION TO {
-				module default {
-					type User {
-						property name -> str;
-					}
-					type TxTest {
-						required property name -> str;
-					}
-				}
-			};
-			POPULATE MIGRATION;
-			COMMIT MIGRATION;
-		`)
-	}
+			}
+		};
+		POPULATE MIGRATION;
+		COMMIT MIGRATION;
+	`)
 }
 
 func initClient() {

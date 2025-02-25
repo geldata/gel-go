@@ -20,7 +20,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"math/rand"
 	"strings"
 	"testing"
 
@@ -311,7 +310,7 @@ func TestSQLTx(t *testing.T) {
 }
 
 func selectInTx(t *testing.T, cb func(context.Context, geltypes.Tx, string)) {
-	name := fmt.Sprintf("test%v", rand.Intn(10_000_000))
+	name := randomName()
 	ctx := context.Background()
 	err := client.Tx(ctx, func(ctx context.Context, tx geltypes.Tx) error {
 		e := tx.Execute(ctx, "INSERT TxTest {name := <str>$0};", name)
