@@ -18,8 +18,6 @@ package gel
 
 import (
 	"context"
-	"fmt"
-	"math/rand"
 	"testing"
 
 	"github.com/geldata/gel-go/gelcfg"
@@ -44,7 +42,7 @@ type Movie struct {
 
 func TestTutorial(t *testing.T) {
 	ctx := context.Background()
-	dbName := fmt.Sprintf("test%v", rand.Intn(10_000))
+	dbName := randomName()
 	err := client.Execute(ctx, "CREATE DATABASE "+dbName)
 	require.NoError(t, err)
 

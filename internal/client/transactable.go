@@ -33,7 +33,11 @@ type transactableConn struct {
 	retryOpts gelcfg.RetryOptions
 }
 
-func (c *transactableConn) granularFlow(ctx context.Context, q *query) error {
+func (c *transactableConn) withRetries(
+	ctx context.Context,
+	q *query,
+	cb func(context.Context, *query) error,
+) error {
 	var (
 		err    error
 		edbErr gelerr.Error
@@ -47,7 +51,7 @@ func (c *transactableConn) granularFlow(ctx context.Context, q *query) error {
 			}
 		}
 
-		err = c.reconnectingConn.granularFlow(ctx, q)
+		err = cb(ctx, q)
 
 	Error:
 		// q is a read only query if it has no capabilities
@@ -77,6 +81,14 @@ func (c *transactableConn) granularFlow(ctx context.Context, q *query) error {
 	}
 
 	return gelerrint.NewClientError("unreachable", nil)
+}
+
+func (c *transactableConn) granularFlow(ctx context.Context, q *query) error {
+	return c.withRetries(ctx, q, c.reconnectingConn.granularFlow)
+}
+
+func (c *transactableConn) ScriptFlow(ctx context.Context, q *query) error {
+	return c.withRetries(ctx, q, c.reconnectingConn.ScriptFlow)
 }
 
 func (c *transactableConn) Tx(
