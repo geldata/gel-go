@@ -22,7 +22,7 @@ func NewQueryOptions() QueryOptions {
 	return QueryOptions{fromFactory: true}
 }
 
-// QueryOptions controls some limitations that the server can impose on
+// QueryOptions controls limitations that the server can impose on
 // queries.
 type QueryOptions struct {
 	fromFactory bool

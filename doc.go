@@ -56,8 +56,8 @@
 //
 // You may also connect to a database using a DSN:
 //
-//	url := "gel://edgedb@localhost/edgedb"
-//	client, err := gel.CreateClientDSN(ctx, url, opts)
+//	dsn := "gel://edgedb@localhost/edgedb"
+//	client, err := gel.CreateClientDSN(ctx, dsn, opts)
 //
 // Or you can use Option fields.
 //
@@ -73,7 +73,7 @@
 //
 // gel never returns underlying errors directly.
 // If you are checking for things like context expiration
-// use errors.Is() or errors.As().
+// use [errors.Is] or [errors.As].
 //
 //	err := client.Query(...)
 //	if errors.Is(err, context.Canceled) { ... }
@@ -91,7 +91,7 @@
 // # Datatypes
 //
 // The following list shows the marshal/unmarshal
-// mapping between Gel types and go types:
+// mapping between Gel types and go types. See also [geltypes]:
 //
 //	Gel                      Go
 //	---------                ---------
@@ -128,7 +128,7 @@
 // one directly to the other.
 //
 // Shape fields that are not required must use optional types for receiving
-// query results. The gelcfg.Optional struct can be embedded to make structs
+// query results. The [gelcfg.Optional] struct can be embedded to make structs
 // optional.
 //
 //	type User struct {
@@ -171,9 +171,9 @@
 // # Custom Marshalers
 //
 // Interfaces for user defined marshaler/unmarshalers  are documented in the
-// internal/marshal package.
+// [github.com/geldata/gel-go/internal/marshal] package.
 //
-// [Gel]: https://www.edgedb.com
-// [json]: https://www.edgedb.com/docs/edgeql/insert#bulk-inserts
-// [client connection docs]: https://www.edgedb.com/docs/clients/connection
+// [Gel]: https://www.geldata.com
+// [json]: https://docs.geldata.com/reference/edgeql/insert#bulk-inserts
+// [client connection docs]: https://docs.geldata.com/learn/clients#connection
 package gel

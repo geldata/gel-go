@@ -33,7 +33,7 @@ import (
 
 func TestAuth(t *testing.T) {
 	ctx := context.Background()
-	p, err := CreateClient(ctx, gelcfg.Options{
+	p, err := CreateClient(gelcfg.Options{
 		Host:       opts.Host,
 		Port:       opts.Port,
 		User:       "user_with_password",
@@ -118,7 +118,7 @@ func convertUint16ToUint8(value uint16) (uint8, uint8) {
 
 func TestConnectTimeout(t *testing.T) {
 	ctx := context.Background()
-	p, err := CreateClient(ctx, gelcfg.Options{
+	p, err := CreateClient(gelcfg.Options{
 		Host:               opts.Host,
 		Port:               opts.Port,
 		User:               opts.User,
@@ -148,7 +148,7 @@ func TestConnectTimeout(t *testing.T) {
 
 func TestConnectRefused(t *testing.T) {
 	ctx := context.Background()
-	p, err := CreateClient(ctx, gelcfg.Options{
+	p, err := CreateClient(gelcfg.Options{
 		Host:               "localhost",
 		Port:               23456,
 		WaitUntilAvailable: 1 * time.Nanosecond,
@@ -173,7 +173,7 @@ func TestConnectRefused(t *testing.T) {
 
 func TestConnectInvalidName(t *testing.T) {
 	ctx := context.Background()
-	p, err := CreateClient(ctx, gelcfg.Options{
+	p, err := CreateClient(gelcfg.Options{
 		Host:               "invalid.example.org",
 		Port:               23456,
 		WaitUntilAvailable: 1 * time.Nanosecond,
@@ -208,7 +208,7 @@ func TestConnectInvalidName(t *testing.T) {
 
 func TestConnectRefusedUnixSocket(t *testing.T) {
 	ctx := context.Background()
-	p, err := CreateClient(ctx, gelcfg.Options{
+	p, err := CreateClient(gelcfg.Options{
 		Host:               "/tmp/non-existent",
 		WaitUntilAvailable: 1 * time.Nanosecond,
 	})

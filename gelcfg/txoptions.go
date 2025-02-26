@@ -18,8 +18,9 @@ package gelcfg
 
 import "fmt"
 
-// IsolationLevel documentation can be found here
-// https://www.edgedb.com/docs/reference/edgeql/tx_start#parameters
+// IsolationLevel documentation can be found [here]
+//
+// [here]: https://docs.geldata.com/reference/stdlib/sys#type::sys::TransactionIsolation
 type IsolationLevel string
 
 const (

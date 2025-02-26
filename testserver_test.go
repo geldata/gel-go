@@ -138,9 +138,8 @@ func initClient() {
 	opts = testserver.Options()
 
 	log.Println("initializing testserver.Client")
-	ctx := context.Background()
 	var err error
-	client, err = CreateClient(ctx, opts)
+	client, err = CreateClient(opts)
 	if err != nil {
 		testserver.Fatal(err)
 	}

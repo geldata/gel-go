@@ -27,7 +27,7 @@ import (
 var rnd = snc.NewRand()
 
 // RetryBackoff returns the duration to wait after the nth attempt
-// before making the next attempt when retrying a transaction.
+// before retrying a transaction.
 type RetryBackoff func(n int) time.Duration
 
 func defaultBackoff(attempt int) time.Duration {
