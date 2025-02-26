@@ -41,24 +41,14 @@ func CreateClientDSN(dsn string, opts gelcfg.Options) (*Client, error) { // noli
 		return nil, err
 	}
 
-	warningHandler := gelcfg.LogWarnings
-	if opts.WarningHandler != nil {
-		warningHandler = opts.WarningHandler
-	}
-
-	p := &Client{
-		pool:           pool,
-		warningHandler: warningHandler,
-	}
+	p := &Client{pool: pool}
 
 	return p, nil
 }
 
 // Client is a connection pool and is safe for concurrent use.
 type Client struct {
-	pool           *gel.Pool
-	warningHandler gelcfg.WarningHandler
-	queryOptions   gelcfg.QueryOptions
+	pool *gel.Pool
 }
 
 // EnsureConnected forces the client to connect if it hasn't already.
@@ -90,8 +80,7 @@ func (c *Client) Execute(
 		gel.CopyState(c.pool.State),
 		nil,
 		true,
-		c.warningHandler,
-		c.queryOptions,
+		c.pool.QueryConfig,
 	)
 	if err != nil {
 		return err
@@ -121,8 +110,7 @@ func (c *Client) Query(
 		out,
 		args,
 		c.pool.State,
-		c.warningHandler,
-		c.queryOptions,
+		c.pool.QueryConfig,
 	)
 	return gel.FirstError(err, c.pool.Release(conn, err))
 }
@@ -150,8 +138,7 @@ func (c *Client) QuerySingle(
 		out,
 		args,
 		c.pool.State,
-		c.warningHandler,
-		c.queryOptions,
+		c.pool.QueryConfig,
 	)
 	return gel.FirstError(err, c.pool.Release(conn, err))
 }
@@ -176,8 +163,7 @@ func (c *Client) QueryJSON(
 		out,
 		args,
 		c.pool.State,
-		c.warningHandler,
-		c.queryOptions,
+		c.pool.QueryConfig,
 	)
 	return gel.FirstError(err, c.pool.Release(conn, err))
 }
@@ -204,8 +190,7 @@ func (c *Client) QuerySingleJSON(
 		out,
 		args,
 		c.pool.State,
-		c.warningHandler,
-		c.queryOptions,
+		c.pool.QueryConfig,
 	)
 	return gel.FirstError(err, c.pool.Release(conn, err))
 }
@@ -230,8 +215,7 @@ func (c *Client) QuerySQL(
 		out,
 		args,
 		c.pool.State,
-		c.warningHandler,
-		c.queryOptions,
+		c.pool.QueryConfig,
 	)
 	return gel.FirstError(err, c.pool.Release(conn, err))
 }
@@ -255,8 +239,7 @@ func (c *Client) ExecuteSQL(
 		gel.CopyState(c.pool.State),
 		nil,
 		true,
-		c.warningHandler,
-		c.queryOptions,
+		c.pool.QueryConfig,
 	)
 	if err != nil {
 		return err
@@ -281,8 +264,7 @@ func (c *Client) Tx(ctx context.Context, action geltypes.TxBlock) error {
 		ctx,
 		action,
 		c.pool.State,
-		c.warningHandler,
-		c.queryOptions,
+		c.pool.QueryConfig,
 	)
 	return gel.FirstError(err, c.pool.Release(conn, err))
 }

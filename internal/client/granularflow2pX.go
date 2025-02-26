@@ -76,7 +76,7 @@ func (c *protocolConnection) parse2pX(
 	w.PushUint16(0) // no headers
 	w.PushUint64(q.getCapabilities())
 	w.PushUint64(0) // no compilation_flags
-	w.PushUint64(q.queryOpts.ImplicitLimit())
+	w.PushUint64(q.cfg.QueryOptions.ImplicitLimit())
 	if c.protocolVersion.GTE(protocolVersion3p0) {
 		w.PushUint8(uint8(q.lang))
 	}
@@ -136,7 +136,7 @@ func (c *protocolConnection) decodeCommandDataDescriptionMsg2pX(
 	r *buff.Reader,
 	q *query,
 ) (*CommandDescriptionV2, error) {
-	_, err := decodeHeaders2pX(r, q.cmd, q.warningHandler)
+	_, err := decodeHeaders2pX(r, q.cmd, q.cfg.WarningHandler)
 	if err != nil {
 		return nil, err
 	}
@@ -198,7 +198,7 @@ func (c *protocolConnection) execute2pX(
 	w.PushUint16(0) // no headers
 	w.PushUint64(q.getCapabilities())
 	w.PushUint64(0) // no compilation_flags
-	w.PushUint64(q.queryOpts.ImplicitLimit())
+	w.PushUint64(q.cfg.QueryOptions.ImplicitLimit())
 	if c.protocolVersion.GTE(protocolVersion3p0) {
 		w.PushUint8(uint8(q.lang))
 	}

@@ -30,7 +30,8 @@ func (c Client) WithTxOptions(
 		panic("TxOptions not created with NewTxOptions() are not valid")
 	}
 
-	c.pool.TxOpts = opts
+	c.copyPool()
+	c.pool.QueryConfig.TxOptions = opts
 	return &c
 }
 
@@ -43,7 +44,8 @@ func (c Client) WithRetryOptions( // nolint:gocritic
 		panic("RetryOptions not created with NewRetryOptions() are not valid")
 	}
 
-	c.pool.RetryOpts = opts
+	c.copyPool()
+	c.pool.QueryConfig.RetryOptions = opts
 	return &c
 }
 
@@ -197,7 +199,8 @@ func (c Client) WithWarningHandler( // nolint:gocritic
 		warningHandler = gelcfg.LogWarnings
 	}
 
-	c.warningHandler = warningHandler
+	c.copyPool()
+	c.pool.QueryConfig.WarningHandler = warningHandler
 	return &c
 }
 
@@ -205,6 +208,7 @@ func (c Client) WithWarningHandler( // nolint:gocritic
 func (c Client) WithQueryOptions(
 	options gelcfg.QueryOptions,
 ) *Client { // nolint:gocritic
-	c.queryOptions = options
+	c.copyPool()
+	c.pool.QueryConfig.QueryOptions = options
 	return &c
 }

@@ -69,7 +69,7 @@ func (c *protocolConnection) parse1pX(
 	w.PushUint16(0) // no headers
 	w.PushUint64(q.getCapabilities())
 	w.PushUint64(0) // no compilation_flags
-	w.PushUint64(q.queryOpts.ImplicitLimit())
+	w.PushUint64(q.cfg.QueryOptions.ImplicitLimit())
 	w.PushUint8(uint8(q.fmt))
 	w.PushUint8(uint8(q.expCard))
 	w.PushString(q.cmd)
@@ -126,7 +126,7 @@ func (c *protocolConnection) decodeCommandDataDescriptionMsg1pX(
 	r *buff.Reader,
 	q *query,
 ) (*CommandDescription, error) {
-	_, err := decodeHeaders1pX(r, q.cmd, q.warningHandler)
+	_, err := decodeHeaders1pX(r, q.cmd, q.cfg.WarningHandler)
 	if err != nil {
 		return nil, err
 	}
@@ -188,7 +188,7 @@ func (c *protocolConnection) execute1pX(
 	w.PushUint16(0) // no headers
 	w.PushUint64(q.getCapabilities())
 	w.PushUint64(0) // no compilation_flags
-	w.PushUint64(q.queryOpts.ImplicitLimit())
+	w.PushUint64(q.cfg.QueryOptions.ImplicitLimit())
 	w.PushUint8(uint8(q.fmt))
 	w.PushUint8(uint8(q.expCard))
 	w.PushString(q.cmd)

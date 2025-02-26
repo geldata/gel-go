@@ -21,7 +21,6 @@ import (
 	"errors"
 	"time"
 
-	"github.com/geldata/gel-go/gelcfg"
 	"github.com/geldata/gel-go/gelerr"
 	types "github.com/geldata/gel-go/geltypes"
 	gelerrint "github.com/geldata/gel-go/internal/gelerr"
@@ -29,8 +28,6 @@ import (
 
 type transactableConn struct {
 	*reconnectingConn
-	txOpts    gelcfg.TxOptions
-	retryOpts gelcfg.RetryOptions
 }
 
 func (c *transactableConn) withRetries(
@@ -64,7 +61,7 @@ func (c *transactableConn) withRetries(
 			edbErr.HasTag(gelerr.ShouldRetry) &&
 			(capabilities == 0 ||
 				edbErr.Category(gelerr.TransactionConflictError)) {
-			rule, e := c.retryOpts.RuleForException(edbErr)
+			rule, e := q.cfg.RetryOptions.RuleForException(edbErr)
 			if e != nil {
 				return e
 			}
@@ -95,8 +92,7 @@ func (c *transactableConn) Tx(
 	ctx context.Context,
 	action types.TxBlock,
 	state map[string]interface{},
-	warningHandler gelcfg.WarningHandler,
-	queryOpts gelcfg.QueryOptions,
+	cfg QueryConfig,
 ) (err error) {
 	conn, err := c.borrow("transaction")
 	if err != nil {
@@ -119,10 +115,8 @@ func (c *transactableConn) Tx(
 			tx := &Tx{
 				borrowableConn: borrowableConn{conn: conn},
 				txState:        &txState{},
-				options:        c.txOpts,
 				state:          state,
-				queryOpts:      queryOpts,
-				warningHandler: warningHandler,
+				cfg:            cfg,
 			}
 			err = tx.start(ctx)
 			if err != nil {
@@ -149,7 +143,7 @@ func (c *transactableConn) Tx(
 
 	Error:
 		if errors.As(err, &edbErr) && edbErr.HasTag(gelerr.ShouldRetry) {
-			rule, e := c.retryOpts.RuleForException(edbErr)
+			rule, e := cfg.RetryOptions.RuleForException(edbErr)
 			if e != nil {
 				return e
 			}

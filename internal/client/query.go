@@ -30,24 +30,23 @@ import (
 )
 
 type query struct {
-	out            reflect.Value
-	outType        reflect.Type
-	method         string
-	lang           Language
-	cmd            string
-	fmt            Format
-	expCard        Cardinality
-	args           []interface{}
-	capabilities   uint64
-	state          map[string]interface{}
-	queryOpts      gelcfg.QueryOptions
-	parse          bool
-	warningHandler gelcfg.WarningHandler
+	out          reflect.Value
+	outType      reflect.Type
+	method       string
+	lang         Language
+	cmd          string
+	fmt          Format
+	expCard      Cardinality
+	args         []interface{}
+	capabilities uint64
+	state        map[string]interface{}
+	parse        bool
+	cfg          QueryConfig
 }
 
 func (q *query) getCapabilities() uint64 {
 	capabilities := q.capabilities
-	if q.queryOpts.ReadOnly() {
+	if q.cfg.QueryOptions.ReadOnly() {
 		capabilities &^= capabilitiesModifications
 	}
 	return capabilities
@@ -73,8 +72,7 @@ func NewQuery(
 	state map[string]interface{},
 	out interface{},
 	parse bool,
-	warningHandler gelcfg.WarningHandler,
-	queryOpts gelcfg.QueryOptions,
+	cfg QueryConfig,
 ) (*query, error) { // nolint:revive
 	var (
 		expCard Cardinality
@@ -89,17 +87,16 @@ func NewQuery(
 			lang = SQL
 		}
 		return &query{
-			method:         method,
-			lang:           lang,
-			cmd:            cmd,
-			fmt:            Null,
-			expCard:        Many,
-			args:           args,
-			capabilities:   capabilities,
-			state:          state,
-			queryOpts:      queryOpts,
-			parse:          parse,
-			warningHandler: warningHandler,
+			method:       method,
+			lang:         lang,
+			cmd:          cmd,
+			fmt:          Null,
+			expCard:      Many,
+			args:         args,
+			capabilities: capabilities,
+			state:        state,
+			cfg:          cfg,
+			parse:        parse,
 		}, nil
 	case "Query":
 		expCard = Many
@@ -122,17 +119,16 @@ func NewQuery(
 	}
 
 	q := query{
-		method:         method,
-		lang:           lang,
-		cmd:            cmd,
-		fmt:            frmt,
-		expCard:        expCard,
-		args:           args,
-		capabilities:   capabilities,
-		state:          state,
-		queryOpts:      queryOpts,
-		parse:          parse,
-		warningHandler: warningHandler,
+		method:       method,
+		lang:         lang,
+		cmd:          cmd,
+		fmt:          frmt,
+		expCard:      expCard,
+		args:         args,
+		capabilities: capabilities,
+		state:        state,
+		cfg:          cfg,
+		parse:        parse,
 	}
 
 	var err error
@@ -167,6 +163,14 @@ type unseter interface {
 	Unset()
 }
 
+type QueryConfig struct {
+	WarningHandler gelcfg.WarningHandler
+	QueryOptions   gelcfg.QueryOptions
+	TxOptions      gelcfg.TxOptions
+	RetryOptions   gelcfg.RetryOptions
+	Annotations    map[string]string
+}
+
 // RunQuery runs a query.
 func RunQuery(
 	ctx context.Context,
@@ -175,8 +179,7 @@ func RunQuery(
 	out interface{},
 	args []interface{},
 	state map[string]interface{},
-	warningHandler gelcfg.WarningHandler,
-	queryOpts gelcfg.QueryOptions,
+	cfg QueryConfig,
 ) error {
 	if method == "QuerySingleJSON" {
 		switch out.(type) {
@@ -196,8 +199,7 @@ func RunQuery(
 		state,
 		out,
 		true,
-		warningHandler,
-		queryOpts,
+		cfg,
 	)
 	if err != nil {
 		return err

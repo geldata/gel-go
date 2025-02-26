@@ -1161,7 +1161,7 @@ func TestWithWarningHandler(t *testing.T) {
 	require.NoError(t, err)
 
 	if !hasWarnOnCall {
-		t.Skip()
+		t.Skip("missing std::_warn_on_call")
 	}
 
 	seen := []error{}
@@ -1196,6 +1196,12 @@ func TestWithWarningHandler(t *testing.T) {
 	err = a.QuerySingleJSON(ctx, `SELECT _warn_on_call()`, &resultJSON)
 	require.NoError(t, err)
 	require.Greater(t, len(seen), 0)
+
+	// Assert that the client config was not changed.
+	seen = []error{}
+	err = client.QuerySingle(ctx, `SELECT _warn_on_call()`, &resultSingle)
+	require.NoError(t, err)
+	require.Equal(t, 0, len(seen))
 }
 
 func TestWithQueryOptionsReadonly(t *testing.T) {
