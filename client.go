@@ -26,20 +26,16 @@ import (
 
 // CreateClient returns a new client. The client connects lazily. Call
 // Client.EnsureConnected() to force a connection.
-func CreateClient(ctx context.Context, opts gelcfg.Options) (*Client, error) { // nolint:gocritic,lll
-	return CreateClientDSN(ctx, "", opts)
+func CreateClient(opts gelcfg.Options) (*Client, error) { // nolint:gocritic,lll
+	return CreateClientDSN("", opts)
 }
 
 // CreateClientDSN returns a new client. See also CreateClient.
 //
-// dsn is either an instance name
-// https://www.edgedb.com/docs/clients/connection
-// or it specifies a single string in the following format:
+// dsn is either an instance name or a [DSN].
 //
-//	gel://user:password@host:port/database?option=value.
-//
-// The following options are recognized: host, port, user, database, password.
-func CreateClientDSN(_ context.Context, dsn string, opts gelcfg.Options) (*Client, error) { // nolint:gocritic,lll
+// [DSN]: https://docs.geldata.com/reference/reference/dsn#ref-dsn
+func CreateClientDSN(dsn string, opts gelcfg.Options) (*Client, error) { // nolint:gocritic,lll
 	pool, err := gel.NewPool(dsn, opts)
 	if err != nil {
 		return nil, err
@@ -71,7 +67,7 @@ func (c *Client) EnsureConnected(ctx context.Context) error {
 }
 
 // Close closes all connections in the client.
-// Calling close blocks until all acquired connections have been released,
+// Calling Close() blocks until all acquired connections have been released,
 // and returns an error if called more than once.
 func (c *Client) Close() error { return c.pool.Close() }
 
@@ -270,19 +266,11 @@ func (c *Client) ExecuteSQL(
 	return gel.FirstError(err, c.pool.Release(conn, err))
 }
 
-// Tx runs a [geltypes.TxBlock] in a transaction retrying failed attempts.
+// Tx runs action in a transaction retrying failed attempts.
 //
-// Retries are governed by retry rules.
-// The default rule can be set with WithRetryRule().
-// For more fine grained control a retry rule can be set
-// for each defined RetryCondition using WithRetryCondition().
-// When a transaction fails but is retryable
-// the rule for the failure condition is used to determine if the transaction
-// should be tried again based on RetryRule.Attempts and the amount of time
-// to wait before retrying is determined by RetryRule.Backoff.
-// If either field is unset (see RetryRule) then the default rule is used.
-// If the object's default is unset the fall back is 3 attempts
-// and exponential backoff.
+// Retries are governed by [gelcfg.RetryOptions] and [gelcfg.RetryRule].
+// retry options can be set using [Client.WithRetryOptions].
+// See [gelcfg.RetryRule] for more details on how they work.
 func (c *Client) Tx(ctx context.Context, action geltypes.TxBlock) error {
 	conn, err := c.pool.Acquire(ctx)
 	if err != nil {

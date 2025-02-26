@@ -47,7 +47,6 @@ func TestTutorial(t *testing.T) {
 	require.NoError(t, err)
 
 	edb, err := CreateClient(
-		ctx,
 		gelcfg.Options{
 			Host:       opts.Host,
 			Port:       opts.Port,

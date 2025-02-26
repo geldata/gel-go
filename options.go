@@ -52,7 +52,12 @@ func (c *Client) copyPool() {
 	c.pool = &pool
 }
 
-// WithConfig sets configuration values for the returned client.
+// WithConfig returns a shallow copy of the client
+// with configuration values set to cfg.
+// Equivalent to using the edgeql configure session command.
+// For available configuration parameters refer to the [Config documentation].
+//
+// [Config documentation]: https://docs.geldata.com/reference/stdlib/cfg#ref-std-cfg
 func (c Client) WithConfig( // nolint:gocritic
 	cfg map[string]interface{},
 ) *Client {
@@ -75,7 +80,8 @@ func (c Client) WithConfig( // nolint:gocritic
 	return &c
 }
 
-// WithoutConfig unsets configuration values for the returned client.
+// WithoutConfig returns a shallow copy of the client
+// with keys unset from the configuration.
 func (c Client) WithoutConfig(key ...string) *Client { // nolint:gocritic
 	state := gel.CopyState(c.pool.State)
 
@@ -91,7 +97,8 @@ func (c Client) WithoutConfig(key ...string) *Client { // nolint:gocritic
 	return &c
 }
 
-// WithModuleAliases sets module name aliases for the returned client.
+// WithModuleAliases returns a shallow copy of the client
+// with module name aliases set to aliases.
 func (c Client) WithModuleAliases( // nolint:gocritic
 	aliases ...gelcfg.ModuleAlias,
 ) *Client {
@@ -112,7 +119,8 @@ func (c Client) WithModuleAliases( // nolint:gocritic
 	return &c
 }
 
-// WithoutModuleAliases unsets module name aliases for the returned client.
+// WithoutModuleAliases returns a shallow copy of the client
+// with aliases unset.
 func (c Client) WithoutModuleAliases( // nolint:gocritic
 	aliases ...string,
 ) *Client {
@@ -193,7 +201,7 @@ func (c Client) WithWarningHandler( // nolint:gocritic
 	return &c
 }
 
-// WithQueryOptions sets the gelcfg.Queryoptions for the returned Client.
+// WithQueryOptions sets the [gelcfg.QueryOptions] for the returned Client.
 func (c Client) WithQueryOptions(
 	options gelcfg.QueryOptions,
 ) *Client { // nolint:gocritic

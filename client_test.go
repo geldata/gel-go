@@ -32,7 +32,7 @@ import (
 
 func TestConnectClient(t *testing.T) {
 	ctx := context.Background()
-	p, err := CreateClient(ctx, opts)
+	p, err := CreateClient(opts)
 	require.NoError(t, err)
 
 	var result string
@@ -56,7 +56,7 @@ func TestConnectClient(t *testing.T) {
 
 func TestClientRejectsTransaction(t *testing.T) {
 	ctx := context.Background()
-	p, err := CreateClient(ctx, opts)
+	p, err := CreateClient(opts)
 	require.NoError(t, err)
 
 	expected := "gel.DisabledCapabilityError: " +
@@ -87,7 +87,7 @@ func TestConnectClientZeroConcurrency(t *testing.T) {
 	o.Concurrency = 0
 
 	ctx := context.Background()
-	p, err := CreateClient(ctx, o)
+	p, err := CreateClient(o)
 	require.NoError(t, err)
 	require.NoError(t, p.EnsureConnected(ctx))
 
@@ -108,8 +108,7 @@ func TestConnectClientZeroConcurrency(t *testing.T) {
 }
 
 func TestCloseClientConcurently(t *testing.T) {
-	ctx := context.Background()
-	p, err := CreateClient(ctx, opts)
+	p, err := CreateClient(opts)
 	require.NoError(t, err)
 
 	errs := make(chan error)
@@ -130,7 +129,7 @@ func TestCloseClientConcurently(t *testing.T) {
 func TestClientTx(t *testing.T) {
 	ctx := context.Background()
 
-	p, err := CreateClient(ctx, opts)
+	p, err := CreateClient(opts)
 	require.NoError(t, err)
 	defer p.Close() // nolint:errcheck
 

@@ -24,11 +24,9 @@ import (
 )
 
 // RetryCondition represents scenarios that can cause a transaction
-// run in Tx() methods to be retried.
+// or a single query run outside a geltypes.TxBlock to be retried.
 type RetryCondition int
 
-// The following conditions can be configured with a custom RetryRule.
-// See RetryOptions.
 const (
 	// TxConflict indicates that the server could not complete a transaction
 	// because it encountered a deadlock or serialization error.
@@ -39,14 +37,14 @@ const (
 	NetworkError
 )
 
-// NewRetryOptions returns the default retry options.
+// NewRetryOptions returns the default RetryOptions.
 func NewRetryOptions() RetryOptions {
 	return RetryOptions{fromFactory: true}.WithDefault(NewRetryRule())
 }
 
-// RetryOptions configures how Tx() retries failed transactions.  Use
-// NewRetryOptions to get a default RetryOptions value instead of creating one
-// yourself.
+// RetryOptions configures how failed transactions or queries outside of
+// transactions are retried.  Use [NewRetryOptions] to get a default
+// RetryOptions value instead of creating one yourself.
 type RetryOptions struct {
 	fromFactory bool
 	txConflict  RetryRule
