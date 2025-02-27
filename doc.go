@@ -32,7 +32,7 @@
 //
 //	func main() {
 //	    ctx := context.Background()
-//	    client, err := gel.CreateClient(ctx, gelcfg.Options{})
+//	    client, err := gel.CreateClient(gelcfg.Options{})
 //	    if err != nil {
 //	        log.Fatal(err)
 //	    }
@@ -57,7 +57,7 @@
 // You may also connect to a database using a DSN:
 //
 //	dsn := "gel://edgedb@localhost/edgedb"
-//	client, err := gel.CreateClientDSN(ctx, dsn, opts)
+//	client, err := gel.CreateClientDSN(dsn, opts)
 //
 // Or you can use Option fields.
 //
@@ -67,7 +67,7 @@
 //	    Concurrency: 4,
 //	}
 //
-//	client, err := gel.CreateClient(ctx, opts)
+//	client, err := gel.CreateClient(opts)
 //
 // # Errors
 //

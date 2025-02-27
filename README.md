@@ -30,7 +30,7 @@ import (
 
 func main() {
 	ctx := context.Background()
-	client, err := gel.CreateClient(ctx, gelcfg.Options{})
+	client, err := gel.CreateClient(gelcfg.Options{})
 	if err != nil {
 		log.Fatal(err)
 	}
