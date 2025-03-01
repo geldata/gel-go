@@ -221,6 +221,10 @@ func (c Client) WithQueryOptions(
 	return &c
 }
 
+// WithQueryTag returns a copy of the client with the [sys::QueryStats] tag
+// set.
+//
+// [sys::QueryStats]: https://docs.geldata.com/reference/stdlib/sys#type::sys::QueryStats
 func (c Client) WithQueryTag(tag string) (*Client, error) {
 	for _, prefix := range []string{"gel/", "edgedb/"} {
 		if strings.HasPrefix(tag, prefix) {
@@ -233,7 +237,7 @@ func (c Client) WithQueryTag(tag string) (*Client, error) {
 
 	if len(tag) > 128 {
 		return nil, gelerrint.NewInvalidArgumentError(
-			fmt.Sprintf("tag too long (> 128 characters)"),
+			"tag too long (> 128 characters)",
 			nil,
 		)
 	}
@@ -241,4 +245,14 @@ func (c Client) WithQueryTag(tag string) (*Client, error) {
 	c.copyPool()
 	c.pool.QueryConfig.Annotations["tag"] = tag
 	return &c, nil
+}
+
+// WithoutQueryTag returns a copy of the client with the [sys::QueryStats] tag
+// removed.
+//
+// [sys::QueryStats]: https://docs.geldata.com/reference/stdlib/sys#type::sys::QueryStats
+func (c Client) WithoutQueryTag() *Client {
+	c.copyPool()
+	delete(c.pool.QueryConfig.Annotations, "tag")
+	return &c
 }
