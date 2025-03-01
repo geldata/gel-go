@@ -67,13 +67,33 @@ func (c *protocolConnection) pesimistic2pX(r *buff.Reader, q *query) error {
 	return c.execute2pX(r, q, cdcs)
 }
 
+func (c *protocolConnection) writeAnnotations(w *buff.Writer, q *query) error {
+	n := len(q.cfg.Annotations)
+	if c.protocolVersion.GTE(protocolVersion3p0) && n > 0 {
+		if n >= 1<<16 {
+			return gelerr.NewInvalidArgumentError("too many annotations", nil)
+		}
+		w.PushUint16(uint16(n))
+		for key, val := range q.cfg.Annotations {
+			w.PushString(key)
+			w.PushString(val)
+		}
+	} else {
+		w.PushUint16(0)
+	}
+
+	return nil
+}
+
 func (c *protocolConnection) parse2pX(
 	r *buff.Reader,
 	q *query,
 ) (*CommandDescriptionV2, error) {
 	w := buff.NewWriter(c.writeMemory[:0])
 	w.BeginMessage(uint8(Parse))
-	w.PushUint16(0) // no headers
+	if err := c.writeAnnotations(w, q); err != nil {
+		return nil, err
+	}
 	w.PushUint64(q.getCapabilities())
 	w.PushUint64(0) // no compilation_flags
 	w.PushUint64(q.cfg.QueryOptions.ImplicitLimit())
@@ -195,7 +215,9 @@ func (c *protocolConnection) execute2pX(
 ) error {
 	w := buff.NewWriter(c.writeMemory[:0])
 	w.BeginMessage(uint8(Execute))
-	w.PushUint16(0) // no headers
+	if err := c.writeAnnotations(w, q); err != nil {
+		return err
+	}
 	w.PushUint64(q.getCapabilities())
 	w.PushUint64(0) // no compilation_flags
 	w.PushUint64(q.cfg.QueryOptions.ImplicitLimit())

@@ -17,8 +17,13 @@
 package gel
 
 import (
+	"fmt"
+	"maps"
+	"strings"
+
 	"github.com/geldata/gel-go/gelcfg"
 	gel "github.com/geldata/gel-go/internal/client"
+	gelerrint "github.com/geldata/gel-go/internal/gelerr"
 )
 
 // WithTxOptions returns a shallow copy of the client
@@ -50,7 +55,10 @@ func (c Client) WithRetryOptions( // nolint:gocritic
 }
 
 func (c *Client) copyPool() {
+	annotations := make(map[string]string, len(c.pool.QueryConfig.Annotations))
+	maps.Copy(annotations, c.pool.QueryConfig.Annotations)
 	pool := *c.pool
+	pool.QueryConfig.Annotations = annotations
 	c.pool = &pool
 }
 
@@ -211,4 +219,26 @@ func (c Client) WithQueryOptions(
 	c.copyPool()
 	c.pool.QueryConfig.QueryOptions = options
 	return &c
+}
+
+func (c Client) WithQueryTag(tag string) (*Client, error) {
+	for _, prefix := range []string{"gel/", "edgedb/"} {
+		if strings.HasPrefix(tag, prefix) {
+			return nil, gelerrint.NewInvalidArgumentError(
+				fmt.Sprintf("reserved tag: %s*", prefix),
+				nil,
+			)
+		}
+	}
+
+	if len(tag) > 128 {
+		return nil, gelerrint.NewInvalidArgumentError(
+			fmt.Sprintf("tag too long (> 128 characters)"),
+			nil,
+		)
+	}
+
+	c.copyPool()
+	c.pool.QueryConfig.Annotations["tag"] = tag
+	return &c, nil
 }

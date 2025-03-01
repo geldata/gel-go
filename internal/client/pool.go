@@ -75,6 +75,7 @@ func NewPool(dsn string, opts gelcfg.Options) (*Pool, error) { // nolint:gocriti
 			QueryOptions:   gelcfg.NewQueryOptions(),
 			TxOptions:      gelcfg.NewTxOptions(),
 			RetryOptions:   gelcfg.NewRetryOptions(),
+			Annotations:    make(map[string]string),
 		},
 	}
 
