@@ -92,7 +92,7 @@ func (c *transactableConn) Tx(
 	ctx context.Context,
 	action types.TxBlock,
 	state map[string]interface{},
-	cfg QueryConfig,
+	cfg *QueryConfig,
 ) (err error) {
 	conn, err := c.borrow("transaction")
 	if err != nil {
@@ -116,7 +116,7 @@ func (c *transactableConn) Tx(
 				borrowableConn: borrowableConn{conn: conn},
 				txState:        &txState{},
 				state:          state,
-				cfg:            cfg,
+				cfg:            *cfg,
 			}
 			err = tx.start(ctx)
 			if err != nil {

@@ -264,7 +264,7 @@ func (c *Client) Tx(ctx context.Context, action geltypes.TxBlock) error {
 		ctx,
 		action,
 		c.pool.State,
-		c.pool.QueryConfig,
+		&c.pool.QueryConfig,
 	)
 	return gel.FirstError(err, c.pool.Release(conn, err))
 }
