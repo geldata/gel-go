@@ -72,7 +72,7 @@ func NewQuery(
 	state map[string]interface{},
 	out interface{},
 	parse bool,
-	cfg QueryConfig,
+	cfg *QueryConfig,
 ) (*query, error) { // nolint:revive
 	var (
 		expCard Cardinality
@@ -95,7 +95,7 @@ func NewQuery(
 			args:         args,
 			capabilities: capabilities,
 			state:        state,
-			cfg:          cfg,
+			cfg:          *cfg,
 			parse:        parse,
 		}, nil
 	case "Query":
@@ -127,7 +127,7 @@ func NewQuery(
 		args:         args,
 		capabilities: capabilities,
 		state:        state,
-		cfg:          cfg,
+		cfg:          *cfg,
 		parse:        parse,
 	}
 
@@ -163,6 +163,7 @@ type unseter interface {
 	Unset()
 }
 
+// QueryConfig controls how a query is executed
 type QueryConfig struct {
 	WarningHandler gelcfg.WarningHandler
 	QueryOptions   gelcfg.QueryOptions
@@ -179,7 +180,7 @@ func RunQuery(
 	out interface{},
 	args []interface{},
 	state map[string]interface{},
-	cfg QueryConfig,
+	cfg *QueryConfig,
 ) error {
 	if method == "QuerySingleJSON" {
 		switch out.(type) {

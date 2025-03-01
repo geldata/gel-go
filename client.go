@@ -80,7 +80,7 @@ func (c *Client) Execute(
 		gel.CopyState(c.pool.State),
 		nil,
 		true,
-		c.pool.QueryConfig,
+		&c.pool.QueryConfig,
 	)
 	if err != nil {
 		return err
@@ -110,7 +110,7 @@ func (c *Client) Query(
 		out,
 		args,
 		c.pool.State,
-		c.pool.QueryConfig,
+		&c.pool.QueryConfig,
 	)
 	return gel.FirstError(err, c.pool.Release(conn, err))
 }
@@ -138,7 +138,7 @@ func (c *Client) QuerySingle(
 		out,
 		args,
 		c.pool.State,
-		c.pool.QueryConfig,
+		&c.pool.QueryConfig,
 	)
 	return gel.FirstError(err, c.pool.Release(conn, err))
 }
@@ -163,7 +163,7 @@ func (c *Client) QueryJSON(
 		out,
 		args,
 		c.pool.State,
-		c.pool.QueryConfig,
+		&c.pool.QueryConfig,
 	)
 	return gel.FirstError(err, c.pool.Release(conn, err))
 }
@@ -190,7 +190,7 @@ func (c *Client) QuerySingleJSON(
 		out,
 		args,
 		c.pool.State,
-		c.pool.QueryConfig,
+		&c.pool.QueryConfig,
 	)
 	return gel.FirstError(err, c.pool.Release(conn, err))
 }
@@ -215,7 +215,7 @@ func (c *Client) QuerySQL(
 		out,
 		args,
 		c.pool.State,
-		c.pool.QueryConfig,
+		&c.pool.QueryConfig,
 	)
 	return gel.FirstError(err, c.pool.Release(conn, err))
 }
@@ -239,7 +239,7 @@ func (c *Client) ExecuteSQL(
 		gel.CopyState(c.pool.State),
 		nil,
 		true,
-		c.pool.QueryConfig,
+		&c.pool.QueryConfig,
 	)
 	if err != nil {
 		return err
