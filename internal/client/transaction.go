@@ -76,10 +76,8 @@ func (s *txState) assertStarted(opName string) error {
 type Tx struct {
 	borrowableConn
 	*txState
-	options        gelcfg.TxOptions
-	state          map[string]interface{}
-	warningHandler gelcfg.WarningHandler
-	queryOpts      gelcfg.QueryOptions
+	state map[string]interface{}
+	cfg   QueryConfig
 }
 
 func (t *Tx) execute(
@@ -95,8 +93,7 @@ func (t *Tx) execute(
 		t.state,
 		nil,
 		false,
-		t.warningHandler,
-		t.queryOpts,
+		&t.cfg,
 	)
 	if err != nil {
 		return err
@@ -152,7 +149,7 @@ func (t *Tx) start(ctx context.Context) error {
 		)
 	}
 
-	query := startTxQuery(t.options)
+	query := startTxQuery(t.cfg.TxOptions)
 	return t.execute(ctx, query, startedTx)
 }
 
@@ -202,8 +199,7 @@ func (t *Tx) Execute(
 		t.state,
 		nil,
 		true,
-		t.warningHandler,
-		t.queryOpts,
+		&t.cfg,
 	)
 	if err != nil {
 		return err
@@ -227,8 +223,7 @@ func (t *Tx) Query(
 		out,
 		args,
 		t.state,
-		t.warningHandler,
-		t.queryOpts,
+		&t.cfg,
 	)
 }
 
@@ -250,8 +245,7 @@ func (t *Tx) QuerySingle(
 		out,
 		args,
 		t.state,
-		t.warningHandler,
-		t.queryOpts,
+		&t.cfg,
 	)
 }
 
@@ -270,8 +264,7 @@ func (t *Tx) QueryJSON(
 		out,
 		args,
 		t.state,
-		t.warningHandler,
-		t.queryOpts,
+		&t.cfg,
 	)
 }
 
@@ -292,8 +285,7 @@ func (t *Tx) QuerySingleJSON(
 		out,
 		args,
 		t.state,
-		t.warningHandler,
-		t.queryOpts,
+		&t.cfg,
 	)
 }
 
@@ -311,8 +303,7 @@ func (t *Tx) ExecuteSQL(
 		t.state,
 		nil,
 		true,
-		t.warningHandler,
-		t.queryOpts,
+		&t.cfg,
 	)
 	if err != nil {
 		return err
@@ -336,7 +327,6 @@ func (t *Tx) QuerySQL(
 		out,
 		args,
 		t.state,
-		t.warningHandler,
-		t.queryOpts,
+		&t.cfg,
 	)
 }

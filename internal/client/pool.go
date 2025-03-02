@@ -49,16 +49,19 @@ func NewPool(dsn string, opts gelcfg.Options) (*Pool, error) { // nolint:gocriti
 		return nil, err
 	}
 
+	warningHandler := gelcfg.LogWarnings
+	if opts.WarningHandler != nil {
+		warningHandler = opts.WarningHandler
+	}
+
 	False := false
 	p := &Pool{
 		isClosed:             &False,
 		isClosedMutex:        &sync.RWMutex{},
 		Cfg:                  cfg,
-		TxOpts:               gelcfg.NewTxOptions(),
 		Concurrency:          int(opts.Concurrency),
 		freeConns:            make(chan func() *transactableConn, 1),
 		potentialConnsMutext: &sync.Mutex{},
-		RetryOpts:            gelcfg.NewRetryOptions(),
 		cacheCollection: cacheCollection{
 			ServerSettings:    cfg.ServerSettings,
 			typeIDCache:       cache.New(1_000),
@@ -67,6 +70,13 @@ func NewPool(dsn string, opts gelcfg.Options) (*Pool, error) { // nolint:gocriti
 			capabilitiesCache: cache.New(1_000),
 		},
 		State: make(map[string]interface{}),
+		QueryConfig: QueryConfig{
+			WarningHandler: warningHandler,
+			QueryOptions:   gelcfg.NewQueryOptions(),
+			TxOptions:      gelcfg.NewTxOptions(),
+			RetryOptions:   gelcfg.NewRetryOptions(),
+			Annotations:    make(map[string]string),
+		},
 	}
 
 	return p, nil
@@ -85,8 +95,7 @@ type Pool struct {
 	// A buffered channel of connections ready for use.
 	freeConns chan func() *transactableConn
 
-	TxOpts    gelcfg.TxOptions
-	RetryOpts gelcfg.RetryOptions
+	QueryConfig QueryConfig
 
 	Cfg             *connConfig
 	cacheCollection cacheCollection
@@ -97,8 +106,6 @@ type Pool struct {
 
 func (p *Pool) newConn(ctx context.Context) (*transactableConn, error) {
 	conn := transactableConn{
-		txOpts:    p.TxOpts,
-		retryOpts: p.RetryOpts,
 		reconnectingConn: &reconnectingConn{
 			Cfg:             p.Cfg,
 			cacheCollection: p.cacheCollection,
