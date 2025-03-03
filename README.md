@@ -13,7 +13,7 @@ $ go get github.com/geldata/gel-go
 
 ## Basic Usage
 
-Follow the [Gel tutorial](https://www.geldata.com/docs/guides/quickstart)
+Follow the [Gel tutorial](https://docs.geldata.com/learn/quickstart/overview/fastapi)
 to get Gel installed and minimally configured.
 
 ```go
@@ -49,8 +49,8 @@ func main() {
 ## Development
 
 A local installation of Gel is required to run tests.
-Download Gel from [here](https://www.geldata.com/download)
-or [build it manually](https://www.geldata.com/docs/reference/dev).
+Download Gel from [here](https://docs.geldata.com/learn/cli)
+or [build it manually](https://docs.geldata.com/resources/guides/contributing/code).
 
 To run the test suite run `make test`.
 To run lints `make lint`.
