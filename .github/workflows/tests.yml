@@ -30,9 +30,14 @@ jobs:
           go-version: ${{ matrix.go-version }}
 
       - name: Lint
+        uses: golangci/golangci-lint-action@v6.5.0
+        with:
+          # GREP_FOR_THIS_STRING_WHEN_CHANGING_GOLANGCI_LINT_VERSION
+          version: v1.61.0
+
+      - name: Check Code Generation
         run: |
           go install
-          make lint
           make gen
           if [[ "$(git status --porcelain)" != "" ]]; then
             echo "Generated code is out of sync. Run make gen."
