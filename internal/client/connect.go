@@ -20,12 +20,12 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"slices"
 
 	"github.com/geldata/gel-go/internal"
 	"github.com/geldata/gel-go/internal/buff"
 	"github.com/geldata/gel-go/internal/gelerr"
 	"github.com/xdg/scram"
-	"golang.org/x/exp/slices"
 )
 
 // ClientHandshakeMessage writes a client handshake message.

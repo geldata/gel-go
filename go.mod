@@ -1,15 +1,16 @@
 module github.com/geldata/gel-go
 
-go 1.18
+go 1.23.0
+
+toolchain go1.23.5
 
 require (
 	github.com/certifi/gocertifi v0.0.0-20210507211836-431795d63e8d
 	github.com/pelletier/go-toml/v2 v2.1.0
-	github.com/sigurn/crc16 v0.0.0-20211026045750-20ab5afb07e3
+	github.com/sigurn/crc16 v0.0.0-20240131213347-83fcde1e29d1
 	github.com/stretchr/testify v1.8.4
 	github.com/xdg/scram v1.0.5
-	golang.org/x/exp v0.0.0-20230510235704-dd950f8aeaea
-	golang.org/x/sys v0.29.0
+	golang.org/x/sys v0.30.0
 )
 
 require (
@@ -22,7 +23,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/xdg/stringprep v1.0.3 // indirect
-	golang.org/x/crypto v0.32.0 // indirect
-	golang.org/x/text v0.21.0
+	golang.org/x/crypto v0.33.0 // indirect
+	golang.org/x/text v0.22.0
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
