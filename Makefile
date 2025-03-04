@@ -3,6 +3,8 @@ CHANGES:=$(shell git status --porcelain)
 quality: lint test bench
 
 lint:
+	# GREP_FOR_THIS_STRING_WHEN_CHANGING_GOLANGCI_LINT_VERSION
+	go run github.com/golangci/golangci-lint/cmd/golangci-lint@v1.61.0 config verify
 	go run github.com/golangci/golangci-lint/cmd/golangci-lint@v1.61.0 run --sort-results
 
 test:

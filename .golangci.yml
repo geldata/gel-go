@@ -20,18 +20,6 @@ run:
   build-tags:
     - tools
 
-  # which dirs to skip: issues from them won't be reported;
-  # can use regexp here: generated.*, regexp is applied on full path;
-  # default value is empty list, but default dirs are skipped independently
-  # from this option's value (see skip-dirs-use-default).
-  # "/" will be replaced by current OS file path separator to properly work
-  # on Windows.
-  skip-dirs:
-
-  # default is true. Enables skipping of directories:
-  #   vendor$, third_party$, testdata$, examples$, Godeps$, builtin$
-  skip-dirs-use-default: true
-
   # by default isn't set. If set we pass it to "go list -mod={option}". From "go help modules":
   # If invoked with -mod=readonly, the go command is disallowed from the implicit
   # automatic updating of go.mod described above. Instead, it fails when any changes
@@ -144,52 +132,11 @@ linters-settings:
     # simplify code: gofmt with `-s` option, true by default
     simplify: true
   goheader:
-    values:
-      const:
-        # define here const type values in format k:v, for example:
-        # YEAR: 2020
-      regexp:
-        # define here regexp type values, for example
-        # AUTHOR: .*@mycompany\.com
     template-path: ./.licence-header.txt
   goimports:
     # put imports beginning with prefix after 3rd-party packages;
     # it's a comma-separated list of prefixes
     local-prefixes: github.com/org/project
-  golint:
-    # minimal confidence for issues, default is 0.8
-    min-confidence: 0.8
-  gomnd:
-    # the list of enabled checks,
-    # see https://github.com/tommy-muehle/go-mnd/#checks for description.
-    checks: argument,case,condition,operation,return,assign
-  gomodguard:
-    allowed:
-      # List of allowed modules
-      modules:
-        # - gopkg.in/yaml.v2
-      # List of allowed module domains
-      domains:
-        # - golang.org
-    blocked:
-      # List of blocked modules
-      modules:
-        # # Blocked module
-        # - github.com/uudashr/go-module:
-        #     # Recommended modules that should be used instead (Optional)
-        #     recommendations:
-        #       - golang.org/x/mod
-        #     # Reason why the recommended module should be used (Optional)
-        #     reason: "`mod` is the official go.mod parser library."
-      # List of blocked module version constraints
-      versions:
-        # # Blocked module with version constraint
-        # - github.com/mitchellh/go-homedir:
-        #     # Version constraint,
-        #     see https://github.com/Masterminds/semver#basic-comparisons
-        #     version: "< 1.1.0"
-        #     # Reason why the version constraint exists. (Optional)
-        #     reason: "testing if blocked version constraint works."
   govet:
     # settings per analyzer
     settings:
@@ -205,14 +152,6 @@ linters-settings:
     enable-all: true
     disable:
       - fieldalignment
-  depguard:
-    list-type: blacklist
-    include-go-root: false
-    packages:
-      - github.com/sirupsen/logrus
-    packages-with-error-message:
-      # specify an error message to output when a blacklisted package is used
-      - github.com/sirupsen/logrus: "logging is allowed only by logutils.Log"
   lll:
     # max line length, lines longer will be reported. Default is 120.
     # '\t' is counted as 1 character by default,
@@ -220,9 +159,6 @@ linters-settings:
     line-length: 79
     # tab width in spaces. Default to 1.
     tab-width: 4
-  maligned:
-    # print struct with more effective memory layout or not, false by default
-    suggest-new: true
   misspell:
     # Correct spellings using locale preferences for US or UK.
     # Default is to use a neutral variety of English.
@@ -253,8 +189,6 @@ linters-settings:
     allow-unused: false
     # Disable to ensure that nolint directives don't have a leading space.
     # Default is true.
-    allow-leading-space: true
-    # Exclude following linters from requiring an explanation.  Default is [].
     allow-no-explanation: []
     # Enable to require an explanation of nonzero length
     # after each nolint directive. Default is false.
@@ -274,15 +208,6 @@ linters-settings:
     # XXX: if you enable this setting,
     # unparam will report a lot of false-positives in text editors:
     # if it's called for subdir of a project it can't find external interfaces.
-    # All text editor integrations with golangci-lint
-    # call it on a directory with the changed file.
-    check-exported: false
-  unused:
-    # treat code as a program (not a library)
-    # and report unused exported identifiers; default is false.
-    # XXX: if you enable this setting,
-    # unused will report a lot of false-positives in text editors:
-    # if it's called for subdir of a project it can't find funcs usages.
     # All text editor integrations with golangci-lint
     # call it on a directory with the changed file.
     check-exported: false
@@ -318,21 +243,6 @@ linters-settings:
     # Report non-wrapping error creation using fmt.Errorf
     errorf: true
 
-  # The custom section can be used to define linter plugins
-  # to be loaded at runtime. See README doc for more info.
-  custom:
-    # Each custom linter should have a unique name.
-    # example:
-    #  # The path to the plugin *.so. Can be absolute or local.
-    #  # Required for each custom linter
-    #  path: /path/to/example.so
-    #  # The description of the linter.
-    #  # Optional, just for documentation purposes.
-    #  description: This is an example usage of a plugin linter.
-    #  # Intended to point to the repo location of the linter.
-    #  # Optional, just for documentation purposes.
-    #  original-url: github.com/golangci/example-linter
-
 linters:
   enable:
     - errcheck
@@ -352,11 +262,7 @@ linters:
     - unconvert
     - unused
     - whitespace
-  disable:
   disable-all: false
-  presets:
-    # - bugs
-    # - unused
   fast: false
 
 
@@ -385,11 +291,6 @@ issues:
   # The default value is false. If set to true exclude and exclude-rules
   # regular expressions become case sensitive.
   exclude-case-sensitive: false
-
-  # The list of ids of default excludes to include or disable.
-  # By default it's empty.
-  include:
-    # - EXC0002 # disable excluding of issues about comments from golint
 
   # Maximum issues count per one linter. Set to 0 to disable. Default is 50.
   max-issues-per-linter: 0
