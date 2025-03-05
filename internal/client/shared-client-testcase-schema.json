@@ -1,0 +1,226 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name"
+  ],
+  "properties": {
+    " ": {
+      "type": "string"
+    },
+    "~": {
+      "type": "string"
+    },
+    "env": {
+      "type": "object"
+    },
+    "name": {
+      "type": "string"
+    },
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "address",
+        "branch",
+        "tlsCAData",
+        "user",
+        "waitUntilAvailable",
+        "database",
+        "password",
+        "secretKey",
+        "serverSettings",
+        "tlsSecurity",
+        "tlsServerName"
+      ],
+      "properties": {
+        "address": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "branch": {
+          "type": "string"
+        },
+        "tlsCAData": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "user": {
+          "type": "string"
+        },
+        "waitUntilAvailable": {
+          "type": "string"
+        },
+        "database": {
+          "type": "string"
+        },
+        "password": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "secretKey": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "serverSettings": {
+          "type": "object",
+          "additionalProperties": false,
+          "patternProperties": {
+            "^.*$": {
+              "type": "string"
+            }
+          }
+        },
+        "tlsSecurity": {
+          "type": "string"
+        },
+        "tlsServerName": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "warnings": {
+      "type": "array"
+    },
+    "fs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [],
+      "properties": {
+        "cwd": {
+          "type": "string"
+        },
+        "files": {
+          "type": "object",
+          "additionalProperties": false,
+          "patternProperties": {
+            "^.*$": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "project-path"
+                  ],
+                  "properties": {
+                    "project-path": {
+                      "type": "string"
+                    }
+                  },
+                  "patternProperties": {
+                    "^.*$": {
+                      "type": "string"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "homedir": {
+          "type": "string"
+        }
+      }
+    },
+    "platform": {
+      "type": "string"
+    },
+    "opts": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "dsn": {
+          "type": "string"
+        },
+        "port": {
+          "type": [
+            "number",
+            "string"
+          ]
+        },
+        "tlsSecurity": {
+          "type": "string"
+        },
+        "tlsServerName": {
+          "type": "string"
+        },
+        "tlsCA": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "host": {
+          "type": "string"
+        },
+        "waitUntilAvailable": {
+          "type": "string"
+        },
+        "branch": {
+          "type": "string"
+        },
+        "database": {
+          "type": "string"
+        },
+        "serverSettings": {
+          "type": "object",
+          "additionalProperties": false,
+          "patternProperties": {
+            "^.*$": {
+              "type": "string"
+            }
+          }
+        },
+        "instance": {
+          "type": "string"
+        },
+        "tlsCAFile": {
+          "type": "string"
+        },
+        "credentialsFile": {
+          "type": "string"
+        },
+        "user": {
+          "type": "string"
+        },
+        "credentials": {
+          "type": "string"
+        },
+        "secretKey": {
+          "type": "string"
+        }
+      }
+    },
+    "error": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

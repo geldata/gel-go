@@ -24,6 +24,9 @@ bench:
 
 format:
 	gofmt -s -w .
+	tmpfile=$(shell mktemp); \
+	jq '.' internal/client/shared-client-testcase-schema.json > $$tmpfile; \
+	mv $$tmpfile internal/client/shared-client-testcase-schema.json
 
 errors:
 	type edb || (\
