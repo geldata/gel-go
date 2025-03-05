@@ -14,21 +14,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// edgeql-go is a tool to generate go functions from edgeql queries. When run
-// in a Gel project directory (or subdirectory) a *_edgeql.go source file
-// will be generated for each *.edgeql file.  The generated go will have an
-// edgeqlFileName and edgeqlFileNameJSON function with typed arguments and
-// return value matching the query's arguments and result shape.
+// edgeql-go is a tool to generate go functions from edgeql queries.
+//
+// When run in a Gel project directory or subdirectory an *_edgeql.go source
+// file will be generated for each *.edgeql file.  The generated go will have a
+// query and queryJSON function with typed arguments and return value matching
+// the query's arguments and result shape.  For example if a directory contains
+// a get_user.edgeql file, edgeql-go will create a get_user_edgeql.go file
+// with a getUser(...) and getUserJSON(...) function.
 //
 // # Install
 //
-//	go install github.com/geldata/gel-go/cmd/edgeql-go@latest
+// For go 1.24 and above:
 //
-// See also [pinning tool dependencies].
+//	go get -tool github.com/geldata/gel-go/cmd/edgeql-go@latest
+//
+// For go 1.23 and below:
+//
+//	go install github.com/geldata/gel-go/cmd/edgeql-go@latest
 //
 // # Usage
 //
-// Typically this process would be run using [go generate] like this:
+// Typically this process would be run using [go generate].
+// For go 1.24 and above:
+//
+//	//go:generate go tool edgeql-go -pubfuncs -pubtypes -mixedcaps
+//
+// For go 1.23 and below:
 //
 //	//go:generate edgeql-go -pubfuncs -pubtypes -mixedcaps
 //
@@ -36,6 +48,5 @@
 //
 //	edgeql-go -help
 //
-// [pinning tool dependencies]: https://github.com/golang/go/wiki/Modules#how-can-i-track-tool-dependencies-for-a-module
 // [go generate]: https://go.dev/blog/generate
 package main
