@@ -286,7 +286,7 @@ func assertNoRetry(
 
 	errorCount := 3
 	for i := 0; i < 3; i++ {
-		err := <-errors
+		err = <-errors
 		if err != nil {
 			assert.ErrorContains(t, err, "TransactionSerializationError")
 		} else {
