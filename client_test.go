@@ -21,6 +21,8 @@ import (
 	"errors"
 	"sync"
 	"testing"
+	"time"
+	"unsafe"
 
 	"github.com/geldata/gel-go/gelcfg"
 	"github.com/geldata/gel-go/gelerr"
@@ -255,52 +257,61 @@ func TestQuerySQL(t *testing.T) {
 	}
 }
 
-// TODO: return when session_idle_timeout changes
-// will be reflected at connection creation
+func TestSessionIdleTimeout(t *testing.T) {
+	ctx := context.Background()
+	p, err := gel.NewPool("", opts)
+	require.NoError(t, err)
 
-// func TestSessionIdleTimeout(t *testing.T) {
-// 	ctx := context.Background()
-// 	p, err := CreateClient(ctx, opts)
-// 	require.NoError(t, err)
+	con, err := p.Acquire(ctx)
+	require.NoError(t, err)
 
-// 	var result geltypes.Duration
-// 	err = p.QuerySingle(ctx,
-// 		"SELECT assert_single(cfg::Config.session_idle_timeout)", &result)
-// 	require.NoError(t, err)
-// 	require.Equal(t, geltypes.Duration(1_000_000), result)
+	var result geltypes.Duration
+	err = gel.RunQuery(
+		ctx,
+		con,
+		"QuerySingle",
+		"SELECT assert_single(cfg::Config.session_idle_timeout)",
+		&result,
+		[]any{},
+		p.State,
+		&p.QueryConfig,
+	)
+	require.NoError(t, p.Release(con, err))
+	require.NoError(t, err)
+	require.Equal(t, geltypes.Duration(1_000_000), result)
 
-// 	// The client keeps one connection in the pool.
-// 	// Get a reference to that connection.
-// 	con1, err := p.acquire(ctx)
-// 	require.NoError(t, err)
-// 	require.NotNil(t, con1)
+	// The client keeps one connection in the pool.
+	// Get a reference to that connection.
+	con1, err := p.Acquire(ctx)
+	require.NoError(t, err)
+	require.NotNil(t, con1)
 
-// 	err = p.release(con1, nil)
-// 	require.NoError(t, err)
+	err = p.Release(con1, nil)
+	require.NoError(t, err)
 
-// 	// After releasing we should get the same connection
-//  // back again on acquire.
-// 	con2, err := p.acquire(ctx)
-// 	require.NoError(t, err)
-// 	require.NotNil(t, con2)
-// 	assert.Equal(t, con1, con2)
+	// After releasing we should get the same connection
+	// back again on acquire.
+	con2, err := p.Acquire(ctx)
+	require.NoError(t, err)
+	require.NotNil(t, con2)
+	assert.Equal(t, con1, con2)
 
-// 	err = p.release(con2, nil)
-// 	require.NoError(t, err)
+	err = p.Release(con2, nil)
+	require.NoError(t, err)
 
-// 	// If the pooled connection is not used for longer than the
-// 	// session_idle_timeout then the next acquired connection
-//  // should be a new connection.
-// 	time.Sleep(1_200 * time.Millisecond)
+	// If the pooled connection is not used for longer than the
+	// session_idle_timeout then the next acquired connection
+	// should be a new connection.
+	time.Sleep(1_200 * time.Millisecond)
 
-// 	con3, err := p.acquire(ctx)
-// 	require.NoError(t, err)
-// 	require.NotNil(t, con3)
-// 	assert.NotEqual(t, unsafe.Pointer(con1), unsafe.Pointer(con3))
+	con3, err := p.Acquire(ctx)
+	require.NoError(t, err)
+	require.NotNil(t, con3)
+	assert.NotEqual(t, unsafe.Pointer(con1), unsafe.Pointer(con3))
 
-// 	err = p.release(con3, nil)
-// 	assert.NoError(t, err)
-// }
+	err = p.Release(con3, nil)
+	assert.NoError(t, err)
+}
 
 // Try to trigger race conditions
 func TestConcurentClientUsage(t *testing.T) {
