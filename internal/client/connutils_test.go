@@ -36,9 +36,27 @@ import (
 	"github.com/geldata/gel-go/geltypes"
 	gelerrint "github.com/geldata/gel-go/internal/gelerr"
 	"github.com/geldata/gel-go/internal/snc"
+	"github.com/kaptinlin/jsonschema"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+var sharedClientTestcaseSchema = newSharedClientTestcaseSchema()
+
+func newSharedClientTestcaseSchema() *jsonschema.Schema {
+	name := "shared-client-testcase-schema.json"
+	data, err := os.ReadFile(name)
+	if err != nil {
+		log.Fatalln("error reading", name, err)
+	}
+
+	schema, err := jsonschema.NewCompiler().Compile(data)
+	if err != nil {
+		log.Fatalln("error compiling", name, err)
+	}
+
+	return schema
+}
 
 func setenvmap(m map[string]string) func() {
 	funcs := make([]func(), 0, len(m))
@@ -560,6 +578,17 @@ func createFile(tmpDir, file, data string) error {
 	return os.WriteFile(file, []byte(data), 0644)
 }
 
+// Make sure that if something changes in the shared-client-testcases that is
+// not expected the tests don't pass.
+func assertTestcaseSchema(t *testing.T, testcase any) {
+	result := sharedClientTestcaseSchema.Validate(testcase)
+	if !result.IsValid() {
+		details, _ := json.MarshalIndent(result.ToList(), "", "  ")
+		fmt.Println(testcase)
+		require.Fail(t, string(details))
+	}
+}
+
 func TestConnectionParameterResolution(t *testing.T) {
 	data, err := os.ReadFile(
 		"../../shared-client-testcases/connection_testcases.json",
@@ -574,6 +603,8 @@ func TestConnectionParameterResolution(t *testing.T) {
 
 	for i, testcase := range testcases {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			assertTestcaseSchema(t, testcase)
+
 			if _, ok := testcase["platform"]; ok {
 				t.Skip("platform specific tests not supported")
 			}

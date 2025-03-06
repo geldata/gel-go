@@ -35,6 +35,14 @@ jobs:
           # GREP_FOR_THIS_STRING_WHEN_CHANGING_GOLANGCI_LINT_VERSION
           version: v1.61.0
 
+      - name: Check Formatting
+        run: |
+          make format
+          if [[ "$(git status --porcelain)" != "" ]]; then
+            echo "Code is not formatted. Run make format."
+            exit 1
+          fi
+
       - name: Check Code Generation
         run: |
           go install
