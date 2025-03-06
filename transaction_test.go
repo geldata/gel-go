@@ -309,14 +309,18 @@ func TestSQLTx(t *testing.T) {
 	}
 }
 
-func selectInTx(t *testing.T, cb func(context.Context, geltypes.Tx, string)) {
+func selectInTx(
+	t *testing.T,
+	cb func(context.Context, geltypes.Tx, string) error,
+) {
 	name := randomName()
 	ctx := context.Background()
 	err := client.Tx(ctx, func(ctx context.Context, tx geltypes.Tx) error {
 		e := tx.Execute(ctx, "INSERT TxTest {name := <str>$0};", name)
 		require.NoError(t, e)
 
-		cb(ctx, tx, name)
+		e = cb(ctx, tx, name)
+		require.NoError(t, e)
 		return nil
 	})
 	require.NoError(t, err)
@@ -338,22 +342,38 @@ func selectInTx(t *testing.T, cb func(context.Context, geltypes.Tx, string)) {
 }
 
 func TestTxExerciseQuery(t *testing.T) {
-	selectInTx(t, func(ctx context.Context, tx geltypes.Tx, name string) {
+	selectInTx(t, func(
+		ctx context.Context,
+		tx geltypes.Tx,
+		name string,
+	) error {
 		var result []string
 		query := "SELECT name := TxTest.name FILTER name = <str>$0"
 		err := tx.Query(ctx, query, &result, name)
-		require.NoError(t, err)
+		if err != nil {
+			return err
+		}
+
 		assert.Equal(t, []string{name}, result)
+		return nil
 	})
 }
 
 func TestTxExerciseQueryJSON(t *testing.T) {
-	selectInTx(t, func(ctx context.Context, tx geltypes.Tx, name string) {
+	selectInTx(t, func(
+		ctx context.Context,
+		tx geltypes.Tx,
+		name string,
+	) error {
 		var result []byte
 		query := "SELECT name := TxTest.name FILTER name = <str>$0"
 		err := tx.QueryJSON(ctx, query, &result, name)
-		require.NoError(t, err)
+		if err != nil {
+			return err
+		}
+
 		assert.Equal(t, fmt.Sprintf(`["%s"]`, name), string(result))
+		return nil
 	})
 }
 
@@ -362,29 +382,23 @@ func TestTxExerciseQuerySQL(t *testing.T) {
 		t.Skipf("server version is too old to support SQL")
 	}
 
-	selectInTx(t, func(ctx context.Context, tx geltypes.Tx, name string) {
+	selectInTx(t, func(
+		ctx context.Context,
+		tx geltypes.Tx,
+		name string,
+	) error {
 		var result []struct {
 			Name string `gel:"name"`
 		}
 		query := `SELECT name FROM "TxTest" WHERE name = $1`
 		err := tx.QuerySQL(ctx, query, &result, name)
-		require.NoError(t, err)
+		if err != nil {
+			return err
+		}
+
 		require.Equal(t, 1, len(result))
 		assert.Equal(t, name, result[0].Name)
-	})
-}
-
-func TestTxQuerySQLMalformedQuery(t *testing.T) {
-	t.Skip("see https://github.com/geldata/gel-go/issues/335")
-	if serverVersion(t) < 6 {
-		t.Skip("server version is too old to support SQL")
-	}
-
-	selectInTx(t, func(ctx context.Context, tx geltypes.Tx, name string) {
-		var result []string
-		err := tx.QuerySQL(ctx, `malformed query`, &result, name)
-		require.NoError(t, err)
-		assert.Equal(t, []string{name}, result)
+		return nil
 	})
 }
 
@@ -393,12 +407,20 @@ func TestTxExerciseQuerySingle(t *testing.T) {
 		t.Skipf("server version is too old to support SQL")
 	}
 
-	selectInTx(t, func(ctx context.Context, tx geltypes.Tx, name string) {
+	selectInTx(t, func(
+		ctx context.Context,
+		tx geltypes.Tx,
+		name string,
+	) error {
 		var result string
 		query := "SELECT name := TxTest.name FILTER name = <str>$0 LIMIT 1"
 		err := tx.QuerySingle(ctx, query, &result, name)
-		require.NoError(t, err)
+		if err != nil {
+			return err
+		}
+
 		assert.Equal(t, name, result)
+		return nil
 	})
 }
 
@@ -407,11 +429,51 @@ func TestTxExerciseQuerySingleJSON(t *testing.T) {
 		t.Skipf("server version is too old to support SQL")
 	}
 
-	selectInTx(t, func(ctx context.Context, tx geltypes.Tx, name string) {
+	selectInTx(t, func(
+		ctx context.Context,
+		tx geltypes.Tx,
+		name string,
+	) error {
 		var result []byte
 		query := "SELECT name := TxTest.name FILTER name = <str>$0 LIMIT 1"
 		err := tx.QuerySingleJSON(ctx, query, &result, name)
-		require.NoError(t, err)
+		if err != nil {
+			return err
+		}
+
 		assert.Equal(t, fmt.Sprintf(`"%s"`, name), string(result))
+		return nil
 	})
+}
+
+func TestTxQuerySQLMalformedQuery(t *testing.T) {
+	if serverVersion(t) < 6 {
+		t.Skip("server version is too old to support SQL")
+	}
+
+	ctx := context.Background()
+	err := client.Tx(ctx, func(ctx context.Context, tx geltypes.Tx) error {
+		var result []string
+		err := tx.QuerySQL(ctx, `malformed query`, &result)
+		if err != nil {
+			assert.ErrorContains(t, err, "EdgeQLSyntaxError")
+			return err
+		}
+
+		assert.Fail(t, "expected a syntax error")
+		return nil
+	})
+	assert.ErrorContains(t, err, "EdgeQLSyntaxError")
+
+	err = client.Tx(ctx, func(ctx context.Context, tx geltypes.Tx) error {
+		err = tx.ExecuteSQL(ctx, `malformed query`)
+		if err != nil {
+			assert.ErrorContains(t, err, "EdgeQLSyntaxError")
+			return err
+		}
+
+		assert.Fail(t, "expected a syntax error")
+		return nil
+	})
+	assert.ErrorContains(t, err, "EdgeQLSyntaxError")
 }
