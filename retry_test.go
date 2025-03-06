@@ -24,6 +24,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/geldata/gel-go/gelcfg"
 	"github.com/geldata/gel-go/geltypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -235,6 +236,243 @@ func TestRetryTxQuerySingle(t *testing.T) {
 
 func TestRetryTxQuerySingleJSON(t *testing.T) {
 	assertRetryTx(
+		t,
+		func(ctx context.Context, tx geltypes.Tx, query, name string) error {
+			var value []byte
+			return tx.QuerySingleJSON(ctx, query, &value, name)
+		},
+	)
+}
+
+func assertNoRetry(
+	t *testing.T,
+	cb func(context.Context, string, string, int64, int64) error,
+) {
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+
+	err := client.Execute(ctx, `SELECT 1`)
+	require.NoError(t, err)
+
+	query := `
+		SELECT (
+			INSERT Counter {
+				name := <str>$0,
+				value := 1,
+			} UNLESS CONFLICT ON .name
+			ELSE (
+				UPDATE Counter
+				SET { value := .value + 1 }
+			)
+		).value
+		ORDER BY sys::_sleep(<int64>$1)
+		THEN <int64>$2
+	`
+
+	name := randomName()
+	errors := make(chan error, 3)
+
+	go func() {
+		errors <- cb(ctx, query, name, 0, 0)
+	}()
+
+	go func() {
+		errors <- cb(ctx, query, name, 5, 1)
+	}()
+
+	go func() {
+		errors <- cb(ctx, query, name, 5, 2)
+	}()
+
+	errorCount := 3
+	for i := 0; i < 3; i++ {
+		err := <-errors
+		if err != nil {
+			assert.ErrorContains(t, err, "TransactionSerializationError")
+		} else {
+			errorCount--
+		}
+	}
+	require.Greater(t, errorCount, 0)
+
+	var value int32
+	query = "SELECT (SELECT Counter FILTER .name = <str>$0).value"
+	err = client.QuerySingle(ctx, query, &value, name)
+	assert.NoError(t, err)
+	assert.GreaterOrEqual(t, value, int32(0))
+	assert.Less(t, value, int32(3))
+}
+
+func noRetriesClient() *Client {
+	rule := gelcfg.NewRetryRule().WithAttempts(1)
+	opts := gelcfg.NewRetryOptions().WithDefault(rule)
+	return client.WithRetryOptions(opts)
+}
+
+func TestWithRetryOptionsExecute(t *testing.T) {
+	assertNoRetry(t, func(
+		ctx context.Context,
+		query, name string,
+		sleep, nonce int64,
+	) error {
+		return noRetriesClient().
+			Execute(ctx, query, name, sleep, nonce)
+	})
+}
+
+func TestWithRetryOptionsQuery(t *testing.T) {
+	assertNoRetry(t, func(
+		ctx context.Context,
+		query, name string,
+		sleep, nonce int64,
+	) error {
+		var value []int32
+		return noRetriesClient().
+			Query(ctx, query, &value, name, sleep, nonce)
+	})
+}
+
+func TestWithRetryOptionsQueryJSON(t *testing.T) {
+	assertNoRetry(t, func(
+		ctx context.Context,
+		query, name string,
+		sleep, nonce int64,
+	) error {
+		var value []byte
+		return noRetriesClient().
+			QueryJSON(ctx, query, &value, name, sleep, nonce)
+	})
+}
+
+func TestWithRetryOptionsQuerySingle(t *testing.T) {
+	assertNoRetry(t, func(
+		ctx context.Context,
+		query, name string,
+		sleep, nonce int64,
+	) error {
+		var value int32
+		return noRetriesClient().
+			QuerySingle(ctx, query, &value, name, sleep, nonce)
+	})
+}
+
+func TestWithRetryOptionsQuerySingleJSON(t *testing.T) {
+	assertNoRetry(t, func(
+		ctx context.Context,
+		query, name string,
+		sleep, nonce int64,
+	) error {
+		var value []byte
+		return noRetriesClient().
+			QuerySingleJSON(ctx, query, &value, name, sleep, nonce)
+	})
+}
+
+func assertNoRetryTx(
+	t *testing.T,
+	cb func(context.Context, geltypes.Tx, string, string) error,
+) {
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+
+	name := randomName()
+	iterMtx := sync.Mutex{}
+	iterations := 0
+	barrier := sync.WaitGroup{}
+	barrier.Add(2)
+	errors := make(chan error, 2)
+	noRetries := noRetriesClient()
+
+	for i := 0; i < 2; i++ {
+		go func() {
+			errors <- noRetries.Tx(
+				ctx,
+				func(ctx context.Context, tx geltypes.Tx) error {
+					iterMtx.Lock()
+					iterations++
+					iterMtx.Unlock()
+
+					require.NoError(t, tx.Execute(ctx, "SELECT 1"))
+
+					barrier.Done()
+					barrier.Wait()
+
+					query := `
+					SELECT (
+						INSERT Counter {
+							name := <str>$0,
+							value := 1,
+						}
+						UNLESS CONFLICT ON .name
+						ELSE (
+							UPDATE Counter
+							SET { value := .value + 1 }
+						)
+					).value
+				`
+
+					err := cb(ctx, tx, query, name)
+					if err != nil {
+						barrier.Add(1)
+					}
+					return err
+				},
+			)
+		}()
+	}
+
+	errorCount := 2
+	for i := 0; i < 2; i++ {
+		err := <-errors
+		if err != nil {
+			require.ErrorContains(t, err, "TransactionSerializationError")
+		} else {
+			errorCount--
+		}
+	}
+	require.Greater(t, 2, errorCount)
+
+	assert.Equal(t, 2, iterations)
+
+	var value int32
+	query := "SELECT (SELECT Counter FILTER .name = <str>$0).value"
+	err := noRetries.QuerySingle(ctx, query, &value, name)
+	assert.NoError(t, err)
+	assert.Equal(t, int32(1), value)
+}
+
+func TestWithRetryOptionsTxQuery(t *testing.T) {
+	assertNoRetryTx(
+		t,
+		func(ctx context.Context, tx geltypes.Tx, query, name string) error {
+			var value []int32
+			return tx.Query(ctx, query, &value, name)
+		},
+	)
+}
+
+func TestWithRetryOptionsTxQueryJSON(t *testing.T) {
+	assertNoRetryTx(
+		t,
+		func(ctx context.Context, tx geltypes.Tx, query, name string) error {
+			var value []byte
+			return tx.QueryJSON(ctx, query, &value, name)
+		},
+	)
+}
+
+func TestWithRetryOptionsTxQuerySingle(t *testing.T) {
+	assertNoRetryTx(
+		t,
+		func(ctx context.Context, tx geltypes.Tx, query, name string) error {
+			var value int32
+			return tx.QuerySingle(ctx, query, &value, name)
+		},
+	)
+}
+
+func TestWithRetryOptionsTxQuerySingleJSON(t *testing.T) {
+	assertNoRetryTx(
 		t,
 		func(ctx context.Context, tx geltypes.Tx, query, name string) error {
 			var value []byte

@@ -35,7 +35,7 @@ import (
 
 var rnd = snc.NewRand()
 
-func TestTxRollesBack(t *testing.T) {
+func TestTxRollsBack(t *testing.T) {
 	ctx := context.Background()
 	err := client.Tx(ctx, func(ctx context.Context, tx geltypes.Tx) error {
 		query := "INSERT TxTest {name := 'Test Roll Back'};"
@@ -70,7 +70,7 @@ func TestTxRollesBack(t *testing.T) {
 	require.Equal(t, 0, len(testNames), "The transaction wasn't rolled back")
 }
 
-func TestTxRollesBackOnUserError(t *testing.T) {
+func TestTxRollsBackOnUserError(t *testing.T) {
 	ctx := context.Background()
 	err := client.Tx(ctx, func(ctx context.Context, tx geltypes.Tx) error {
 		query := "INSERT TxTest {name := 'Test Roll Back'};"
