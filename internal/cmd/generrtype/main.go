@@ -1,6 +1,6 @@
-// This source file is part of the EdgeDB open source project.
+// This source file is part of the Gel open source project.
 //
-// Copyright EdgeDB Inc. and the EdgeDB authors.
+// Copyright Gel Data Inc. and the Gel authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -132,9 +132,9 @@ func main() {
 
 	types := errgen.ParseTypes(data)
 
-	fmt.Print(`// This source file is part of the EdgeDB open source project.
+	fmt.Print(`// This source file is part of the Gel open source project.
 //
-// Copyright EdgeDB Inc. and the EdgeDB authors.
+// Copyright Gel Data Inc. and the Gel authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
