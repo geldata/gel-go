@@ -350,9 +350,9 @@ func (r *configResolver) resolveOptions(
 		}
 	}
 
-	if opts.Database != "" { // nolint:staticcheck
+	if opts.Database != "" {
 		e := r.setDatabase(
-			opts.Database, // nolint:staticcheck
+			opts.Database,
 			"Database options",
 		)
 		if e != nil {

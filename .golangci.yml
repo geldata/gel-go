@@ -263,10 +263,15 @@ issues:
 
   # Excluding configuration per-path, per-linter, per-text and per-source
   exclude-rules:
-    # Exclude doc links
-    - linters:
+    # Don't complain about doc link urls that are more then 80 characters
+    - source: "^// \\[.*\\]: http"
+      linters:
         - lll
-      source: "^// \\[.*\\]: http"
+
+    # Don't complain about using our own deprecated gelcfg.Options.Database.
+    - source: "\\.Database[ ,)]"
+      linters:
+        - staticcheck
 
   # Independently from option `exclude` we use default exclude patterns,
   # it can be disabled by this option. To list all
