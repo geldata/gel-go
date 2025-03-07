@@ -17,7 +17,7 @@ jobs:
     strategy:
       matrix:
         go-version: ["1.22", "1.23"]
-        edgedb-version: [stable, nightly]
+        gel-version: [stable, nightly]
         os: [ubuntu-latest, macos-latest]
     steps:
       - uses: actions/checkout@v3
@@ -60,15 +60,15 @@ jobs:
         if: ${{ startswith(matrix.os, 'windows') }}
         uses: vampire/setup-wsl@v1
         with:
-          wsl-shell-user: edgedb
+          wsl-shell-user: gel
           additional-packages:
             ca-certificates
             curl
 
-      - name: Install EdgeDB
-        uses: edgedb/setup-edgedb@v1
+      - name: Install Gel
+        uses: geldata/setup-gel@358410cc5618fa956d16f1b7157a8c86f9b517cf # v1.4
         with:
-          server-version: ${{ matrix.edgedb-version }}
+          server-version: ${{ matrix.gel-version }}
 
       - name: Test
         run: |
