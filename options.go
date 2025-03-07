@@ -26,11 +26,8 @@ import (
 	gelerrint "github.com/geldata/gel-go/internal/gelerr"
 )
 
-// WithTxOptions returns a shallow copy of the client
-// with the TxOptions set to opts.
-func (c Client) WithTxOptions(
-	opts gelcfg.TxOptions,
-) *Client { // nolint:gocritic
+// WithTxOptions returns a copy of c with the [gelcfg.TxOptions] set to opts.
+func (c Client) WithTxOptions(opts gelcfg.TxOptions) *Client { //nolint:gocritic,lll
 	if !opts.IsValid() {
 		panic("TxOptions not created with NewTxOptions() are not valid")
 	}
@@ -40,11 +37,9 @@ func (c Client) WithTxOptions(
 	return &c
 }
 
-// WithRetryOptions returns a shallow copy of the client
+// WithRetryOptions returns a copy of c
 // with the RetryOptions set to opts.
-func (c Client) WithRetryOptions( // nolint:gocritic
-	opts gelcfg.RetryOptions,
-) *Client {
+func (c Client) WithRetryOptions(opts gelcfg.RetryOptions) *Client { //nolint:gocritic,lll
 	if !opts.IsValid() {
 		panic("RetryOptions not created with NewRetryOptions() are not valid")
 	}
@@ -62,15 +57,13 @@ func (c *Client) copyPool() {
 	c.pool = &pool
 }
 
-// WithConfig returns a shallow copy of the client
+// WithConfig returns a copy of c
 // with configuration values set to cfg.
-// Equivalent to using the edgeql configure session command.
-// For available configuration parameters refer to the [Config documentation].
+// This is equivalent to using the edgeql configure session command.
+// For available configuration parameters refer to the [config documentation].
 //
-// [Config documentation]: https://docs.geldata.com/reference/stdlib/cfg#ref-std-cfg
-func (c Client) WithConfig( // nolint:gocritic
-	cfg map[string]interface{},
-) *Client {
+// [config documentation]: https://docs.geldata.com/reference/stdlib/cfg#ref-std-cfg
+func (c Client) WithConfig(cfg map[string]interface{}) *Client { //nolint:gocritic,lll
 	state := gel.CopyState(c.pool.State)
 
 	var config map[string]interface{}
@@ -90,8 +83,7 @@ func (c Client) WithConfig( // nolint:gocritic
 	return &c
 }
 
-// WithoutConfig returns a shallow copy of the client
-// with keys unset from the configuration.
+// WithoutConfig returns a copy of c with keys unset from the configuration.
 func (c Client) WithoutConfig(key ...string) *Client { // nolint:gocritic
 	state := gel.CopyState(c.pool.State)
 
@@ -107,11 +99,9 @@ func (c Client) WithoutConfig(key ...string) *Client { // nolint:gocritic
 	return &c
 }
 
-// WithModuleAliases returns a shallow copy of the client
-// with module name aliases set to aliases.
-func (c Client) WithModuleAliases( // nolint:gocritic
-	aliases ...gelcfg.ModuleAlias,
-) *Client {
+// WithModuleAliases returns a copy of c with module name aliases set to
+// aliases.
+func (c Client) WithModuleAliases(aliases ...gelcfg.ModuleAlias) *Client { //nolint:gocritic,lll
 	state := gel.CopyState(c.pool.State)
 
 	var a []interface{}
@@ -129,11 +119,8 @@ func (c Client) WithModuleAliases( // nolint:gocritic
 	return &c
 }
 
-// WithoutModuleAliases returns a shallow copy of the client
-// with aliases unset.
-func (c Client) WithoutModuleAliases( // nolint:gocritic
-	aliases ...string,
-) *Client {
+// WithoutModuleAliases returns a copy of c with aliases unset.
+func (c Client) WithoutModuleAliases(aliases ...string) *Client { //nolint:gocritic,lll
 	state := gel.CopyState(c.pool.State)
 
 	if a, ok := state["aliases"]; ok {
@@ -159,10 +146,12 @@ func (c Client) WithoutModuleAliases( // nolint:gocritic
 	return &c
 }
 
-// WithGlobals sets values for global variables for the returned client.
-func (c Client) WithGlobals( // nolint:gocritic
-	globals map[string]interface{},
-) *Client {
+// WithGlobals returns a copy of c with its global variables updated from
+// globals.
+//
+// WithGlobals does not remove variables that are not mentioned in globals.
+// Instead use [Client.WithoutGlobals].
+func (c Client) WithGlobals(globals map[string]interface{}) *Client { //nolint:gocritic,lll
 	state := gel.CopyState(c.pool.State)
 
 	var g map[string]interface{}
@@ -182,8 +171,8 @@ func (c Client) WithGlobals( // nolint:gocritic
 	return &c
 }
 
-// WithoutGlobals unsets values for global variables for the returned client.
-func (c Client) WithoutGlobals(globals ...string) *Client { // nolint:gocritic
+// WithoutGlobals returns a copy of c with the specified global names unset.
+func (c Client) WithoutGlobals(globals ...string) *Client { //nolint:gocritic
 	state := gel.CopyState(c.pool.State)
 
 	if c, ok := state["globals"]; ok {
@@ -198,31 +187,31 @@ func (c Client) WithoutGlobals(globals ...string) *Client { // nolint:gocritic
 	return &c
 }
 
-// WithWarningHandler sets the warning handler for the returned client. If
-// warningHandler is nil gelcfg.LogWarnings is used.
-func (c Client) WithWarningHandler( // nolint:gocritic
-	warningHandler gelcfg.WarningHandler,
-) *Client {
-	if warningHandler == nil {
-		warningHandler = gelcfg.LogWarnings
+// WithWarningHandler returns a copy of c with its [gelcfg.WarningHandler] set
+// to handler. If handler is nil, [gelcfg.LogWarnings] is used.
+func (c Client) WithWarningHandler(handler gelcfg.WarningHandler) *Client { //nolint:gocritic,lll
+	if handler == nil {
+		handler = gelcfg.LogWarnings
 	}
 
 	c.copyPool()
-	c.pool.QueryConfig.WarningHandler = warningHandler
+	c.pool.QueryConfig.WarningHandler = handler
 	return &c
 }
 
-// WithQueryOptions sets the [gelcfg.QueryOptions] for the returned Client.
-func (c Client) WithQueryOptions(
-	options gelcfg.QueryOptions,
-) *Client { // nolint:gocritic
+// WithQueryOptions returns a copy of c with its gelcfg.Queryoptions set to
+// opts.
+func (c Client) WithQueryOptions(opts gelcfg.QueryOptions) *Client { //nolint:gocritic,lll
 	c.copyPool()
-	c.pool.QueryConfig.QueryOptions = options
+	c.pool.QueryConfig.QueryOptions = opts
 	return &c
 }
 
-// WithQueryTag returns a copy of the client with the [sys::QueryStats] tag
-// set.
+// WithQueryTag returns a copy of c with the [sys::QueryStats] tag set.
+//
+// sys::QueryStats only records the tag from the first time a query is run.
+// Running the query again with a different tag will not change the tag in the
+// sys::QueryStats entry.
 //
 // [sys::QueryStats]: https://docs.geldata.com/reference/stdlib/sys#type::sys::QueryStats
 func (c Client) WithQueryTag(tag string) (*Client, error) {
@@ -247,8 +236,7 @@ func (c Client) WithQueryTag(tag string) (*Client, error) {
 	return &c, nil
 }
 
-// WithoutQueryTag returns a copy of the client with the [sys::QueryStats] tag
-// removed.
+// WithoutQueryTag returns a copy of c with the [sys::QueryStats] tag removed.
 //
 // [sys::QueryStats]: https://docs.geldata.com/reference/stdlib/sys#type::sys::QueryStats
 func (c Client) WithoutQueryTag() *Client {

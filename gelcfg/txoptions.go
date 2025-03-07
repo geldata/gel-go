@@ -37,6 +37,8 @@ func NewTxOptions() TxOptions {
 }
 
 // TxOptions configures how transactions behave.
+//
+// See [github.com/geldata/gel-go.Client.WithTxOptions] for an example.
 type TxOptions struct {
 	// fromFactory indicates that a TxOptions value was created using
 	// NewTxOptions() and not created directly with TxOptions{}.
