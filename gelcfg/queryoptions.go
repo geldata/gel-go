@@ -24,6 +24,8 @@ func NewQueryOptions() QueryOptions {
 
 // QueryOptions controls limitations that the server can impose on
 // queries.
+//
+// See [github.com/geldata/gel-go.Client.WithQueryOptions] for example usage.
 type QueryOptions struct {
 	fromFactory bool
 

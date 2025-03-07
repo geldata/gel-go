@@ -27,9 +27,11 @@ import (
 // WarningHandler takes an error slice that represent warnings and optionally
 // returns an error. This can be used to log warnings, increment metrics,
 // promote warnings to errors by returning them etc.
+//
+// See [github.com/geldata/gel-go.Client.WithWarningHandler] for an example.
 type WarningHandler = func([]error) error
 
-// LogWarnings is a [WarningHandler] that logs warnings.
+// LogWarnings is a [WarningHandler] that logs warnings using [log.Println].
 func LogWarnings(errors []error) error {
 	for _, err := range errors {
 		log.Println("Gel warning:", err.Error())
@@ -173,6 +175,8 @@ const (
 )
 
 // ModuleAlias is an alias name and module name pair.
+//
+// See [github.com/geldata/gel-go.Client.WithModuleAliases] for example usage.
 type ModuleAlias struct {
 	Alias  string
 	Module string
