@@ -654,7 +654,7 @@ func TestConnectionParameterResolution(t *testing.T) {
 						t.Skip("unusable port value")
 					}
 				}
-				options.Database = getStr( // nolint:staticcheck
+				options.Database = getStr(
 					t,
 					opts,
 					"database",
