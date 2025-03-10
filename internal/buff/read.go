@@ -105,14 +105,6 @@ func (r *Reader) Next(doneReadingSignal chan struct{}) bool {
 	return true
 }
 
-func min(x, y int) int {
-	if x < y {
-		return x
-	}
-
-	return y
-}
-
 func (r *Reader) feed(n int) error {
 	if r.data != nil && len(r.data.Buf) == 0 {
 		r.data.Release()

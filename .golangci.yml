@@ -43,9 +43,6 @@ output:
   # print linter name in the end of issue text, default is true
   print-linter-name: true
 
-  # make issues output unique by line, default is true
-  uniq-by-line: true
-
   # add a prefix to the output file references; default is no prefix
   path-prefix: ""
 
@@ -92,16 +89,6 @@ linters-settings:
     # minimal occurrences count to trigger, 3 by default
     min-occurrences: 3
   gocritic:
-    # Which checks should be enabled; can't be combined with 'disabled-checks';
-    # See https://go-critic.github.io/overview#checks-overview
-    # To check which checks are enabled run `GL_DEBUG=gocritic golangci-lint run`
-    # By default list of stable checks is used.
-    # enabled-checks:
-    #   - rangeValCopy
-
-    # Which checks should be disabled; can't be combined with 'enabled-checks'; default is empty
-    disabled-checks:
-      - regexpMust
 
     # Enable multiple checks by tags, run `GL_DEBUG=gocritic golangci-lint run` to see all tags and checks.
     # Empty list by default. See https://github.com/go-critic/go-critic#usage -> section "Tags".
@@ -119,8 +106,7 @@ linters-settings:
     # minimal code complexity to report, 30 by default (but we recommend 10-20)
     min-complexity: 10
   godot:
-    # check all top-level comments, not only declarations
-    check-all: false
+    scope: all
   godox:
     # report any comments starting with keywords, this is useful for TODO or FIXME comments that
     # might be left in the code accidentally and should be resolved before merging
