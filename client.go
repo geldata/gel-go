@@ -249,11 +249,16 @@ func (c *Client) ExecuteSQL(
 	return gel.FirstError(err, c.pool.Release(conn, err))
 }
 
-// Tx runs action in a transaction retrying failed attempts.
+// Tx runs action in a transaction retrying failed attempts. Queries must be
+// executed on the [geltypes.Tx] that is passed to action. Queries executed on
+// the client in a geltypes.TxBlock will not run in the transaction and will be
+// applied immediately.
 //
-// Retries are governed by [gelcfg.RetryOptions] and [gelcfg.RetryRule].
-// retry options can be set using [Client.WithRetryOptions].
-// See [gelcfg.RetryRule] for more details on how they work.
+// The geltypes.TxBlock may be re-run if any of the queries fail in a way that
+// might succeed on subsequent attempts. Retries are governed by
+// [gelcfg.RetryOptions] and [gelcfg.RetryRule].  Retry options can be set
+// using [Client.WithRetryOptions].  See [gelcfg.RetryRule] for more details on
+// how they work.
 func (c *Client) Tx(ctx context.Context, action geltypes.TxBlock) error {
 	conn, err := c.pool.Acquire(ctx)
 	if err != nil {

@@ -33,7 +33,8 @@ type Executor interface {
 	QuerySingleJSON(context.Context, string, any, ...any) error
 }
 
-// Tx is a transaction. Use gel.Client.Tx() to get a transaction.
+// Tx is a transaction. Use [github.com/geldata/gel-go.Client.Tx] to get a
+// transaction.
 type Tx interface {
 	Executor
 }
