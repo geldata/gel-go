@@ -189,8 +189,8 @@ type DecimalMarshaler interface {
 // [std::decimal]: https://docs.geldata.com/reference/reference/protocol/dataformats#std-decimal
 type DecimalUnmarshaler interface {
 	// UnmarshalEdgeDBDecimal must be able to decode the decimal wire format.
-	// UnmarshalEdgeDBDecimal must copy the data if it wishes to retain the data
-	// after returning.
+	// UnmarshalEdgeDBDecimal must copy the data if it wishes to retain the
+	// data after returning.
 	UnmarshalEdgeDBDecimal(data []byte) error
 }
 
@@ -210,8 +210,8 @@ type DateTimeMarshaler interface {
 // [std::datetime]: https://docs.geldata.com/reference/reference/protocol/dataformats#std-datetime
 type DateTimeUnmarshaler interface {
 	// UnmarshalEdgeDBDateTime must be able to decode the datetime wire format.
-	// UnmarshalEdgeDBDateTime must copy the data if it wishes to retain the data
-	// after returning.
+	// UnmarshalEdgeDBDateTime must copy the data if it wishes to retain the
+	// data after returning.
 	UnmarshalEdgeDBDateTime(data []byte) error
 }
 
@@ -226,13 +226,14 @@ type LocalDateTimeMarshaler interface {
 }
 
 // LocalDateTimeUnmarshaler is the interface implemented by an object
-// that can unmarshal the [cal::local_datetime] wire format representation of itself.
+// that can unmarshal the [cal::local_datetime] wire format representation of
+// itself.
 //
 // [cal::local_datetime]: https://docs.geldata.com/reference/reference/protocol/dataformats#cal-local-datetime
 type LocalDateTimeUnmarshaler interface {
-	// UnmarshalEdgeDBLocalDateTime must be able to decode the local_datetime wire
-	// format. UnmarshalEdgeDBLocalDateTime must copy the data if it wishes to
-	// retain the data after returning.
+	// UnmarshalEdgeDBLocalDateTime must be able to decode the local_datetime
+	// wire format. UnmarshalEdgeDBLocalDateTime must copy the data if it
+	// wishes to retain the data after returning.
 	UnmarshalEdgeDBLocalDateTime(data []byte) error
 }
 
@@ -247,13 +248,14 @@ type LocalDateMarshaler interface {
 }
 
 // LocalDateUnmarshaler is the interface implemented by an object
-// that can unmarshal the [cal::locl_date] wire format representation of itself.
+// that can unmarshal the [cal::locl_date] wire format representation of
+// itself.
 //
 // [cal::locl_date]: https://docs.geldata.com/reference/reference/protocol/dataformats#cal-local-date
 type LocalDateUnmarshaler interface {
-	// UnmarshalEdgeDBLocalDate must be able to decode the local_date wire format.
-	// UnmarshalEdgeDBLocalDate must copy the data if it wishes to retain the data
-	// after returning.
+	// UnmarshalEdgeDBLocalDate must be able to decode the local_date wire
+	// format.  UnmarshalEdgeDBLocalDate must copy the data if it wishes to
+	// retain the data after returning.
 	UnmarshalEdgeDBLocalDate(data []byte) error
 }
 
@@ -268,13 +270,14 @@ type LocalTimeMarshaler interface {
 }
 
 // LocalTimeUnmarshaler is the interface implemented by an object
-// that can unmarshal the [cal::local_time] wire format representation of itself.
+// that can unmarshal the [cal::local_time] wire format representation of
+// itself.
 //
 // [cal::local_time]: https://docs.geldata.com/reference/reference/protocol/dataformats#cal-local-time
 type LocalTimeUnmarshaler interface {
-	// UnmarshalEdgeDBLocalTime must be able to decode the local_time wire format.
-	// UnmarshalEdgeDBLocalTime must copy the data if it wishes to retain the data
-	// after returning.
+	// UnmarshalEdgeDBLocalTime must be able to decode the local_time wire
+	// format.  UnmarshalEdgeDBLocalTime must copy the data if it wishes to
+	// retain the data after returning.
 	UnmarshalEdgeDBLocalTime(data []byte) error
 }
 
@@ -294,8 +297,8 @@ type DurationMarshaler interface {
 // [std::duration]: https://docs.geldata.com/reference/reference/protocol/dataformats#std-duration
 type DurationUnmarshaler interface {
 	// UnmarshalEdgeDBDuration must be able to decode the duration wire format.
-	// UnmarshalEdgeDBDuration must copy the data if it wishes to retain the data
-	// after returning.
+	// UnmarshalEdgeDBDuration must copy the data if it wishes to retain the
+	// data after returning.
 	UnmarshalEdgeDBDuration(data []byte) error
 }
 
@@ -304,8 +307,8 @@ type DurationUnmarshaler interface {
 //
 // [cal::relative_duration]: https://docs.geldata.com/reference/reference/protocol/dataformats#cal-relative-duration
 type RelativeDurationMarshaler interface {
-	// MarshalEdgeDBRelativeDuration encodes the receiver into a binary form and
-	// returns the result.
+	// MarshalEdgeDBRelativeDuration encodes the receiver into a binary form
+	// and returns the result.
 	MarshalEdgeDBRelativeDuration() ([]byte, error)
 }
 
@@ -316,8 +319,8 @@ type RelativeDurationMarshaler interface {
 // [cal::relative_duration]: https://docs.geldata.com/reference/reference/protocol/dataformats#cal-relative-duration
 type RelativeDurationUnmarshaler interface {
 	// UnmarshalEdgeDBRelativeDuration must be able to decode the
-	// cal::relative_duration wire format.  UnmarshalEdgeDBRelativeDuration must
-	// copy data if it wishes to retain the bytes after returning.
+	// cal::relative_duration wire format.  UnmarshalEdgeDBRelativeDuration
+	// must copy data if it wishes to retain the bytes after returning.
 	UnmarshalEdgeDBRelativeDuration(data []byte) error
 }
 
@@ -422,8 +425,8 @@ type Float32Marshaler interface {
 // [std::float32]: https://docs.geldata.com/reference/reference/protocol/dataformats#std-float32
 type Float32Unmarshaler interface {
 	// UnmarshalEdgeDBFloat32 must be able to decode the float32 wire format.
-	// UnmarshalEdgeDBFloat32 must copy the data if it wishes to retain the data
-	// after returning.
+	// UnmarshalEdgeDBFloat32 must copy the data if it wishes to retain the
+	// data after returning.
 	UnmarshalEdgeDBFloat32(data []byte) error
 }
 
@@ -443,8 +446,8 @@ type Float64Marshaler interface {
 // [std::float64]: https://docs.geldata.com/reference/reference/protocol/dataformats#std-float64
 type Float64Unmarshaler interface {
 	// UnmarshalEdgeDBFloat64 must be able to decode the float64 wire format.
-	// UnmarshalEdgeDBFloat64 must copy the data if it wishes to retain the data
-	// after returning.
+	// UnmarshalEdgeDBFloat64 must copy the data if it wishes to retain the
+	// data after returning.
 	UnmarshalEdgeDBFloat64(data []byte) error
 }
 
