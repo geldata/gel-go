@@ -34,14 +34,6 @@ const defaultIdleConnectionTimeout = 30 * time.Second
 // DefaultConcurrency is used if no other concurrency setting is found.
 var DefaultConcurrency = max(4, runtime.NumCPU())
 
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-
-	return b
-}
-
 // NewPool makes a new pool.
 func NewPool(dsn string, opts gelcfg.Options) (*Pool, error) { // nolint:gocritic,lll
 	cfg, err := parseConnectDSNAndArgs(dsn, &opts, newCfgPaths())
