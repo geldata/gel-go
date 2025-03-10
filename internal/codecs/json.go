@@ -100,7 +100,7 @@ func (c *JSONCodec) encodeData(w *buff.Writer, data []byte) error {
 	w.PushUint32(uint32(1 + len(data)))
 
 	// json format is always 1
-	// https://www.edgedb.com/docs/internals/protocol/dataformats
+	// https://docs.geldata.com/reference/reference/protocol/dataformats#std-json
 	w.PushUint8(1)
 
 	w.PushBytes(data)

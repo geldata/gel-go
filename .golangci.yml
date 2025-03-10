@@ -277,10 +277,10 @@ issues:
 
   # Excluding configuration per-path, per-linter, per-text and per-source
   exclude-rules:
-    # Exclude doc links
-    - linters:
+    # Exclude comments with long urls
+    - source: "//.*http[s]?://"
+      linters:
         - lll
-      source: "^// \\[.*\\]: http"
 
   # Independently from option `exclude` we use default exclude patterns,
   # it can be disabled by this option. To list all

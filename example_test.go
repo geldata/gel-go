@@ -32,7 +32,7 @@ var (
 // [Link properties] are treated as fields in the linked to struct, and the @
 // is omitted from the field's tag.
 //
-// [Link properties]: https://www.edgedb.com/docs/guides/link_properties
+// [Link properties]: https://docs.geldata.com/reference/datamodel/linkprops#link-properties
 func Example_linkProperty() {
 	var result []struct {
 		Name    string `gel:"name"`

@@ -27,7 +27,7 @@ import (
 )
 
 // IDZero is descriptor ID 00000000-0000-0000-0000-000000000000
-// https://www.edgedb.com/docs/internals/protocol/typedesc#type-descriptors
+// https://docs.geldata.com/reference/reference/protocol/typedesc#type-descriptors
 var IDZero = geltypes.UUID{}
 
 //go:generate go run golang.org/x/tools/cmd/stringer@v0.25.0 -type Type
@@ -80,7 +80,7 @@ const (
 )
 
 // Descriptor is a type descriptor
-// https://www.edgedb.com/docs/internals/protocol/typedesc
+// https://docs.geldata.com/reference/reference/protocol/typedesc
 type Descriptor struct {
 	Type   Type
 	ID     geltypes.UUID

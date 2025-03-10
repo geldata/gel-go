@@ -32,7 +32,7 @@ var (
 	NoOpEncoder = noOpEncoder{}
 )
 
-// noOpDecoder decodes empty blocks i.e. does nothing.
+// noOpDecoder decodes [empty blocks] i.e. does nothing.
 //
 //	There is one special type with type id of zero:
 //	00000000-0000-0000-0000-000000000000.
@@ -40,7 +40,7 @@ var (
 //	It’s used when a statement returns no meaningful results,
 //	e.g. the CREATE DATABASE example statement.
 //
-// https://www.edgedb.com/docs/internals/protocol/typedesc#type-descriptors
+// [empty blocks]: https://docs.geldata.com/reference/reference/protocol/typedesc#type-descriptors
 type noOpDecoder struct{}
 
 func (c noOpDecoder) DescriptorID() types.UUID { return descriptor.IDZero }

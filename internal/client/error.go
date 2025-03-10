@@ -78,7 +78,7 @@ func positionFromHeaders(headers map[uint16]string) (*int, *int, error) {
 }
 
 // decodeErrorResponseMsg decodes an error response
-// https://www.edgedb.com/docs/internals/protocol/messages#errorresponse
+// https://docs.geldata.com/reference/reference/protocol/messages#errorresponse
 func decodeErrorResponseMsg(r *buff.Reader, query string) error {
 	r.Discard(1) // severity
 	w := Warning{
