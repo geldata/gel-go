@@ -19,6 +19,7 @@ package gel
 import (
 	"context"
 	"errors"
+	"fmt"
 	"math/big"
 	"os"
 	"testing"
@@ -1164,42 +1165,52 @@ func TestWithWarningHandler(t *testing.T) {
 		t.Skip("missing std::_warn_on_call")
 	}
 
+	// The default warning handler logs warnings. Make sure we never log
+	// warnings in this test so that there isn't noise in the test run output.
+	a := client.WithWarningHandler(func(_ []error) error { return nil })
+
 	seen := []error{}
-	a := client.WithWarningHandler(func(warnings []error) error {
+	b := a.WithWarningHandler(func(warnings []error) error {
 		seen = append(seen, warnings...)
 		return nil
 	})
 
-	err = a.Execute(ctx, `SELECT _warn_on_call()`)
+	// The server sends warnings in response to both parse and execute.  Use a
+	// query that we know is not cached so that we can assert exactly how many
+	// warnings are expected.
+	name := randomName()
+	query := fmt.Sprintf(`SELECT (%s := _warn_on_call()).%s`, name, name)
+
+	err = b.Execute(ctx, query)
 	require.NoError(t, err)
-	require.Greater(t, len(seen), 0)
+	require.Equal(t, 2, len(seen))
 
 	var resultMany []int64
 	seen = []error{}
-	err = a.Query(ctx, `SELECT _warn_on_call()`, &resultMany)
+	err = b.Query(ctx, query, &resultMany)
 	require.NoError(t, err)
-	require.Greater(t, len(seen), 0)
+	require.Equal(t, 2, len(seen))
 
 	var resultJSON []byte
 	seen = []error{}
-	err = a.QueryJSON(ctx, `SELECT _warn_on_call()`, &resultJSON)
+	err = b.QueryJSON(ctx, query, &resultJSON)
 	require.NoError(t, err)
-	require.Greater(t, len(seen), 0)
+	require.Equal(t, 2, len(seen))
 
 	var resultSingle int64
 	seen = []error{}
-	err = a.QuerySingle(ctx, `SELECT _warn_on_call()`, &resultSingle)
+	err = b.QuerySingle(ctx, query, &resultSingle)
 	require.NoError(t, err)
-	require.Greater(t, len(seen), 0)
+	require.Equal(t, 2, len(seen))
 
 	seen = []error{}
-	err = a.QuerySingleJSON(ctx, `SELECT _warn_on_call()`, &resultJSON)
+	err = b.QuerySingleJSON(ctx, query, &resultJSON)
 	require.NoError(t, err)
-	require.Greater(t, len(seen), 0)
+	require.Equal(t, 2, len(seen))
 
 	// Assert that the client config was not changed.
 	seen = []error{}
-	err = client.QuerySingle(ctx, `SELECT _warn_on_call()`, &resultSingle)
+	err = a.QuerySingle(ctx, query, &resultSingle)
 	require.NoError(t, err)
 	require.Equal(t, 0, len(seen))
 }
@@ -1211,10 +1222,10 @@ func TestWithQueryOptionsReadonly(t *testing.T) {
 		create property name -> str;
 	};`)
 	assert.NoError(t, err)
-	defer (func() {
+	defer func() {
 		err = client.Execute(ctx, `drop type QueryOptsTest;`)
 		assert.NoError(t, err)
-	})()
+	}()
 
 	var res struct {
 		ID types.UUID `edgedb:"id"`
