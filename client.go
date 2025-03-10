@@ -20,17 +20,24 @@ import (
 	"context"
 
 	"github.com/geldata/gel-go/gelcfg"
+	"github.com/geldata/gel-go/gelerr"
 	"github.com/geldata/gel-go/geltypes"
 	gel "github.com/geldata/gel-go/internal/client"
 )
 
 // CreateClient returns a new client. The client connects lazily. Call
-// Client.EnsureConnected() to force a connection.
+// [Client.EnsureConnected] to force a connection.
+//
+// We recommend using an empty [gelcfg.Options] struct.
+// [Read more] about the recommended ways to configure client connections.
+//
+// [Read more]: https://docs.geldata.com/reference/clients/connection
 func CreateClient(opts gelcfg.Options) (*Client, error) { // nolint:gocritic,lll
 	return CreateClientDSN("", opts)
 }
 
-// CreateClientDSN returns a new client. See also CreateClient.
+// CreateClientDSN returns a new Client. We recommend using [CreateClient] for
+// most use cases.
 //
 // dsn is either an instance name or a [DSN].
 //
@@ -51,7 +58,11 @@ type Client struct {
 	pool *gel.Pool
 }
 
-// EnsureConnected forces the client to connect if it hasn't already.
+// EnsureConnected forces the client to connect if it hasn't already. This can
+// be used to ensure that your program will fail early in the case that the
+// [configured connection parameters] are not correct.
+//
+// [configured connection parameters]: https://docs.geldata.com/reference/clients/connection
 func (c *Client) EnsureConnected(ctx context.Context) error {
 	return c.pool.EnsureConnected(ctx)
 }
@@ -62,11 +73,7 @@ func (c *Client) EnsureConnected(ctx context.Context) error {
 func (c *Client) Close() error { return c.pool.Close() }
 
 // Execute an EdgeQL command (or commands).
-func (c *Client) Execute(
-	ctx context.Context,
-	cmd string,
-	args ...interface{},
-) error {
+func (c *Client) Execute(ctx context.Context, cmd string, args ...interface{}) error { //nolint:lll
 	conn, err := c.pool.Acquire(ctx)
 	if err != nil {
 		return err
@@ -91,12 +98,7 @@ func (c *Client) Execute(
 }
 
 // Query runs a query and returns the results.
-func (c *Client) Query(
-	ctx context.Context,
-	cmd string,
-	out interface{},
-	args ...interface{},
-) error {
+func (c *Client) Query(ctx context.Context, cmd string, out interface{}, args ...interface{}) error { //nolint:lll
 	conn, err := c.pool.Acquire(ctx)
 	if err != nil {
 		return err
@@ -115,16 +117,15 @@ func (c *Client) Query(
 	return gel.FirstError(err, c.pool.Release(conn, err))
 }
 
-// QuerySingle runs a singleton-returning query and returns its element.
-// If the query executes successfully but doesn't return a result
-// a NoDataError is returned. If the out argument is an optional type the out
-// argument will be set to missing instead of returning a NoDataError.
-func (c *Client) QuerySingle(
-	ctx context.Context,
-	cmd string,
-	out interface{},
-	args ...interface{},
-) error {
+// needed for dock link [gelerr.NoDataError]
+var _ = gelerr.NoDataError
+
+// QuerySingle runs a singleton-returning query and returns its element.  If
+// the query executes successfully but doesn't return a result a
+// [gelerr.NoDataError] is returned.  If the out
+// argument is an optional type the out argument will be set to missing instead
+// of returning a NoDataError.
+func (c *Client) QuerySingle(ctx context.Context, cmd string, out interface{}, args ...interface{}) error { //nolint:lll
 	conn, err := c.pool.Acquire(ctx)
 	if err != nil {
 		return err
@@ -143,13 +144,8 @@ func (c *Client) QuerySingle(
 	return gel.FirstError(err, c.pool.Release(conn, err))
 }
 
-// QueryJSON runs a query and return the results as JSON.
-func (c *Client) QueryJSON(
-	ctx context.Context,
-	cmd string,
-	out *[]byte,
-	args ...interface{},
-) error {
+// QueryJSON runs a query and returns the results as JSON.
+func (c *Client) QueryJSON(ctx context.Context, cmd string, out *[]byte, args ...interface{}) error { //nolint:lll
 	conn, err := c.pool.Acquire(ctx)
 	if err != nil {
 		return err
@@ -170,13 +166,8 @@ func (c *Client) QueryJSON(
 
 // QuerySingleJSON runs a singleton-returning query.
 // If the query executes successfully but doesn't have a result
-// a NoDataError is returned.
-func (c *Client) QuerySingleJSON(
-	ctx context.Context,
-	cmd string,
-	out interface{},
-	args ...interface{},
-) error {
+// a [gelerr.NoDataError] is returned.
+func (c *Client) QuerySingleJSON(ctx context.Context, cmd string, out interface{}, args ...interface{}) error { //nolint:lll
 	conn, err := c.pool.Acquire(ctx)
 	if err != nil {
 		return err
@@ -196,12 +187,7 @@ func (c *Client) QuerySingleJSON(
 }
 
 // QuerySQL runs a SQL query and returns the results.
-func (c *Client) QuerySQL(
-	ctx context.Context,
-	cmd string,
-	out interface{},
-	args ...interface{},
-) error {
+func (c *Client) QuerySQL(ctx context.Context, cmd string, out interface{}, args ...interface{}) error { //nolint:lll
 	conn, err := c.pool.Acquire(ctx)
 	if err != nil {
 		return err
@@ -221,11 +207,7 @@ func (c *Client) QuerySQL(
 }
 
 // ExecuteSQL executes a SQL command (or commands).
-func (c *Client) ExecuteSQL(
-	ctx context.Context,
-	cmd string,
-	args ...interface{},
-) error {
+func (c *Client) ExecuteSQL(ctx context.Context, cmd string, args ...interface{}) error { //nolint:lll
 	conn, err := c.pool.Acquire(ctx)
 	if err != nil {
 		return err
