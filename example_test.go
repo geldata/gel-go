@@ -22,6 +22,7 @@ import (
 	"log"
 
 	gel "github.com/geldata/gel-go"
+	"github.com/geldata/gel-go/gelcfg"
 	"github.com/geldata/gel-go/gelerr"
 	"github.com/geldata/gel-go/geltypes"
 	"github.com/geldata/gel-go/internal/testserver"
@@ -33,6 +34,7 @@ var (
 	// examples concise.
 	ctx    context.Context
 	client *gel.Client
+	opts   gelcfg.Options
 	id     geltypes.UUID
 )
 
@@ -45,7 +47,7 @@ func isDuplicateDatabaseDefinitionError(err error) bool {
 func init() {
 	ctx = context.Background()
 
-	opts := testserver.Options()
+	opts = testserver.Options()
 	var err error
 	client, err = gel.CreateClient(opts)
 	if err != nil {
@@ -70,7 +72,11 @@ func init() {
 				# ExampleClient_WithGlobals
 				global used_everywhere: int64;
 
-				type User {};
+				type User {
+					required name: str {
+						default := 'default';
+					};
+				};
 				type Product {};
 			}
 		};
