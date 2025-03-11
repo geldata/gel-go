@@ -28,7 +28,9 @@ import (
 // CreateClient returns a new client. The client connects lazily. Call
 // [Client.EnsureConnected] to force a connection.
 //
-// We recommend using an empty [gelcfg.Options] struct.
+// Instead of providing connection details directly, we recommend connecting
+// using projects locally, and environment variables for remote instances,
+// providing an empty [gelcfg.Options] struct here.
 // [Read more] about the recommended ways to configure client connections.
 //
 // [Read more]: https://docs.geldata.com/reference/clients/connection
