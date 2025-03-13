@@ -1,8 +1,6 @@
 package main
 
 import (
-	"context"
-
 	_ "test/argnames"
 	_ "test/object"
 	_ "test/scalar"
@@ -15,5 +13,5 @@ import (
 )
 
 func main() {
-	_, _ = gel.CreateClient(context.Background(), gelcfg.Options{})
+	_, _ = gel.CreateClient(gelcfg.Options{})
 }
