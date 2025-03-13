@@ -7,6 +7,7 @@ import (
 	_ "embed"
 
 	gel "github.com/geldata/gel-go"
+	"github.com/geldata/gel-go/geltypes"
 )
 
 //go:embed select_tuple.edgeql
@@ -16,8 +17,8 @@ var selectTupleCmd string
 // is part of the return type for
 // selectTuple()
 type selectTupleResult struct {
-	Element0 gel.OptionalStr        `gel:"0"`
-	Element1 gel.OptionalInt64      `gel:"1"`
+	Element0 geltypes.OptionalStr   `gel:"0"`
+	Element1 geltypes.OptionalInt64 `gel:"1"`
 	Element2 selectTupleResult2Item `gel:"2"`
 }
 
@@ -25,9 +26,9 @@ type selectTupleResult struct {
 // is part of the return type for
 // selectTuple()
 type selectTupleResult2Item struct {
-	gel.Optional
-	Element0 gel.OptionalStr   `gel:"0"`
-	Element1 gel.OptionalInt64 `gel:"1"`
+	geltypes.Optional
+	Element0 geltypes.OptionalStr   `gel:"0"`
+	Element1 geltypes.OptionalInt64 `gel:"1"`
 }
 
 // selectTuple

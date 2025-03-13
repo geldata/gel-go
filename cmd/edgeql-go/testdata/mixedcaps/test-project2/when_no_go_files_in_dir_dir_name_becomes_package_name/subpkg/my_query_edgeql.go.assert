@@ -9,6 +9,7 @@ import (
 	"time"
 
 	gel "github.com/geldata/gel-go"
+	"github.com/geldata/gel-go/geltypes"
 )
 
 //go:embed my_query.edgeql
@@ -18,60 +19,60 @@ var myQueryCmd string
 // is part of the return type for
 // myQuery()
 type myQueryResult struct {
-	A  gel.UUID                       `gel:"a"`
-	B  gel.OptionalUUID               `gel:"b"`
-	C  string                         `gel:"c"`
-	D  gel.OptionalStr                `gel:"d"`
-	E  []byte                         `gel:"e"`
-	F  gel.OptionalBytes              `gel:"f"`
-	G  int16                          `gel:"g"`
-	H  gel.OptionalInt16              `gel:"h"`
-	I  int32                          `gel:"i"`
-	J  gel.OptionalInt32              `gel:"j"`
-	K  int64                          `gel:"k"`
-	L  gel.OptionalInt64              `gel:"l"`
-	M  float32                        `gel:"m"`
-	N  gel.OptionalFloat32            `gel:"n"`
-	O  float64                        `gel:"o"`
-	P  gel.OptionalFloat64            `gel:"p"`
-	Q  bool                           `gel:"q"`
-	R  gel.OptionalBool               `gel:"r"`
-	S  time.Time                      `gel:"s"`
-	T  gel.OptionalDateTime           `gel:"t"`
-	U  gel.LocalDateTime              `gel:"u"`
-	V  gel.OptionalLocalDateTime      `gel:"v"`
-	W  gel.LocalDate                  `gel:"w"`
-	X  gel.OptionalLocalDate          `gel:"x"`
-	Y  gel.LocalTime                  `gel:"y"`
-	Z  gel.OptionalLocalTime          `gel:"z"`
-	Aa gel.Duration                   `gel:"aa"`
-	Ab gel.OptionalDuration           `gel:"ab"`
-	Ac *big.Int                       `gel:"ac"`
-	Ad gel.OptionalBigInt             `gel:"ad"`
-	Ae gel.RelativeDuration           `gel:"ae"`
-	Af gel.OptionalRelativeDuration   `gel:"af"`
-	Ag gel.DateDuration               `gel:"ag"`
-	Ah gel.OptionalDateDuration       `gel:"ah"`
-	Ai gel.Memory                     `gel:"ai"`
-	Aj gel.OptionalMemory             `gel:"aj"`
-	Ak gel.RangeInt32                 `gel:"ak"`
-	Al gel.OptionalRangeInt32         `gel:"al"`
-	Am gel.RangeInt64                 `gel:"am"`
-	An gel.OptionalRangeInt64         `gel:"an"`
-	Ao gel.RangeFloat32               `gel:"ao"`
-	Ap gel.OptionalRangeFloat32       `gel:"ap"`
-	Aq gel.RangeFloat64               `gel:"aq"`
-	Ar gel.OptionalRangeFloat64       `gel:"ar"`
-	As gel.RangeDateTime              `gel:"as"`
-	At gel.OptionalRangeDateTime      `gel:"at"`
-	Au gel.RangeLocalDateTime         `gel:"au"`
-	Av gel.OptionalRangeLocalDateTime `gel:"av"`
-	Aw gel.RangeLocalDate             `gel:"aw"`
-	Ax gel.OptionalRangeLocalDate     `gel:"ax"`
-	Ay int64                          `gel:"ay"`
-	Az gel.OptionalInt64              `gel:"az"`
-	Ba string                         `gel:"ba"`
-	Bb gel.OptionalStr                `gel:"bb"`
+	A  geltypes.UUID                       `gel:"a"`
+	B  geltypes.OptionalUUID               `gel:"b"`
+	C  string                              `gel:"c"`
+	D  geltypes.OptionalStr                `gel:"d"`
+	E  []byte                              `gel:"e"`
+	F  geltypes.OptionalBytes              `gel:"f"`
+	G  int16                               `gel:"g"`
+	H  geltypes.OptionalInt16              `gel:"h"`
+	I  int32                               `gel:"i"`
+	J  geltypes.OptionalInt32              `gel:"j"`
+	K  int64                               `gel:"k"`
+	L  geltypes.OptionalInt64              `gel:"l"`
+	M  float32                             `gel:"m"`
+	N  geltypes.OptionalFloat32            `gel:"n"`
+	O  float64                             `gel:"o"`
+	P  geltypes.OptionalFloat64            `gel:"p"`
+	Q  bool                                `gel:"q"`
+	R  geltypes.OptionalBool               `gel:"r"`
+	S  time.Time                           `gel:"s"`
+	T  geltypes.OptionalDateTime           `gel:"t"`
+	U  geltypes.LocalDateTime              `gel:"u"`
+	V  geltypes.OptionalLocalDateTime      `gel:"v"`
+	W  geltypes.LocalDate                  `gel:"w"`
+	X  geltypes.OptionalLocalDate          `gel:"x"`
+	Y  geltypes.LocalTime                  `gel:"y"`
+	Z  geltypes.OptionalLocalTime          `gel:"z"`
+	Aa geltypes.Duration                   `gel:"aa"`
+	Ab geltypes.OptionalDuration           `gel:"ab"`
+	Ac *big.Int                            `gel:"ac"`
+	Ad geltypes.OptionalBigInt             `gel:"ad"`
+	Ae geltypes.RelativeDuration           `gel:"ae"`
+	Af geltypes.OptionalRelativeDuration   `gel:"af"`
+	Ag geltypes.DateDuration               `gel:"ag"`
+	Ah geltypes.OptionalDateDuration       `gel:"ah"`
+	Ai geltypes.Memory                     `gel:"ai"`
+	Aj geltypes.OptionalMemory             `gel:"aj"`
+	Ak geltypes.RangeInt32                 `gel:"ak"`
+	Al geltypes.OptionalRangeInt32         `gel:"al"`
+	Am geltypes.RangeInt64                 `gel:"am"`
+	An geltypes.OptionalRangeInt64         `gel:"an"`
+	Ao geltypes.RangeFloat32               `gel:"ao"`
+	Ap geltypes.OptionalRangeFloat32       `gel:"ap"`
+	Aq geltypes.RangeFloat64               `gel:"aq"`
+	Ar geltypes.OptionalRangeFloat64       `gel:"ar"`
+	As geltypes.RangeDateTime              `gel:"as"`
+	At geltypes.OptionalRangeDateTime      `gel:"at"`
+	Au geltypes.RangeLocalDateTime         `gel:"au"`
+	Av geltypes.OptionalRangeLocalDateTime `gel:"av"`
+	Aw geltypes.RangeLocalDate             `gel:"aw"`
+	Ax geltypes.OptionalRangeLocalDate     `gel:"ax"`
+	Ay int64                               `gel:"ay"`
+	Az geltypes.OptionalInt64              `gel:"az"`
+	Ba string                              `gel:"ba"`
+	Bb geltypes.OptionalStr                `gel:"bb"`
 }
 
 // myQuery
@@ -80,56 +81,56 @@ type myQueryResult struct {
 func myQuery(
 	ctx context.Context,
 	client *gel.Client,
-	A gel.UUID,
-	B gel.OptionalUUID,
+	A geltypes.UUID,
+	B geltypes.OptionalUUID,
 	C string,
-	D gel.OptionalStr,
+	D geltypes.OptionalStr,
 	E []byte,
-	F gel.OptionalBytes,
+	F geltypes.OptionalBytes,
 	G int16,
-	H gel.OptionalInt16,
+	H geltypes.OptionalInt16,
 	I int32,
-	J gel.OptionalInt32,
+	J geltypes.OptionalInt32,
 	K int64,
-	L gel.OptionalInt64,
+	L geltypes.OptionalInt64,
 	M float32,
-	N gel.OptionalFloat32,
+	N geltypes.OptionalFloat32,
 	O float64,
-	P gel.OptionalFloat64,
+	P geltypes.OptionalFloat64,
 	Q bool,
-	R gel.OptionalBool,
+	R geltypes.OptionalBool,
 	S time.Time,
-	T gel.OptionalDateTime,
-	U gel.LocalDateTime,
-	V gel.OptionalLocalDateTime,
-	W gel.LocalDate,
-	X gel.OptionalLocalDate,
-	Y gel.LocalTime,
-	Z gel.OptionalLocalTime,
-	Aa gel.Duration,
-	Ab gel.OptionalDuration,
+	T geltypes.OptionalDateTime,
+	U geltypes.LocalDateTime,
+	V geltypes.OptionalLocalDateTime,
+	W geltypes.LocalDate,
+	X geltypes.OptionalLocalDate,
+	Y geltypes.LocalTime,
+	Z geltypes.OptionalLocalTime,
+	Aa geltypes.Duration,
+	Ab geltypes.OptionalDuration,
 	Ac *big.Int,
-	Ad gel.OptionalBigInt,
-	Ae gel.RelativeDuration,
-	Af gel.OptionalRelativeDuration,
-	Ag gel.DateDuration,
-	Ah gel.OptionalDateDuration,
-	Ai gel.Memory,
-	Aj gel.OptionalMemory,
-	Ak gel.RangeInt32,
-	Al gel.OptionalRangeInt32,
-	Am gel.RangeInt64,
-	An gel.OptionalRangeInt64,
-	Ao gel.RangeFloat32,
-	Ap gel.OptionalRangeFloat32,
-	Aq gel.RangeFloat64,
-	Ar gel.OptionalRangeFloat64,
-	As gel.RangeDateTime,
-	At gel.OptionalRangeDateTime,
-	Au gel.RangeLocalDateTime,
-	Av gel.OptionalRangeLocalDateTime,
-	Aw gel.RangeLocalDate,
-	Ax gel.OptionalRangeLocalDate,
+	Ad geltypes.OptionalBigInt,
+	Ae geltypes.RelativeDuration,
+	Af geltypes.OptionalRelativeDuration,
+	Ag geltypes.DateDuration,
+	Ah geltypes.OptionalDateDuration,
+	Ai geltypes.Memory,
+	Aj geltypes.OptionalMemory,
+	Ak geltypes.RangeInt32,
+	Al geltypes.OptionalRangeInt32,
+	Am geltypes.RangeInt64,
+	An geltypes.OptionalRangeInt64,
+	Ao geltypes.RangeFloat32,
+	Ap geltypes.OptionalRangeFloat32,
+	Aq geltypes.RangeFloat64,
+	Ar geltypes.OptionalRangeFloat64,
+	As geltypes.RangeDateTime,
+	At geltypes.OptionalRangeDateTime,
+	Au geltypes.RangeLocalDateTime,
+	Av geltypes.OptionalRangeLocalDateTime,
+	Aw geltypes.RangeLocalDate,
+	Ax geltypes.OptionalRangeLocalDate,
 ) (myQueryResult, error) {
 	var result myQueryResult
 
@@ -201,56 +202,56 @@ func myQuery(
 func myQueryJSON(
 	ctx context.Context,
 	client *gel.Client,
-	A gel.UUID,
-	B gel.OptionalUUID,
+	A geltypes.UUID,
+	B geltypes.OptionalUUID,
 	C string,
-	D gel.OptionalStr,
+	D geltypes.OptionalStr,
 	E []byte,
-	F gel.OptionalBytes,
+	F geltypes.OptionalBytes,
 	G int16,
-	H gel.OptionalInt16,
+	H geltypes.OptionalInt16,
 	I int32,
-	J gel.OptionalInt32,
+	J geltypes.OptionalInt32,
 	K int64,
-	L gel.OptionalInt64,
+	L geltypes.OptionalInt64,
 	M float32,
-	N gel.OptionalFloat32,
+	N geltypes.OptionalFloat32,
 	O float64,
-	P gel.OptionalFloat64,
+	P geltypes.OptionalFloat64,
 	Q bool,
-	R gel.OptionalBool,
+	R geltypes.OptionalBool,
 	S time.Time,
-	T gel.OptionalDateTime,
-	U gel.LocalDateTime,
-	V gel.OptionalLocalDateTime,
-	W gel.LocalDate,
-	X gel.OptionalLocalDate,
-	Y gel.LocalTime,
-	Z gel.OptionalLocalTime,
-	Aa gel.Duration,
-	Ab gel.OptionalDuration,
+	T geltypes.OptionalDateTime,
+	U geltypes.LocalDateTime,
+	V geltypes.OptionalLocalDateTime,
+	W geltypes.LocalDate,
+	X geltypes.OptionalLocalDate,
+	Y geltypes.LocalTime,
+	Z geltypes.OptionalLocalTime,
+	Aa geltypes.Duration,
+	Ab geltypes.OptionalDuration,
 	Ac *big.Int,
-	Ad gel.OptionalBigInt,
-	Ae gel.RelativeDuration,
-	Af gel.OptionalRelativeDuration,
-	Ag gel.DateDuration,
-	Ah gel.OptionalDateDuration,
-	Ai gel.Memory,
-	Aj gel.OptionalMemory,
-	Ak gel.RangeInt32,
-	Al gel.OptionalRangeInt32,
-	Am gel.RangeInt64,
-	An gel.OptionalRangeInt64,
-	Ao gel.RangeFloat32,
-	Ap gel.OptionalRangeFloat32,
-	Aq gel.RangeFloat64,
-	Ar gel.OptionalRangeFloat64,
-	As gel.RangeDateTime,
-	At gel.OptionalRangeDateTime,
-	Au gel.RangeLocalDateTime,
-	Av gel.OptionalRangeLocalDateTime,
-	Aw gel.RangeLocalDate,
-	Ax gel.OptionalRangeLocalDate,
+	Ad geltypes.OptionalBigInt,
+	Ae geltypes.RelativeDuration,
+	Af geltypes.OptionalRelativeDuration,
+	Ag geltypes.DateDuration,
+	Ah geltypes.OptionalDateDuration,
+	Ai geltypes.Memory,
+	Aj geltypes.OptionalMemory,
+	Ak geltypes.RangeInt32,
+	Al geltypes.OptionalRangeInt32,
+	Am geltypes.RangeInt64,
+	An geltypes.OptionalRangeInt64,
+	Ao geltypes.RangeFloat32,
+	Ap geltypes.OptionalRangeFloat32,
+	Aq geltypes.RangeFloat64,
+	Ar geltypes.OptionalRangeFloat64,
+	As geltypes.RangeDateTime,
+	At geltypes.OptionalRangeDateTime,
+	Au geltypes.RangeLocalDateTime,
+	Av geltypes.OptionalRangeLocalDateTime,
+	Aw geltypes.RangeLocalDate,
+	Ax geltypes.OptionalRangeLocalDate,
 ) ([]byte, error) {
 	var result []byte
 

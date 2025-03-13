@@ -7,6 +7,7 @@ import (
 	_ "embed"
 
 	gel "github.com/geldata/gel-go"
+	"github.com/geldata/gel-go/geltypes"
 )
 
 //go:embed select_link_prop.edgeql
@@ -24,8 +25,8 @@ type selectLinkPropResult struct {
 // is part of the return type for
 // SelectLinkProp()
 type selectLinkPropResultFriendsItem struct {
-	Name     string              `gel:"Name"`
-	Strength gel.OptionalFloat64 `gel:"Strength"`
+	Name     string                   `gel:"Name"`
+	Strength geltypes.OptionalFloat64 `gel:"Strength"`
 }
 
 // SelectLinkProp
