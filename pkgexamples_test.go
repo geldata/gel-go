@@ -17,17 +17,38 @@
 package gel_test
 
 import (
-	"context"
 	"log"
 
 	"github.com/geldata/gel-go/geltypes"
 )
 
-func ExampleClient_Tx() {
-	err := client.Tx(ctx, func(ctx context.Context, tx geltypes.Tx) error {
-		return tx.Execute(ctx, "INSERT User { name := 'Don' }")
-	})
+// Package level examples.
+
+// [Link properties] are treated as fields in the linked to struct, and the @
+// is omitted from the field's tag.
+//
+// [Link properties]: https://www.edgedb.com/docs/guides/link_properties
+func Example_linkProperty() {
+	var result []struct {
+		Name    string `gel:"name"`
+		Friends []struct {
+			Name     string                   `gel:"name"`
+			Strength geltypes.OptionalFloat64 `gel:"strength"`
+		} `gel:"friends"`
+	}
+
+	err := client.Query(
+		ctx,
+		`select Person {
+		name,
+		friends: {
+			name,
+			@strength,
+		}
+	}`,
+		&result,
+	)
 	if err != nil {
-		log.Println(err)
+		log.Fatal(err)
 	}
 }

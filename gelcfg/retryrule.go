@@ -57,6 +57,8 @@ func NewRetryRule() RetryRule {
 // should be tried again based on [RetryRule.Attempts] and the amount of time
 // to wait before retrying is determined by [RetryRule.Backoff].
 // The default retry rule is 3 attempts and exponential backoff with jitter.
+//
+// See [github.com/geldata/gel-go.Client.WithRetryOptions] for an example.
 type RetryRule struct {
 	// fromFactory indicates that a RetryOptions value was created using
 	// NewRetryOptions() and not created directly. Requiring users to use the
