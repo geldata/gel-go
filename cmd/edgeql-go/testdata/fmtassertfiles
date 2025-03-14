@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+# fmtassertfiles runs go fmt on the *.go.assert files in all sub directories.
+
+set -eu
+
+files="$(find . -name '*.go.assert')"
+
+for file in $files; do
+	mv $file ${file%".assert"}
+done
+
+for proj in $(find . -maxdepth 2 -mindepth 2 -type d); do
+	(cd $proj && go fmt ./...)
+done
+
+for file in $files; do
+	mv ${file%".assert"} $file 
+done

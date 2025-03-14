@@ -3,7 +3,7 @@
 // {{.QueryFuncName}}()
 type {{.Name}} struct {
 {{- if not .Required}}
-gel.Optional
+geltypes.Optional
 {{- end}}
 {{range .Fields}}    {{.GoName}} {{.Type}} `{{.Tag}}`
 {{end}}}

@@ -1,8 +1,8 @@
 github.com/certifi/gocertifi v0.0.0-20210507211836-431795d63e8d h1:S2NE3iHSwP0XV47EEXL8mWmRdEfGscSJ+7EgePNgt0s=
 github.com/certifi/gocertifi v0.0.0-20210507211836-431795d63e8d/go.mod h1:sGbDF6GwGcLpkNXPUTkMRoywsNa/ol15pxFe6ERfguA=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
-github.com/geldata/gel-go v0.18.0-alpha.1 h1:92WokeJfpL4TdOTqZquxS7DzC3A4oXTBFHMIQdIUgws=
-github.com/geldata/gel-go v0.18.0-alpha.1/go.mod h1:1B2DC889nDzTO7ycWNIARTAEAs9G9PdKBvYrMNv4kHI=
+github.com/geldata/gel-go v1.1.0 h1:f8Bp9VQbLlcbh4Ip47fxCjFYv0IGXhk5M13uwi3T0P8=
+github.com/geldata/gel-go v1.1.0/go.mod h1:1B2DC889nDzTO7ycWNIARTAEAs9G9PdKBvYrMNv4kHI=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/sigurn/crc16 v0.0.0-20211026045750-20ab5afb07e3 h1:aQKxg3+2p+IFXXg97McgDGT5zcMrQoi0EICZs8Pgchs=
 github.com/sigurn/crc16 v0.0.0-20211026045750-20ab5afb07e3/go.mod h1:9/etS5gpQq9BJsJMWg1wpLbfuSnkm8dPF6FdW2JXVhA=

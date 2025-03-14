@@ -2,7 +2,7 @@ module test
 
 go 1.19
 
-require github.com/geldata/gel-go v0.18.0-alpha.1
+require github.com/geldata/gel-go v1.1.0
 
 require (
 	github.com/certifi/gocertifi v0.0.0-20210507211836-431795d63e8d // indirect

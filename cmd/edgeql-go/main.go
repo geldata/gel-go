@@ -97,7 +97,9 @@ func main() {
 
 	fileQueue := queueFilesInBackground()
 
-	t, err := template.ParseFS(templates, "templates/*.template")
+	t, err := template.New("files.template").
+		Funcs(map[string]any{"hasPrefix": strings.HasPrefix}).
+		ParseFS(templates, "templates/*.template")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -257,7 +259,7 @@ func writeGoFile(
 	}
 
 	var buf bytes.Buffer
-	err = t.Execute(&buf, map[string]any{
+	err = t.ExecuteTemplate(&buf, "file.template", map[string]any{
 		"PackageName":  packageName,
 		"ExtraImports": imports,
 		"Queries":      queries,
