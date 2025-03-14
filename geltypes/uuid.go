@@ -45,8 +45,9 @@ func ParseUUID(s string) (UUID, error) {
 	return tmp, nil
 }
 
-// UUID is a universally unique identifier
-// https://www.edgedb.com/docs/stdlib/uuid
+// UUID represents [std::uuid], a universally unique identifier.
+//
+// [std::uuid]: https://docs.geldata.com/reference/stdlib/uuid#type::std::uuid
 type UUID [16]byte
 
 func (id UUID) String() string {

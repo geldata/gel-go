@@ -48,423 +48,426 @@ type OptionalMarshaler interface {
 }
 
 // StrMarshaler is the interface implemented by an object
-// that can marshal itself into the str wire format.
-// https://www.edgedb.com/docs/internals/protocol/dataformats#std-str
+// that can marshal itself into the [std::str] wire format.
 //
-// MarshalEdgeDBStr encodes the receiver
-// into a binary form and returns the result.
+// [std::str]: https://docs.geldata.com/reference/reference/protocol/dataformats#std-str
 type StrMarshaler interface {
+	// MarshalEdgeDBStr encodes the receiver
+	// into a binary form and returns the result.
 	MarshalEdgeDBStr() ([]byte, error)
 }
 
 // StrUnmarshaler is the interface implemented by an object
-// that can unmarshal the str wire format representation of itself.
-// https://www.edgedb.com/docs/internals/protocol/dataformats#std-str
+// that can unmarshal the [std::str] wire format representation of itself.
 //
-// UnmarshalEdgeDBStr must be able to decode the str wire format.
-// UnmarshalEdgeDBStr must copy the data if it wishes to retain the data
-// after returning.
+// [std::str]: https://docs.geldata.com/reference/reference/protocol/dataformats#std-str
 type StrUnmarshaler interface {
+	// UnmarshalEdgeDBStr must be able to decode the str wire format.
+	// UnmarshalEdgeDBStr must copy the data if it wishes to retain the data
+	// after returning.
 	UnmarshalEdgeDBStr(data []byte) error
 }
 
 // BoolMarshaler is the interface implemented by an object
-// that can marshal itself into the bool wire format.
-// https://www.edgedb.com/docs/internals/protocol/dataformats#std-bool
+// that can marshal itself into the [std::bool] wire format.
 //
-// MarshalEdgeDBBool encodes the receiver
-// into a binary form and returns the result.
+// [std::bool]: https://docs.geldata.com/reference/reference/protocol/dataformats#std-bool
 type BoolMarshaler interface {
+	// MarshalEdgeDBBool encodes the receiver
+	// into a binary form and returns the result.
 	MarshalEdgeDBBool() ([]byte, error)
 }
 
 // BoolUnmarshaler is the interface implemented by an object
-// that can unmarshal the bool wire format representation of itself.
-// https://www.edgedb.com/docs/internals/protocol/dataformats#std-bool
+// that can unmarshal the [std::bool] wire format representation of itself.
 //
-// UnmarshalEdgeDBBool must be able to decode the bool wire format.
-// UnmarshalEdgeDBBool must copy the data if it wishes to retain the data
-// after returning.
+// [std::bool]: https://docs.geldata.com/reference/reference/protocol/dataformats#std-bool
 type BoolUnmarshaler interface {
+	// UnmarshalEdgeDBBool must be able to decode the bool wire format.
+	// UnmarshalEdgeDBBool must copy the data if it wishes to retain the data
+	// after returning.
 	UnmarshalEdgeDBBool(data []byte) error
 }
 
 // JSONMarshaler is the interface implemented by an object
-// that can marshal itself into the json wire format.
-// https://www.edgedb.com/docs/internals/protocol/dataformats#std-json
+// that can marshal itself into the [std::json] wire format.
 //
-// MarshalEdgeDBJSON encodes the receiver
-// into a binary form and returns the result.
+// [std::json]: https://docs.geldata.com/reference/reference/protocol/dataformats#std-json
 type JSONMarshaler interface {
+	// MarshalEdgeDBJSON encodes the receiver
+	// into a binary form and returns the result.
 	MarshalEdgeDBJSON() ([]byte, error)
 }
 
 // JSONUnmarshaler is the interface implemented by an object
-// that can unmarshal the json wire format representation of itself.
-// https://www.edgedb.com/docs/internals/protocol/dataformats#std-json
+// that can unmarshal the [std::json] wire format representation of itself.
 //
-// UnmarshalEdgeDBJSON must be able to decode the json wire format.
-// UnmarshalEdgeDBJSON must copy the data if it wishes to retain the data
-// after returning.
+// [std::json]: https://docs.geldata.com/reference/reference/protocol/dataformats#std-json
 type JSONUnmarshaler interface {
+	// UnmarshalEdgeDBJSON must be able to decode the json wire format.
+	// UnmarshalEdgeDBJSON must copy the data if it wishes to retain the data
+	// after returning.
 	UnmarshalEdgeDBJSON(data []byte) error
 }
 
 // UUIDMarshaler is the interface implemented by an object
-// that can marshal itself into the uuid wire format.
-// https://www.edgedb.com/docs/internals/protocol/dataformats#std-uuid
+// that can marshal itself into the [std::uuid] wire format.
 //
-// MarshalEdgeDBUUID encodes the receiver
-// into a binary form and returns the result.
+// [std::uuid]: https://docs.geldata.com/reference/reference/protocol/dataformats#std-uuid
 type UUIDMarshaler interface {
+	// MarshalEdgeDBUUID encodes the receiver
+	// into a binary form and returns the result.
 	MarshalEdgeDBUUID() ([]byte, error)
 }
 
 // UUIDUnmarshaler is the interface implemented by an object
-// that can unmarshal the uuid wire format representation of itself.
-// https://www.edgedb.com/docs/internals/protocol/dataformats#std-uuid
+// that can unmarshal the [std::uuid] wire format representation of itself.
 //
-// UnmarshalEdgeDBUUID must be able to decode the uuid wire format.
-// UnmarshalEdgeDBUUID must copy the data if it wishes to retain the data
-// after returning.
+// [std::uuid]: https://docs.geldata.com/reference/reference/protocol/dataformats#std-uuid
 type UUIDUnmarshaler interface {
+	// UnmarshalEdgeDBUUID must be able to decode the uuid wire format.
+	// UnmarshalEdgeDBUUID must copy the data if it wishes to retain the data
+	// after returning.
 	UnmarshalEdgeDBUUID(data []byte) error
 }
 
 // BytesMarshaler is the interface implemented by an object
-// that can marshal itself into the bytes wire format.
-// https://www.edgedb.com/docs/internals/protocol/dataformats#std-bytes
+// that can marshal itself into the [std::bytes] wire format.
 //
-// MarshalEdgeDBBytes encodes the receiver
-// into a binary form and returns the result.
+// [std::bytes]: https://docs.geldata.com/reference/reference/protocol/dataformats#std-bytes
 type BytesMarshaler interface {
+	// MarshalEdgeDBBytes encodes the receiver
+	// into a binary form and returns the result.
 	MarshalEdgeDBBytes() ([]byte, error)
 }
 
 // BytesUnmarshaler is the interface implemented by an object
-// that can unmarshal the bytes wire format representation of itself.
-// https://www.edgedb.com/docs/internals/protocol/dataformats#std-bytes
+// that can unmarshal the [std::bytes] wire format representation of itself.
 //
-// UnmarshalEdgeDBBytes must be able to decode the bytes wire format.
-// UnmarshalEdgeDBBytes must copy the data if it wishes to retain the data
-// after returning.
+// [std::bytes]: https://docs.geldata.com/reference/reference/protocol/dataformats#std-bytes
 type BytesUnmarshaler interface {
+	// UnmarshalEdgeDBBytes must be able to decode the bytes wire format.
+	// UnmarshalEdgeDBBytes must copy the data if it wishes to retain the data
+	// after returning.
 	UnmarshalEdgeDBBytes(data []byte) error
 }
 
 // BigIntMarshaler is the interface implemented by an object
-// that can marshal itself into the bigint wire format.
-// https://www.edgedb.com/docs/internals/protocol/dataformats#std-bigint
+// that can marshal itself into the [std::bigint] wire format.
 //
-// MarshalEdgeDBBigInt encodes the receiver
-// into a binary form and returns the result.
+// [std::bigint]: https://docs.geldata.com/reference/reference/protocol/dataformats#std-bigint
 type BigIntMarshaler interface {
+	// MarshalEdgeDBBigInt encodes the receiver
+	// into a binary form and returns the result.
 	MarshalEdgeDBBigInt() ([]byte, error)
 }
 
 // BigIntUnmarshaler is the interface implemented by an object
-// that can unmarshal the bigint wire format representation of itself.
-// https://www.edgedb.com/docs/internals/protocol/dataformats#std-bigint
+// that can unmarshal the [std::bigint] wire format representation of itself.
 //
-// UnmarshalEdgeDBBigInt must be able to decode the bigint wire format.
-// UnmarshalEdgeDBBigInt must copy the data if it wishes to retain the data
-// after returning.
+// [std::bigint]: https://docs.geldata.com/reference/reference/protocol/dataformats#std-bigint
 type BigIntUnmarshaler interface {
+	// UnmarshalEdgeDBBigInt must be able to decode the bigint wire format.
+	// UnmarshalEdgeDBBigInt must copy the data if it wishes to retain the data
+	// after returning.
 	UnmarshalEdgeDBBigInt(data []byte) error
 }
 
 // DecimalMarshaler is the interface implemented by an object
-// that can marshal itself into the decimal wire format.
-// https://www.edgedb.com/docs/internals/protocol/dataformats#std-decimal
+// that can marshal itself into the [std::decimal] wire format.
 //
-// MarshalEdgeDBDecimal encodes the receiver
-// into a binary form and returns the result.
+// [std::decimal]: https://docs.geldata.com/reference/reference/protocol/dataformats#std-decimal
 type DecimalMarshaler interface {
+	// MarshalEdgeDBDecimal encodes the receiver
+	// into a binary form and returns the result.
 	MarshalEdgeDBDecimal() ([]byte, error)
 }
 
 // DecimalUnmarshaler is the interface implemented by an object
-// that can unmarshal the decimal wire format representation of itself.
-// https://www.edgedb.com/docs/internals/protocol/dataformats#std-decimal
+// that can unmarshal the [std::decimal] wire format representation of itself.
 //
-// UnmarshalEdgeDBDecimal must be able to decode the decimal wire format.
-// UnmarshalEdgeDBDecimal must copy the data if it wishes to retain the data
-// after returning.
+// [std::decimal]: https://docs.geldata.com/reference/reference/protocol/dataformats#std-decimal
 type DecimalUnmarshaler interface {
+	// UnmarshalEdgeDBDecimal must be able to decode the decimal wire format.
+	// UnmarshalEdgeDBDecimal must copy the data if it wishes to retain the
+	// data after returning.
 	UnmarshalEdgeDBDecimal(data []byte) error
 }
 
 // DateTimeMarshaler is the interface implemented by an object
-// that can marshal itself into the datetime wire format.
-// https://www.edgedb.com/docs/internals/protocol/dataformats#std-datetime
+// that can marshal itself into the [std::datetime] wire format.
 //
-// MarshalEdgeDBDateTime encodes the receiver
-// into a binary form and returns the result.
+// [std::datetime]: https://docs.geldata.com/reference/reference/protocol/dataformats#std-datetime
 type DateTimeMarshaler interface {
+	// MarshalEdgeDBDateTime encodes the receiver
+	// into a binary form and returns the result.
 	MarshalEdgeDBDateTime() ([]byte, error)
 }
 
 // DateTimeUnmarshaler is the interface implemented by an object
-// that can unmarshal the datetime wire format representation of itself.
-// https://www.edgedb.com/docs/internals/protocol/dataformats#std-datetime
+// that can unmarshal the [std::datetime] wire format representation of itself.
 //
-// UnmarshalEdgeDBDateTime must be able to decode the datetime wire format.
-// UnmarshalEdgeDBDateTime must copy the data if it wishes to retain the data
-// after returning.
+// [std::datetime]: https://docs.geldata.com/reference/reference/protocol/dataformats#std-datetime
 type DateTimeUnmarshaler interface {
+	// UnmarshalEdgeDBDateTime must be able to decode the datetime wire format.
+	// UnmarshalEdgeDBDateTime must copy the data if it wishes to retain the
+	// data after returning.
 	UnmarshalEdgeDBDateTime(data []byte) error
 }
 
 // LocalDateTimeMarshaler is the interface implemented by an object
-// that can marshal itself into the local_datetime wire format.
-// https://www.edgedb.com/docs/internals/protocol/dataformats
+// that can marshal itself into the [cal::local_datetime] wire format.
 //
-// MarshalEdgeDBLocalDateTime encodes the receiver
-// into a binary form and returns the result.
+// [cal::local_datetime]: https://docs.geldata.com/reference/reference/protocol/dataformats#cal-local-datetime
 type LocalDateTimeMarshaler interface {
+	// MarshalEdgeDBLocalDateTime encodes the receiver
+	// into a binary form and returns the result.
 	MarshalEdgeDBLocalDateTime() ([]byte, error)
 }
 
 // LocalDateTimeUnmarshaler is the interface implemented by an object
-// that can unmarshal the local_datetime wire format representation of itself.
-// https://www.edgedb.com/docs/internals/protocol/dataformats
+// that can unmarshal the [cal::local_datetime] wire format representation of
+// itself.
 //
-// UnmarshalEdgeDBLocalDateTime must be able to decode the local_datetime wire
-// format. UnmarshalEdgeDBLocalDateTime must copy the data if it wishes to
-// retain the data after returning.
+// [cal::local_datetime]: https://docs.geldata.com/reference/reference/protocol/dataformats#cal-local-datetime
 type LocalDateTimeUnmarshaler interface {
+	// UnmarshalEdgeDBLocalDateTime must be able to decode the local_datetime
+	// wire format. UnmarshalEdgeDBLocalDateTime must copy the data if it
+	// wishes to retain the data after returning.
 	UnmarshalEdgeDBLocalDateTime(data []byte) error
 }
 
 // LocalDateMarshaler is the interface implemented by an object
-// that can marshal itself into the local_date wire format.
-// https://www.edgedb.com/docs/internals/protocol/dataformats#std-local-date
+// that can marshal itself into the [cal::locl_date] wire format.
 //
-// MarshalEdgeDBLocalDate encodes the receiver
-// into a binary form and returns the result.
+// [cal::locl_date]: https://docs.geldata.com/reference/reference/protocol/dataformats#cal-local-date
 type LocalDateMarshaler interface {
+	// MarshalEdgeDBLocalDate encodes the receiver
+	// into a binary form and returns the result.
 	MarshalEdgeDBLocalDate() ([]byte, error)
 }
 
 // LocalDateUnmarshaler is the interface implemented by an object
-// that can unmarshal the local_date wire format representation of itself.
-// https://www.edgedb.com/docs/internals/protocol/dataformats#std-local-date
+// that can unmarshal the [cal::locl_date] wire format representation of
+// itself.
 //
-// UnmarshalEdgeDBLocalDate must be able to decode the local_date wire format.
-// UnmarshalEdgeDBLocalDate must copy the data if it wishes to retain the data
-// after returning.
+// [cal::locl_date]: https://docs.geldata.com/reference/reference/protocol/dataformats#cal-local-date
 type LocalDateUnmarshaler interface {
+	// UnmarshalEdgeDBLocalDate must be able to decode the local_date wire
+	// format.  UnmarshalEdgeDBLocalDate must copy the data if it wishes to
+	// retain the data after returning.
 	UnmarshalEdgeDBLocalDate(data []byte) error
 }
 
 // LocalTimeMarshaler is the interface implemented by an object
-// that can marshal itself into the local_time wire format.
-// https://www.edgedb.com/docs/internals/protocol/dataformats#std-local-time
+// that can marshal itself into the [cal::local_time] wire format.
 //
-// MarshalEdgeDBLocalTime encodes the receiver
-// into a binary form and returns the result.
+// [cal::local_time]: https://docs.geldata.com/reference/reference/protocol/dataformats#cal-local-time
 type LocalTimeMarshaler interface {
+	// MarshalEdgeDBLocalTime encodes the receiver
+	// into a binary form and returns the result.
 	MarshalEdgeDBLocalTime() ([]byte, error)
 }
 
 // LocalTimeUnmarshaler is the interface implemented by an object
-// that can unmarshal the local_time wire format representation of itself.
-// https://www.edgedb.com/docs/internals/protocol/dataformats#std-local-time
+// that can unmarshal the [cal::local_time] wire format representation of
+// itself.
 //
-// UnmarshalEdgeDBLocalTime must be able to decode the local_time wire format.
-// UnmarshalEdgeDBLocalTime must copy the data if it wishes to retain the data
-// after returning.
+// [cal::local_time]: https://docs.geldata.com/reference/reference/protocol/dataformats#cal-local-time
 type LocalTimeUnmarshaler interface {
+	// UnmarshalEdgeDBLocalTime must be able to decode the local_time wire
+	// format.  UnmarshalEdgeDBLocalTime must copy the data if it wishes to
+	// retain the data after returning.
 	UnmarshalEdgeDBLocalTime(data []byte) error
 }
 
 // DurationMarshaler is the interface implemented by an object
-// that can marshal itself into the duration wire format.
-// https://www.edgedb.com/docs/internals/protocol/dataformats#std-duration
+// that can marshal itself into the [std::duration] wire format.
 //
-// MarshalEdgeDBDuration encodes the receiver
-// into a binary form and returns the result.
+// [std::duration]: https://docs.geldata.com/reference/reference/protocol/dataformats#std-duration
 type DurationMarshaler interface {
+	// MarshalEdgeDBDuration encodes the receiver
+	// into a binary form and returns the result.
 	MarshalEdgeDBDuration() ([]byte, error)
 }
 
 // DurationUnmarshaler is the interface implemented by an object
-// that can unmarshal the duration wire format representation of itself.
-// https://www.edgedb.com/docs/internals/protocol/dataformats#std-duration
+// that can unmarshal the [std::duration] wire format representation of itself.
 //
-// UnmarshalEdgeDBDuration must be able to decode the duration wire format.
-// UnmarshalEdgeDBDuration must copy the data if it wishes to retain the data
-// after returning.
+// [std::duration]: https://docs.geldata.com/reference/reference/protocol/dataformats#std-duration
 type DurationUnmarshaler interface {
+	// UnmarshalEdgeDBDuration must be able to decode the duration wire format.
+	// UnmarshalEdgeDBDuration must copy the data if it wishes to retain the
+	// data after returning.
 	UnmarshalEdgeDBDuration(data []byte) error
 }
 
 // RelativeDurationMarshaler is the interface implemented by an object that can
-// marshal itself into the cal::relative_duration wire format.
-// https://www.edgedb.com/docs/internals/protocol/dataformats
+// marshal itself into the [cal::relative_duration] wire format.
 //
-// MarshalEdgeDBRelativeDuration encodes the receiver into a binary form and
-// returns the result.
+// [cal::relative_duration]: https://docs.geldata.com/reference/reference/protocol/dataformats#cal-relative-duration
 type RelativeDurationMarshaler interface {
+	// MarshalEdgeDBRelativeDuration encodes the receiver into a binary form
+	// and returns the result.
 	MarshalEdgeDBRelativeDuration() ([]byte, error)
 }
 
 // RelativeDurationUnmarshaler is the interface implemented by an object that
-// can unmarshal the cal::relative_duration wire format representation of
+// can unmarshal the [cal::relative_duration] wire format representation of
 // itself.
-// https://www.edgedb.com/docs/internals/protocol/dataformats#std-duration
 //
-// UnmarshalEdgeDBRelativeDuration must be able to decode the
-// cal::relative_duration wire format.  UnmarshalEdgeDBRelativeDuration must
-// copy the data if it wishes to retain the data after returning.
+// [cal::relative_duration]: https://docs.geldata.com/reference/reference/protocol/dataformats#cal-relative-duration
 type RelativeDurationUnmarshaler interface {
+	// UnmarshalEdgeDBRelativeDuration must be able to decode the
+	// cal::relative_duration wire format.  UnmarshalEdgeDBRelativeDuration
+	// must copy data if it wishes to retain the bytes after returning.
 	UnmarshalEdgeDBRelativeDuration(data []byte) error
 }
 
 // DateDurationMarshaler is the interface implemented by an object that can
-// marshal itself into the cal::relative_duration wire format.
-// https://www.edgedb.com/docs/internals/protocol/dataformats
+// marshal itself into the [cal::date_duration] wire format.
 //
-// MarshalEdgeDBDateDuration encodes the receiver into a binary form and
-// returns the result.
+// [cal::date_duration]: https://docs.geldata.com/reference/reference/protocol/dataformats#cal-date-duration
 type DateDurationMarshaler interface {
+	// MarshalEdgeDBDateDuration encodes the receiver into a binary form and
+	// returns the result.
 	MarshalEdgeDBDateDuration() ([]byte, error)
 }
 
 // DateDurationUnmarshaler is the interface implemented by an object that
-// can unmarshal the cal::relative_duration wire format representation of
+// can unmarshal the [cal::date_duration] wire format representation of
 // itself.
-// https://www.edgedb.com/docs/internals/protocol/dataformats#std-duration
 //
-// UnmarshalEdgeDBDateDuration must be able to decode the
-// cal::relative_duration wire format.  UnmarshalEdgeDBDateDuration must
-// copy the data if it wishes to retain the data after returning.
+// [cal::date_duration]: https://docs.geldata.com/reference/reference/protocol/dataformats#cal-date-duration
 type DateDurationUnmarshaler interface {
+	// UnmarshalEdgeDBDateDuration must be able to decode the
+	// cal::relative_duration wire format.  UnmarshalEdgeDBDateDuration must
+	// copy the data if it wishes to retain the data after returning.
 	UnmarshalEdgeDBDateDuration(data []byte) error
 }
 
 // Int16Marshaler is the interface implemented by an object
-// that can marshal itself into the int16 wire format.
-// https://www.edgedb.com/docs/internals/protocol/dataformats#std-int16
+// that can marshal itself into the [std::int16] wire format.
 //
-// MarshalEdgeDBInt16 encodes the receiver
-// into a binary form and returns the result.
+// [std::int16]: https://docs.geldata.com/reference/reference/protocol/dataformats#std-int16
 type Int16Marshaler interface {
+	// MarshalEdgeDBInt16 encodes the receiver
+	// into a binary form and returns the result.
 	MarshalEdgeDBInt16() ([]byte, error)
 }
 
 // Int16Unmarshaler is the interface implemented by an object
-// that can unmarshal the int16 wire format representation of itself.
-// https://www.edgedb.com/docs/internals/protocol/dataformats#std-int16
+// that can unmarshal the [std::int16] wire format representation of itself.
 //
-// UnmarshalEdgeDBInt16 must be able to decode the int16 wire format.
-// UnmarshalEdgeDBInt16 must copy the data if it wishes to retain the data
-// after returning.
+// [std::int16]: https://docs.geldata.com/reference/reference/protocol/dataformats#std-int16
 type Int16Unmarshaler interface {
+	// UnmarshalEdgeDBInt16 must be able to decode the int16 wire format.
+	// UnmarshalEdgeDBInt16 must copy the data if it wishes to retain the data
+	// after returning.
 	UnmarshalEdgeDBInt16(data []byte) error
 }
 
 // Int32Marshaler is the interface implemented by an object
-// that can marshal itself into the int32 wire format.
-// https://www.edgedb.com/docs/internals/protocol/dataformats#std-int32
+// that can marshal itself into the [std::int32] wire format.
 //
-// MarshalEdgeDBInt32 encodes the receiver
-// into a binary form and returns the result.
+// [std::int32]: https://docs.geldata.com/reference/reference/protocol/dataformats#std-int32
 type Int32Marshaler interface {
+	// MarshalEdgeDBInt32 encodes the receiver
+	// into a binary form and returns the result.
 	MarshalEdgeDBInt32() ([]byte, error)
 }
 
 // Int32Unmarshaler is the interface implemented by an object
-// that can unmarshal the int32 wire format representation of itself.
-// https://www.edgedb.com/docs/internals/protocol/dataformats#std-int32
+// that can unmarshal the [std::int32] wire format representation of itself.
 //
-// UnmarshalEdgeDBInt32 must be able to decode the int32 wire format.
-// UnmarshalEdgeDBInt32 must copy the data if it wishes to retain the data
-// after returning.
+// [std::int32]: https://docs.geldata.com/reference/reference/protocol/dataformats#std-int32
 type Int32Unmarshaler interface {
+	// UnmarshalEdgeDBInt32 must be able to decode the int32 wire format.
+	// UnmarshalEdgeDBInt32 must copy the data if it wishes to retain the data
+	// after returning.
 	UnmarshalEdgeDBInt32(data []byte) error
 }
 
 // Int64Marshaler is the interface implemented by an object
-// that can marshal itself into the int64 wire format.
-// https://www.edgedb.com/docs/internals/protocol/dataformats#std-int64
+// that can marshal itself into the [std::int64] wire format.
 //
-// MarshalEdgeDBInt64 encodes the receiver
-// into a binary form and returns the result.
+// [std::int64]: https://docs.geldata.com/reference/reference/protocol/dataformats#std-int64
 type Int64Marshaler interface {
+	// MarshalEdgeDBInt64 encodes the receiver
+	// into a binary form and returns the result.
 	MarshalEdgeDBInt64() ([]byte, error)
 }
 
 // Int64Unmarshaler is the interface implemented by an object
-// that can unmarshal the int64 wire format representation of itself.
-// https://www.edgedb.com/docs/internals/protocol/dataformats#std-int64
+// that can unmarshal the [std::int64] wire format representation of itself.
 //
-// UnmarshalEdgeDBInt64 must be able to decode the int64 wire format.
-// UnmarshalEdgeDBInt64 must copy the data if it wishes to retain the data
-// after returning.
+// [std::int64]: https://docs.geldata.com/reference/reference/protocol/dataformats#std-int64
 type Int64Unmarshaler interface {
+	// UnmarshalEdgeDBInt64 must be able to decode the int64 wire format.
+	// UnmarshalEdgeDBInt64 must copy the data if it wishes to retain the data
+	// after returning.
 	UnmarshalEdgeDBInt64(data []byte) error
 }
 
 // Float32Marshaler is the interface implemented by an object
-// that can marshal itself into the float32 wire format.
-// https://www.edgedb.com/docs/internals/protocol/dataformats#std-float32
+// that can marshal itself into the [std::float32] wire format.
 //
-// MarshalEdgeDBFloat32 encodes the receiver
-// into a binary form and returns the result.
+// [std::float32]: https://docs.geldata.com/reference/reference/protocol/dataformats#std-float32
 type Float32Marshaler interface {
+	// MarshalEdgeDBFloat32 encodes the receiver
+	// into a binary form and returns the result.
 	MarshalEdgeDBFloat32() ([]byte, error)
 }
 
 // Float32Unmarshaler is the interface implemented by an object
-// that can unmarshal the float32 wire format representation of itself.
-// https://www.edgedb.com/docs/internals/protocol/dataformats#std-float32
+// that can unmarshal the [std::float32] wire format representation of itself.
 //
-// UnmarshalEdgeDBFloat32 must be able to decode the float32 wire format.
-// UnmarshalEdgeDBFloat32 must copy the data if it wishes to retain the data
-// after returning.
+// [std::float32]: https://docs.geldata.com/reference/reference/protocol/dataformats#std-float32
 type Float32Unmarshaler interface {
+	// UnmarshalEdgeDBFloat32 must be able to decode the float32 wire format.
+	// UnmarshalEdgeDBFloat32 must copy the data if it wishes to retain the
+	// data after returning.
 	UnmarshalEdgeDBFloat32(data []byte) error
 }
 
 // Float64Marshaler is the interface implemented by an object
-// that can marshal itself into the float64 wire format.
-// https://www.edgedb.com/docs/internals/protocol/dataformats#std-float64
+// that can marshal itself into the [std::float64] wire format.
 //
-// MarshalEdgeDBFloat64 encodes the receiver
-// into a binary form and returns the result.
+// [std::float64]: https://docs.geldata.com/reference/reference/protocol/dataformats#std-float64
 type Float64Marshaler interface {
+	// MarshalEdgeDBFloat64 encodes the receiver
+	// into a binary form and returns the result.
 	MarshalEdgeDBFloat64() ([]byte, error)
 }
 
 // Float64Unmarshaler is the interface implemented by an object
-// that can unmarshal the float64 wire format representation of itself.
-// https://www.edgedb.com/docs/internals/protocol/dataformats#std-float64
+// that can unmarshal the [std::float64] wire format representation of itself.
 //
-// UnmarshalEdgeDBFloat64 must be able to decode the float64 wire format.
-// UnmarshalEdgeDBFloat64 must copy the data if it wishes to retain the data
-// after returning.
+// [std::float64]: https://docs.geldata.com/reference/reference/protocol/dataformats#std-float64
 type Float64Unmarshaler interface {
+	// UnmarshalEdgeDBFloat64 must be able to decode the float64 wire format.
+	// UnmarshalEdgeDBFloat64 must copy the data if it wishes to retain the
+	// data after returning.
 	UnmarshalEdgeDBFloat64(data []byte) error
 }
 
 // MemoryMarshaler is the interface implemented by an object
-// that can marshal itself into the memory wire format.
-// https://www.edgedb.com/docs/internals/protocol/dataformats#std-memory
+// that can marshal itself into the [cfg::memory] wire format.
 //
-// MarshalEdgeDBMemory encodes the receiver
-// into a binary form and returns the result.
+// [cfg::memory]: https://docs.geldata.com/reference/reference/protocol/dataformats#cfg-memory
 type MemoryMarshaler interface {
+	// MarshalEdgeDBMemory encodes the receiver
+	// into a binary form and returns the result.
 	MarshalEdgeDBMemory() ([]byte, error)
 }
 
 // MemoryUnmarshaler is the interface implemented by an object
-// that can unmarshal the memory wire format representation of itself.
-// https://www.edgedb.com/docs/internals/protocol/dataformats#std-memory
+// that can unmarshal the [cfg::memory] wire format representation of itself.
 //
-// UnmarshalEdgeDBMemory must be able to decode the memory wire format.
-// UnmarshalEdgeDBMemory must copy the data if it wishes to retain the data
-// after returning.
+// [cfg::memory]: https://docs.geldata.com/reference/reference/protocol/dataformats#cfg-memory
 type MemoryUnmarshaler interface {
+	// UnmarshalEdgeDBMemory must be able to decode the memory wire format.
+	// UnmarshalEdgeDBMemory must copy the data if it wishes to retain the data
+	// after returning.
 	UnmarshalEdgeDBMemory(data []byte) error
 }

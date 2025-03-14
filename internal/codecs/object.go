@@ -188,7 +188,7 @@ func (c *objectDecoder) Decode(r *buff.Reader, out unsafe.Pointer) error {
 		elmLen := r.PopUint32()
 		if elmLen == 0xffffffff {
 			// element length -1 means missing field
-			// https://www.edgedb.com/docs/internals/protocol/dataformats
+			// https://docs.geldata.com/reference/reference/protocol/dataformats#tuple-namedtuple-and-object
 			field.decoder.(OptionalDecoder).DecodeMissing(p)
 		} else {
 			err := field.decoder.Decode(r.PopSlice(elmLen), p)

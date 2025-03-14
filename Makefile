@@ -31,7 +31,7 @@ format:
 errors:
 	type edb || (\
 		echo "the edb command must be in your path " && \
-		echo "see https://www.edgedb.com/docs/guides/contributing/code#building-locally" && \
+		echo "see https://docs.geldata.com/resources/guides/contributing/code#building-locally" && \
 		exit 1 \
 		)
 	edb gen-errors-json --client | \
