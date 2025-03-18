@@ -56,14 +56,14 @@
 //
 // You may also connect to a database using a DSN:
 //
-//	dsn := "gel://edgedb@localhost/edgedb"
+//	dsn := "gel://admin@localhost/main"
 //	client, err := gel.CreateClientDSN(dsn, opts)
 //
 // Or you can use Option fields.
 //
 //	opts := gelcfg.Options{
-//	    Database:    "edgedb",
-//	    User:        "edgedb",
+//	    Branch:      "main",
+//	    User:        "admin",
 //	    Concurrency: 4,
 //	}
 //

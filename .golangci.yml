@@ -263,8 +263,8 @@ issues:
 
   # Excluding configuration per-path, per-linter, per-text and per-source
   exclude-rules:
-    # Don't complain about doc link urls that are more then 80 characters
-    - source: "^// \\[.*\\]: http"
+    # Exclude comments with long urls
+    - source: "//.*http[s]?://"
       linters:
         - lll
 

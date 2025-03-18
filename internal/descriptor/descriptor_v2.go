@@ -26,7 +26,7 @@ import (
 )
 
 // V2 is a type descriptor
-// https://www.edgedb.com/docs/internals/protocol/typedesc
+// https://docs.geldata.com/reference/reference/protocol/typedesc
 type V2 struct {
 	Type          Type
 	ID            geltypes.UUID

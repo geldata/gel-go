@@ -134,8 +134,10 @@ func NewLocalDateTime(
 	return LocalDateTime{sec*1_000_000 + nsec/1_000}
 }
 
-// LocalDateTime is a date and time without timezone.
-// https://www.edgedb.com/docs/stdlib/datetime#type::cal::local_datetime
+// LocalDateTime represents [cal::local_datetime], a date and time without
+// a timezone.
+//
+// [cal::local_datetime]: https://docs.geldata.com/reference/stdlib/datetime#type::cal::local_datetime
 type LocalDateTime struct {
 	usec int64
 }
@@ -223,8 +225,9 @@ func NewLocalDate(year int, month time.Month, day int) LocalDate {
 	return LocalDate{int32((t.Unix() + timeShift) / 86400)}
 }
 
-// LocalDate is a date without a time zone.
-// https://www.edgedb.com/docs/stdlib/datetime#type::cal::local_date
+// LocalDate represents [cal::local_date], a date without a timezone.
+//
+// [cal::local_date]: https://docs.geldata.com/reference/stdlib/datetime#type::cal::local_date
 type LocalDate struct {
 	days int32
 }
@@ -329,8 +332,9 @@ func NewLocalTime(hour, minute, second, microsecond int) LocalTime {
 	return LocalTime{t.UnixNano() / 1_000}
 }
 
-// LocalTime is a time without a time zone.
-// https://www.edgedb.com/docs/stdlib/datetime#type::cal::local_time
+// LocalTime represents [cal::local_time], a time without a timezone.
+//
+// [cal::local_time]: https://docs.geldata.com/reference/stdlib/datetime#type::cal::local_time
 type LocalTime struct {
 	usec int64
 }
