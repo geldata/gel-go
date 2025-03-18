@@ -4,8 +4,8 @@ quality: lint test bench
 
 lint:
 	# GREP_FOR_THIS_STRING_WHEN_CHANGING_GOLANGCI_LINT_VERSION
-	go run github.com/golangci/golangci-lint/cmd/golangci-lint@v1.61.0 config verify
-	go run github.com/golangci/golangci-lint/cmd/golangci-lint@v1.61.0 run --sort-results
+	go run github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.6 config verify
+	go run github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.6 run --sort-results
 
 test:
 	# The test server shuts it self down after 10 seconds of inactivity.  If

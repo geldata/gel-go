@@ -37,8 +37,8 @@ type Cache struct {
 }
 
 // New returns a new cache.
-func New(cap int) *Cache {
-	c := Cache{cap: cap, mp: make(map[interface{}]*node, cap)}
+func New(size int) *Cache {
+	c := Cache{cap: size, mp: make(map[interface{}]*node, size)}
 	c.root.next = &c.root
 	c.root.prev = &c.root
 

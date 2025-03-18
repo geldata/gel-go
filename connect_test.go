@@ -38,7 +38,7 @@ func TestAuth(t *testing.T) {
 		Port:       opts.Port,
 		User:       "user_with_password",
 		Password:   types.NewOptionalStr("secret"),
-		Database:   opts.Database, //nolint:staticcheck // SA1019
+		Database:   opts.Database,
 		TLSOptions: opts.TLSOptions,
 	})
 	require.NoError(t, err)
@@ -123,7 +123,7 @@ func TestConnectTimeout(t *testing.T) {
 		Port:               opts.Port,
 		User:               opts.User,
 		Password:           opts.Password,
-		Database:           opts.Database, //nolint:staticcheck // SA1019
+		Database:           opts.Database,
 		ConnectTimeout:     2 * time.Nanosecond,
 		WaitUntilAvailable: 1 * time.Nanosecond,
 	})

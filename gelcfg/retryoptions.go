@@ -45,6 +45,8 @@ func NewRetryOptions() RetryOptions {
 // RetryOptions configures how failed transactions or queries outside of
 // transactions are retried.  Use [NewRetryOptions] to get a default
 // RetryOptions value instead of creating one yourself.
+//
+// See [github.com/geldata/gel-go.Client.WithRetryOptions] for an example.
 type RetryOptions struct {
 	fromFactory bool
 	txConflict  RetryRule

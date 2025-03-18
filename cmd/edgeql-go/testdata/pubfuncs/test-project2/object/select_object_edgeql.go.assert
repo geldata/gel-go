@@ -7,6 +7,7 @@ import (
 	_ "embed"
 
 	gel "github.com/geldata/gel-go"
+	"github.com/geldata/gel-go/geltypes"
 )
 
 //go:embed select_object.edgeql
@@ -16,7 +17,7 @@ var selectObjectCmd string
 // is part of the return type for
 // SelectObject()
 type selectObjectResult struct {
-	gel.Optional
+	geltypes.Optional
 	Name     string                         `gel:"Name"`
 	Language string                         `gel:"Language"`
 	Params   []selectObjectResultParamsItem `gel:"Params"`
@@ -26,8 +27,8 @@ type selectObjectResult struct {
 // is part of the return type for
 // SelectObject()
 type selectObjectResultParamsItem struct {
-	Name    string          `gel:"Name"`
-	Default gel.OptionalStr `gel:"Default"`
+	Name    string               `gel:"Name"`
+	Default geltypes.OptionalStr `gel:"Default"`
 }
 
 // SelectObject

@@ -16,7 +16,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        go-version: ["1.22", "1.23"]
+        go-version: ["1.23", "1.24"]
         gel-version: [stable, nightly]
         os: [ubuntu-latest, macos-latest]
     steps:
@@ -33,7 +33,7 @@ jobs:
         uses: golangci/golangci-lint-action@v6.5.0
         with:
           # GREP_FOR_THIS_STRING_WHEN_CHANGING_GOLANGCI_LINT_VERSION
-          version: v1.61.0
+          version: v1.64.6
 
       - name: Check Formatting
         run: |

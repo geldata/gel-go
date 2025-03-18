@@ -18,42 +18,84 @@ package gel_test
 
 import (
 	"context"
-	"testing"
+	"errors"
+	"log"
 
 	gel "github.com/geldata/gel-go"
+	"github.com/geldata/gel-go/gelcfg"
+	"github.com/geldata/gel-go/gelerr"
 	"github.com/geldata/gel-go/geltypes"
+	"github.com/geldata/gel-go/internal/testserver"
 )
 
 var (
+	// Define identifiers that are used in examples, but keep them in their own
+	// file. This way the definition is not included in the example. This keeps
+	// examples concise.
 	ctx    context.Context
 	client *gel.Client
+	opts   gelcfg.Options
+	id     geltypes.UUID
 )
 
-// [Link properties] are treated as fields in the linked to struct, and the @
-// is omitted from the field's tag.
-//
-// [Link properties]: https://docs.geldata.com/reference/datamodel/linkprops#link-properties
-func Example_linkProperty() {
-	var result []struct {
-		Name    string `gel:"name"`
-		Friends []struct {
-			Name     string                   `gel:"name"`
-			Strength geltypes.OptionalFloat64 `gel:"strength"`
-		} `gel:"friends"`
-	}
-
-	_ = client.Query(
-		ctx,
-		`select Person {
-		name,
-		friends: {
-			name,
-			@strength,
-		}
-	}`,
-		&result,
-	)
+func isDuplicateDatabaseDefinitionError(err error) bool {
+	var gelErr gelerr.Error
+	return errors.As(err, &gelErr) &&
+		gelErr.Category(gelerr.DuplicateDatabaseDefinitionError)
 }
 
-// TestNil makes this not a whole file example. // https://go.dev/blog/examples
-func TestNil(t *testing.T) {}
+func init() {
+	ctx = context.Background()
+
+	opts = testserver.Options()
+	var err error
+	client, err = gel.CreateClient(opts)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = client.Execute(ctx, "create empty branch examples")
+	if err != nil && !isDuplicateDatabaseDefinitionError(err) {
+		log.Fatal(err)
+	}
+
+	opts.Database = ""
+	opts.Branch = "examples"
+	client, err = gel.CreateClient(opts)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = client.Execute(ctx, `
+		START MIGRATION TO {
+			module default {
+				# ExampleClient_WithGlobals
+				global used_everywhere: int64;
+
+				type User {
+					required name: str {
+						default := 'default';
+					};
+				};
+				type Product {};
+			}
+		};
+		POPULATE MIGRATION;
+		COMMIT MIGRATION;
+	`)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// The server sends warnings in response to both parse and execute.  We
+	// don't want the same warning to show up twice in
+	// ExampleClient_WithWarningHandler, so make sure this query is cached
+	// before the example is run.
+	err = client.
+		// Don't log the warning.
+		WithWarningHandler(func(_ []error) error { return nil }).
+		Execute(ctx, `SELECT _warn_on_call()`)
+	if err != nil {
+		log.Fatal(err)
+	}
+}

@@ -4,11 +4,18 @@ package {{.PackageName}}
 
 import (
 	"context"
-	{{- range .ExtraImports}}
+	{{range .ExtraImports -}}
+	{{if hasPrefix . "github.com" | not -}}
 	"{{.}}"
-	{{- end}}
+	{{end -}}
+	{{end -}}
 	_ "embed"
 
+	{{range .ExtraImports -}}
+	{{if hasPrefix . "github.com" -}}
+	"{{.}}"
+	{{end -}}
+	{{end -}}
 	gel "github.com/geldata/gel-go"
 )
 {{range .Queries}}
