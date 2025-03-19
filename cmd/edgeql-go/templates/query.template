@@ -13,7 +13,11 @@ func {{.QueryName}}(
 	ctx context.Context, 
 	client *gel.Client,
 	{{- range .SignatureArgs}}
-	{{.GoName}} {{.Type}},
+	{{.GoName}} {{if eq .Type "json.RawMessage" -}}
+			[]byte
+		{{- else -}}
+			{{.Type}}
+		{{- end}},
 	{{- end}}
 ) ({{.SignatureReturnType}}, error) {
 	var result {{.SignatureReturnType}}
@@ -41,7 +45,11 @@ func {{.QueryName}}JSON(
 	ctx context.Context,
 	client *gel.Client,
 	{{- range .SignatureArgs}}
-	{{.GoName}} {{.Type}},
+	{{.GoName}} {{if eq .Type "json.RawMessage" -}}
+			[]byte
+		{{- else -}}
+			{{.Type}}
+		{{- end}},
 	{{- end}}
 ) ([]byte, error) {
 	var result []byte

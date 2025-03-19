@@ -44,7 +44,7 @@ func generateType(
 	case descriptor.Tuple:
 		types, imports, err = generateTuple(desc, required, path, cmdCfg)
 	case descriptor.BaseScalar, descriptor.Scalar, descriptor.Enum:
-		types, imports, err = generateBaseScalar(desc, required)
+		types, imports, err = generateBaseScalar(desc, required, cmdCfg)
 	case descriptor.Range:
 		types, imports, err = generateRange(desc, required)
 	default:
@@ -81,7 +81,7 @@ func generateTypeV2(
 	case descriptor.Tuple:
 		types, imports, err = generateTupleV2(desc, required, path, cmdCfg)
 	case descriptor.BaseScalar, descriptor.Scalar, descriptor.Enum:
-		types, imports, err = generateBaseScalarV2(desc, required)
+		types, imports, err = generateBaseScalarV2(desc, required, cmdCfg)
 	case descriptor.Range:
 		types, imports, err = generateRangeV2(desc, required)
 	default:
@@ -389,6 +389,7 @@ func generateTupleV2(
 func generateBaseScalar(
 	desc descriptor.Descriptor,
 	required bool,
+	cmdCfg *cmdConfig,
 ) ([]goType, []string, error) {
 	if desc.Type == descriptor.Scalar {
 		desc = codecs.GetScalarDescriptor(desc)
@@ -423,7 +424,19 @@ func generateBaseScalar(
 			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.OptionalStr"
 		}
-	case codecs.BytesID, codecs.JSONID:
+	case codecs.JSONID:
+		if required {
+			if cmdCfg.rawmessage {
+				imports = append(imports, "encoding/json")
+				name = "json.RawMessage"
+			} else {
+				name = "[]byte"
+			}
+		} else {
+			imports = append(imports, "github.com/geldata/gel-go/geltypes")
+			name = "geltypes.OptionalBytes"
+		}
+	case codecs.BytesID:
 		if required {
 			name = "[]byte"
 		} else {
@@ -552,6 +565,7 @@ func generateBaseScalar(
 func generateBaseScalarV2(
 	desc *descriptor.V2,
 	required bool,
+	cmdCfg *cmdConfig,
 ) ([]goType, []string, error) {
 	if desc.Type == descriptor.Scalar {
 		desc = codecs.GetScalarDescriptorV2(desc)
@@ -586,7 +600,19 @@ func generateBaseScalarV2(
 			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.OptionalStr"
 		}
-	case codecs.BytesID, codecs.JSONID:
+	case codecs.JSONID:
+		if required {
+			if cmdCfg.rawmessage {
+				imports = append(imports, "encoding/json")
+				name = "json.RawMessage"
+			} else {
+				name = "[]byte"
+			}
+		} else {
+			imports = append(imports, "github.com/geldata/gel-go/geltypes")
+			name = "geltypes.OptionalBytes"
+		}
+	case codecs.BytesID:
 		if required {
 			name = "[]byte"
 		} else {
