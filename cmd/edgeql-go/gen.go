@@ -29,6 +29,8 @@ func generateType(
 	required bool,
 	path []string,
 	cmdCfg *cmdConfig,
+	isResult bool,
+	isField bool,
 ) ([]goType, []string, error) {
 	var (
 		err     error
@@ -38,13 +40,25 @@ func generateType(
 
 	switch desc.Type {
 	case descriptor.Set, descriptor.Array:
-		types, imports, err = generateSlice(desc, path, cmdCfg)
+		types, imports, err = generateSlice(
+			desc,
+			path,
+			cmdCfg,
+			isResult,
+			isField,
+		)
 	case descriptor.Object, descriptor.NamedTuple:
-		types, imports, err = generateObject(desc, required, path, cmdCfg)
+		types, imports, err = generateObject(desc, required, path, cmdCfg, isResult)
 	case descriptor.Tuple:
-		types, imports, err = generateTuple(desc, required, path, cmdCfg)
+		types, imports, err = generateTuple(desc, required, path, cmdCfg, isResult)
 	case descriptor.BaseScalar, descriptor.Scalar, descriptor.Enum:
-		types, imports, err = generateBaseScalar(desc, required, cmdCfg)
+		types, imports, err = generateBaseScalar(
+			desc,
+			required,
+			cmdCfg,
+			isResult,
+			isField,
+		)
 	case descriptor.Range:
 		types, imports, err = generateRange(desc, required)
 	default:
@@ -66,6 +80,8 @@ func generateTypeV2(
 	required bool,
 	path []string,
 	cmdCfg *cmdConfig,
+	isResult bool,
+	isField bool,
 ) ([]goType, []string, error) {
 	var (
 		err     error
@@ -75,13 +91,25 @@ func generateTypeV2(
 
 	switch desc.Type {
 	case descriptor.Set, descriptor.Array:
-		types, imports, err = generateSliceV2(desc, path, cmdCfg)
+		types, imports, err = generateSliceV2(
+			desc,
+			path,
+			cmdCfg,
+			isResult,
+			isField,
+		)
 	case descriptor.Object, descriptor.NamedTuple:
-		types, imports, err = generateObjectV2(desc, required, path, cmdCfg)
+		types, imports, err = generateObjectV2(desc, required, path, cmdCfg, isResult)
 	case descriptor.Tuple:
-		types, imports, err = generateTupleV2(desc, required, path, cmdCfg)
+		types, imports, err = generateTupleV2(desc, required, path, cmdCfg, isResult)
 	case descriptor.BaseScalar, descriptor.Scalar, descriptor.Enum:
-		types, imports, err = generateBaseScalarV2(desc, required, cmdCfg)
+		types, imports, err = generateBaseScalarV2(
+			desc,
+			required,
+			cmdCfg,
+			isResult,
+			isField,
+		)
 	case descriptor.Range:
 		types, imports, err = generateRangeV2(desc, required)
 	default:
@@ -182,12 +210,16 @@ func generateSlice(
 	desc descriptor.Descriptor,
 	path []string,
 	cmdCfg *cmdConfig,
+	isResult bool,
+	isField bool,
 ) ([]goType, []string, error) {
 	types, imports, err := generateType(
 		desc.Fields[0].Desc,
 		true,
 		path,
 		cmdCfg,
+		isResult,
+		isField,
 	)
 	if err != nil {
 		return nil, nil, err
@@ -201,12 +233,16 @@ func generateSliceV2(
 	desc *descriptor.V2,
 	path []string,
 	cmdCfg *cmdConfig,
+	isResult bool,
+	isField bool,
 ) ([]goType, []string, error) {
 	types, imports, err := generateTypeV2(
 		&desc.Fields[0].Desc,
 		true,
 		path,
 		cmdCfg,
+		isResult,
+		isField,
 	)
 	if err != nil {
 		return nil, nil, err
@@ -221,6 +257,7 @@ func generateObject(
 	required bool,
 	path []string,
 	cmdCfg *cmdConfig,
+	isResult bool,
 ) ([]goType, []string, error) {
 	var imports []string
 	typ := goStruct{Name: nameFromPath(path), Required: required}
@@ -236,6 +273,8 @@ func generateObject(
 			field.Required,
 			append(path, field.Name),
 			cmdCfg,
+			isResult,
+			true,
 		)
 		if err != nil {
 			return nil, nil, err
@@ -265,6 +304,7 @@ func generateObjectV2(
 	required bool,
 	path []string,
 	cmdCfg *cmdConfig,
+	isResult bool,
 ) ([]goType, []string, error) {
 	var imports []string
 	typ := goStruct{Name: nameFromPath(path), Required: required}
@@ -280,6 +320,8 @@ func generateObjectV2(
 			field.Required,
 			append(path, field.Name),
 			cmdCfg,
+			isResult,
+			true,
 		)
 		if err != nil {
 			return nil, nil, err
@@ -309,6 +351,7 @@ func generateTuple(
 	required bool,
 	path []string,
 	cmdCfg *cmdConfig,
+	isResult bool,
 ) ([]goType, []string, error) {
 	var imports []string
 	typ := &goStruct{Name: nameFromPath(path), Required: required}
@@ -320,6 +363,8 @@ func generateTuple(
 			field.Required,
 			append(path, field.Name),
 			cmdCfg,
+			isResult,
+			true,
 		)
 		if err != nil {
 			return nil, nil, err
@@ -350,6 +395,7 @@ func generateTupleV2(
 	required bool,
 	path []string,
 	cmdCfg *cmdConfig,
+	isResult bool,
 ) ([]goType, []string, error) {
 	var imports []string
 	typ := &goStruct{Name: nameFromPath(path), Required: required}
@@ -361,6 +407,8 @@ func generateTupleV2(
 			field.Required,
 			append(path, field.Name),
 			cmdCfg,
+			isResult,
+			true,
 		)
 		if err != nil {
 			return nil, nil, err
@@ -390,6 +438,8 @@ func generateBaseScalar(
 	desc descriptor.Descriptor,
 	required bool,
 	cmdCfg *cmdConfig,
+	isResult bool,
+	isField bool,
 ) ([]goType, []string, error) {
 	if desc.Type == descriptor.Scalar {
 		desc = codecs.GetScalarDescriptor(desc)
@@ -426,7 +476,7 @@ func generateBaseScalar(
 		}
 	case codecs.JSONID:
 		if required {
-			if cmdCfg.rawmessage {
+			if cmdCfg.rawmessage && isResult && isField {
 				imports = append(imports, "encoding/json")
 				name = "json.RawMessage"
 			} else {
@@ -566,6 +616,8 @@ func generateBaseScalarV2(
 	desc *descriptor.V2,
 	required bool,
 	cmdCfg *cmdConfig,
+	isResult bool,
+	isField bool,
 ) ([]goType, []string, error) {
 	if desc.Type == descriptor.Scalar {
 		desc = codecs.GetScalarDescriptorV2(desc)
@@ -602,7 +654,7 @@ func generateBaseScalarV2(
 		}
 	case codecs.JSONID:
 		if required {
-			if cmdCfg.rawmessage {
+			if cmdCfg.rawmessage && isResult && isField {
 				imports = append(imports, "encoding/json")
 				name = "json.RawMessage"
 			} else {
