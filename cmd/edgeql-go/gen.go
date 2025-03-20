@@ -48,9 +48,21 @@ func generateType(
 			isField,
 		)
 	case descriptor.Object, descriptor.NamedTuple:
-		types, imports, err = generateObject(desc, required, path, cmdCfg, isResult)
+		types, imports, err = generateObject(
+			desc,
+			required,
+			path,
+			cmdCfg,
+			isResult,
+		)
 	case descriptor.Tuple:
-		types, imports, err = generateTuple(desc, required, path, cmdCfg, isResult)
+		types, imports, err = generateTuple(
+			desc,
+			required,
+			path,
+			cmdCfg,
+			isResult,
+		)
 	case descriptor.BaseScalar, descriptor.Scalar, descriptor.Enum:
 		types, imports, err = generateBaseScalar(
 			desc,
@@ -99,9 +111,21 @@ func generateTypeV2(
 			isField,
 		)
 	case descriptor.Object, descriptor.NamedTuple:
-		types, imports, err = generateObjectV2(desc, required, path, cmdCfg, isResult)
+		types, imports, err = generateObjectV2(
+			desc,
+			required,
+			path,
+			cmdCfg,
+			isResult,
+		)
 	case descriptor.Tuple:
-		types, imports, err = generateTupleV2(desc, required, path, cmdCfg, isResult)
+		types, imports, err = generateTupleV2(
+			desc,
+			required,
+			path,
+			cmdCfg,
+			isResult,
+		)
 	case descriptor.BaseScalar, descriptor.Scalar, descriptor.Enum:
 		types, imports, err = generateBaseScalarV2(
 			desc,
