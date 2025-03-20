@@ -16,21 +16,21 @@ var (
 	ctx = context.Background()
 )
 
-func TestJSONQuery(t *testing.T) {
+func TestJSONField(t *testing.T) {
 	client, err := gel.CreateClient(gelcfg.Options{})
 	require.NoError(t, err)
 
-	actual, err := jsonQuery(
+	actual, err := jsonField(
 		ctx,
 		client,
 		[]byte("bytes"),
 		geltypes.NewOptionalBytes([]byte("optional bytes")),
-		[]byte(`"json"`),
+		json.RawMessage(`"json"`),
 		geltypes.NewOptionalBytes([]byte(`"optional json"`)),
 	)
 	require.NoError(t, err)
 
-	expected := jsonQueryResult{
+	expected := jsonFieldResult{
 		Bytes:         []byte("bytes"),
 		OptionalBytes: geltypes.NewOptionalBytes([]byte("optional bytes")),
 		Json:          json.RawMessage(`"json"`),
@@ -39,21 +39,21 @@ func TestJSONQuery(t *testing.T) {
 	assert.Equal(t, expected, actual)
 }
 
-func TestJSONQueryMissingOptional(t *testing.T) {
+func TestJSONFieldMissingOptional(t *testing.T) {
 	client, err := gel.CreateClient(gelcfg.Options{})
 	require.NoError(t, err)
 
-	actual, err := jsonQuery(
+	actual, err := jsonField(
 		ctx,
 		client,
 		[]byte("bytes"),
 		geltypes.OptionalBytes{},
-		[]byte(`"json"`),
+		json.RawMessage(`"json"`),
 		geltypes.OptionalBytes{},
 	)
 	require.NoError(t, err)
 
-	expected := jsonQueryResult{
+	expected := jsonFieldResult{
 		Bytes:         []byte("bytes"),
 		OptionalBytes: geltypes.OptionalBytes{},
 		Json:          json.RawMessage(`"json"`),

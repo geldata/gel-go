@@ -11,35 +11,35 @@ import (
 	"github.com/geldata/gel-go/geltypes"
 )
 
-//go:embed json_query.edgeql
-var jsonQueryCmd string
+//go:embed json_field.edgeql
+var jsonFieldCmd string
 
-// jsonQueryResult
+// jsonFieldResult
 // is part of the return type for
-// jsonQuery()
-type jsonQueryResult struct {
+// jsonField()
+type jsonFieldResult struct {
 	Bytes         []byte                 `gel:"Bytes"`
 	OptionalBytes geltypes.OptionalBytes `gel:"OptionalBytes"`
 	Json          json.RawMessage        `gel:"Json"`
 	OptionalJson  geltypes.OptionalBytes `gel:"OptionalJson"`
 }
 
-// jsonQuery
+// jsonField
 // runs the query found in
-// json_query.edgeql
-func jsonQuery(
+// json_field.edgeql
+func jsonField(
 	ctx context.Context,
 	client *gel.Client,
 	bytes []byte,
 	optional_bytes geltypes.OptionalBytes,
 	json []byte,
 	optional_json geltypes.OptionalBytes,
-) (jsonQueryResult, error) {
-	var result jsonQueryResult
+) (jsonFieldResult, error) {
+	var result jsonFieldResult
 
 	err := client.QuerySingle(
 		ctx,
-		jsonQueryCmd,
+		jsonFieldCmd,
 		&result,
 		map[string]interface{}{
 			"bytes":          bytes,
@@ -52,11 +52,11 @@ func jsonQuery(
 	return result, err
 }
 
-// jsonQueryJSON
+// jsonFieldJSON
 // runs the query found in
-// json_query.edgeql
+// json_field.edgeql
 // returning the results as json encoded bytes
-func jsonQueryJSON(
+func jsonFieldJSON(
 	ctx context.Context,
 	client *gel.Client,
 	bytes []byte,
@@ -68,7 +68,7 @@ func jsonQueryJSON(
 
 	err := client.QuerySingleJSON(
 		ctx,
-		jsonQueryCmd,
+		jsonFieldCmd,
 		&result,
 		map[string]interface{}{
 			"bytes":          bytes,
