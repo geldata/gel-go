@@ -489,7 +489,13 @@ func (r *configResolver) resolveDSN(
 		return err
 	}
 
-	val, err := popDSNValue(query, uri.Hostname(), "host", r.host.val == nil)
+	val, err := popDSNValue(
+		query,
+		uri.Hostname(),
+		"host",
+		r.host.val == nil,
+		paths,
+	)
 	if err != nil {
 		return err
 	}
@@ -499,7 +505,7 @@ func (r *configResolver) resolveDSN(
 		}
 	}
 
-	val, err = popDSNValue(query, uri.Port(), "port", r.port.val == nil)
+	val, err = popDSNValue(query, uri.Port(), "port", r.port.val == nil, paths)
 	if err != nil {
 		return err
 	}
@@ -517,7 +523,13 @@ func (r *configResolver) resolveDSN(
 					"cannot be present at the same time")
 		}
 
-		val, err = popDSNValue(query, db, "branch", r.database.val == nil)
+		val, err = popDSNValue(
+			query,
+			db,
+			"branch",
+			r.database.val == nil,
+			paths,
+		)
 		if err != nil {
 			return err
 		} else if val.val != nil {
@@ -528,7 +540,7 @@ func (r *configResolver) resolveDSN(
 		}
 	} else {
 		val, err = popDSNValue(
-			query, db, "database", r.database.val == nil)
+			query, db, "database", r.database.val == nil, paths)
 		if err != nil {
 			return err
 		} else if val.val != nil {
@@ -540,7 +552,7 @@ func (r *configResolver) resolveDSN(
 	}
 
 	val, err = popDSNValue(query, uri.User.Username(), "user",
-		r.user.val == nil)
+		r.user.val == nil, paths)
 	if err != nil {
 		return err
 	}
@@ -551,7 +563,7 @@ func (r *configResolver) resolveDSN(
 	}
 
 	pwd, ok := uri.User.Password()
-	val, err = popDSNValue(query, "", "password", r.password.val == nil)
+	val, err = popDSNValue(query, "", "password", r.password.val == nil, paths)
 	if err != nil {
 		return err
 	}
@@ -562,7 +574,13 @@ func (r *configResolver) resolveDSN(
 		r.setPassword(val.val.(string), source+val.source)
 	}
 
-	val, err = popDSNValue(query, "", "tls_ca_file", r.tlsCAData.val == nil)
+	val, err = popDSNValue(
+		query,
+		"",
+		"tls_ca_file",
+		r.tlsCAData.val == nil,
+		paths,
+	)
 	if err != nil {
 		return err
 	}
@@ -576,7 +594,7 @@ func (r *configResolver) resolveDSN(
 	}
 
 	val, err = popDSNValue(query, "", "tls_verify_hostname",
-		r.tlsSecurity.val == nil)
+		r.tlsSecurity.val == nil, paths)
 	if err != nil {
 		return err
 	}
@@ -592,7 +610,13 @@ func (r *configResolver) resolveDSN(
 		}
 	}
 
-	val, err = popDSNValue(query, "", "tls_security", r.tlsSecurity.val == nil)
+	val, err = popDSNValue(
+		query,
+		"",
+		"tls_security",
+		r.tlsSecurity.val == nil,
+		paths,
+	)
 	if err != nil {
 		return err
 	}
@@ -608,6 +632,7 @@ func (r *configResolver) resolveDSN(
 		"",
 		"tls_server_name",
 		r.tlsServerName.val == nil,
+		paths,
 	)
 	if err != nil {
 		return err
@@ -624,6 +649,7 @@ func (r *configResolver) resolveDSN(
 		"",
 		"wait_until_available",
 		r.waitUntilAvailable.val == nil,
+		paths,
 	)
 	if err != nil {
 		return err
@@ -635,7 +661,13 @@ func (r *configResolver) resolveDSN(
 		}
 	}
 
-	val, err = popDSNValue(query, "", "secret_key", r.secretKey.val == nil)
+	val, err = popDSNValue(
+		query,
+		"",
+		"secret_key",
+		r.secretKey.val == nil,
+		paths,
+	)
 	if err != nil {
 		return err
 	}
@@ -1385,6 +1417,7 @@ func popDSNValue(
 	val string,
 	name string,
 	resolve bool,
+	paths *cfgPaths,
 ) (cfgVal, error) {
 	if val != "" {
 		// XXX: what is the source supposed to be here?
@@ -1419,6 +1452,9 @@ func popDSNValue(
 		source := fmt.Sprintf(" (%v: %q)", key, val)
 		return cfgVal{val: v, source: source}, nil
 	case ok && strings.HasSuffix(key, "_file"):
+		if paths.testDir != "" {
+			val = filepath.Join(paths.testDir, val)
+		}
 		data, err := os.ReadFile(val)
 		if err != nil {
 			return cfgVal{}, fmt.Errorf(
