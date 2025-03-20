@@ -60,9 +60,10 @@ func usage() {
 }
 
 type cmdConfig struct {
-	mixedCaps bool
-	pubfuncs  bool
-	pubtypes  bool
+	mixedCaps  bool
+	pubfuncs   bool
+	pubtypes   bool
+	rawmessage bool
 }
 
 func main() {
@@ -77,12 +78,15 @@ func main() {
 		"Make generated functions public.")
 	pubtypes := flag.Bool("pubtypes", false,
 		"Make generated types public.")
+	rawmessage := flag.Bool("rawmessage", false,
+		"Use json.RawMessage instead of []bytes in struct fields")
 	flag.Parse()
 
 	cfg := &cmdConfig{
-		mixedCaps: *mixedCaps,
-		pubfuncs:  *pubfuncs,
-		pubtypes:  *pubtypes,
+		mixedCaps:  *mixedCaps,
+		pubfuncs:   *pubfuncs,
+		pubtypes:   *pubtypes,
+		rawmessage: *rawmessage,
 	}
 
 	timer := time.AfterFunc(200*time.Millisecond, func() {

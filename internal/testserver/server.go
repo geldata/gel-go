@@ -182,7 +182,7 @@ func startServerProcess() *info {
 
 	autoShutdownAfter := os.Getenv("EDGEDB_SERVER_AUTO_SHUTDOWN_AFTER_SECONDS")
 	if autoShutdownAfter == "" {
-		autoShutdownAfter = "10"
+		autoShutdownAfter = "30"
 	}
 
 	args = append(

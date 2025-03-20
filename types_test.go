@@ -2402,6 +2402,34 @@ func TestSendAndReceiveJSONBytes(t *testing.T) {
 	}
 }
 
+func TestReceiveJSONRawMessage(t *testing.T) {
+	ctx := context.Background()
+
+	strings := []string{"123", "-3.14", "true", "false", "[1, 2, 3]", "null"}
+
+	samples := make([][]byte, len(strings))
+	for i, s := range strings {
+		samples[i] = []byte(s)
+	}
+
+	query := `SELECT array_unpack(<array<json>>$0)`
+
+	var results []json.RawMessage
+	err := client.Query(ctx, query, &results, samples)
+	require.NoError(t, err)
+	require.Equal(t, len(samples), len(results), "wrong number of results")
+
+	for i, s := range strings {
+		t.Run(s, func(t *testing.T) {
+			assert.Equal(
+				t,
+				json.RawMessage(samples[i]),
+				results[i],
+			)
+		})
+	}
+}
+
 type JSONObject struct {
 	A float64 `json:"a"`
 	B string  `json:"b"`

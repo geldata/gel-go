@@ -38,11 +38,11 @@
 // Typically this process would be run using [go generate].
 // For go 1.24 and above:
 //
-//	//go:generate go tool edgeql-go -pubfuncs -pubtypes -mixedcaps
+//	//go:generate go tool edgeql-go -pubfuncs -pubtypes -mixedcaps -rawmessage
 //
 // For go 1.23 and below:
 //
-//	//go:generate edgeql-go -pubfuncs -pubtypes -mixedcaps
+//	//go:generate edgeql-go -pubfuncs -pubtypes -mixedcaps -rawmessage
 //
 // For a complete list of options:
 //

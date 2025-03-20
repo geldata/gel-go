@@ -8,7 +8,7 @@ lint:
 	go run github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.6 run --sort-results
 
 test:
-	# The test server shuts it self down after 10 seconds of inactivity.  If
+	# The test server shuts it self down after 30 seconds of inactivity.  If
 	# the server is still running when a subsequent test run is started the old
 	# server will be reused.  This saves developer time at the expense of
 	# repeatability.  You can set EDGEDB_SERVER_AUTO_SHUTDOWN_AFTER_SECONDS to
