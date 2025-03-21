@@ -23,6 +23,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
 	"os/exec"
 	"path"
@@ -66,11 +67,67 @@ func (i *info) options() gelcfg.Options {
 	}
 }
 
-// Options starts the test server if it isn't already running and returns the
-// connection options.
+// AsDSN returns a dsn string built from o.
+func AsDSN(o gelcfg.Options) string {
+	pwd, ok := o.Password.Get()
+	if ok {
+		pwd = ":" + pwd
+	}
+	return fmt.Sprintf(
+		"gel://%s%s@%s:%d?tls_security=%s&tls_ca_file=%s",
+		o.User,
+		pwd,
+		o.Host,
+		o.Port,
+		o.TLSOptions.SecurityMode,
+		o.TLSOptions.CAFile,
+	)
+}
+
+func randomBranchName() string {
+	return fmt.Sprintf("test_%v", rand.Intn(10_000_000))
+}
+
+// Options starts the test server if it isn't already running, creates an empty
+// branch, and returns the connection options.
 func Options() gelcfg.Options {
 	once.Do(initServerInfo)
-	return opts
+
+	pool, err := gelint.NewPool("", opts)
+	if err != nil {
+		Fatal(err)
+	}
+
+	ctx := context.Background()
+	conn, err := pool.Acquire(ctx)
+	if err != nil {
+		Fatal(err)
+	}
+
+	branch := randomBranchName()
+	q, err := gelint.NewQuery(
+		"Execute",
+		`create empty branch `+branch,
+		nil,
+		conn.Capabilities1pX(),
+		gelint.CopyState(pool.State),
+		nil,
+		true,
+		&pool.QueryConfig,
+	)
+	if err != nil {
+		Fatal(err)
+	}
+
+	err = conn.ScriptFlow(ctx, q)
+	err = errors.Join(err, pool.Release(conn, err))
+	if err != nil {
+		Fatal(err)
+	}
+
+	optsCopy := opts
+	optsCopy.Branch = branch
+	return optsCopy
 }
 
 // Fatal prints a stack trace, logs the error and exits the process.

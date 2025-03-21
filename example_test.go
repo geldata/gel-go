@@ -18,12 +18,10 @@ package gel_test
 
 import (
 	"context"
-	"errors"
 	"log"
 
 	gel "github.com/geldata/gel-go"
 	"github.com/geldata/gel-go/gelcfg"
-	"github.com/geldata/gel-go/gelerr"
 	"github.com/geldata/gel-go/geltypes"
 	"github.com/geldata/gel-go/internal/testserver"
 )
@@ -38,29 +36,10 @@ var (
 	id     geltypes.UUID
 )
 
-func isDuplicateDatabaseDefinitionError(err error) bool {
-	var gelErr gelerr.Error
-	return errors.As(err, &gelErr) &&
-		gelErr.Category(gelerr.DuplicateDatabaseDefinitionError)
-}
-
 func init() {
 	ctx = context.Background()
-
 	opts = testserver.Options()
 	var err error
-	client, err = gel.CreateClient(opts)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = client.Execute(ctx, "create empty branch examples")
-	if err != nil && !isDuplicateDatabaseDefinitionError(err) {
-		log.Fatal(err)
-	}
-
-	opts.Database = ""
-	opts.Branch = "examples"
 	client, err = gel.CreateClient(opts)
 	if err != nil {
 		log.Fatal(err)
