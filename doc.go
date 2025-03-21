@@ -18,56 +18,10 @@
 // [github.com/geldata/gel-go/cmd/edgeql-go] is a code generator that
 // generates go functions from edgeql files.
 //
-// Typical client usage looks like this:
-//
-//	package main
-//
-//	import (
-//	    "context"
-//	    "log"
-//
-//	    "github.com/geldata/gel-go"
-//	    "github.com/geldata/gel-go/gelcfg"
-//	)
-//
-//	func main() {
-//	    ctx := context.Background()
-//	    client, err := gel.CreateClient(gelcfg.Options{})
-//	    if err != nil {
-//	        log.Fatal(err)
-//	    }
-//	    defer client.Close()
-//
-//	    var (
-//	        age   int64 = 21
-//	        users []struct {
-//	            ID   geltypes.UUID `gel:"id"`
-//	            Name string   `gel:"name"`
-//	        }
-//	    )
-//
-//	    query := "SELECT User{name} FILTER .age = <int64>$0"
-//	    err = client.Query(ctx, query, &users, age)
-//	    ...
-//	}
+// See [Client] for an example of typical usage.
 //
 // We recommend using environment variables for connection parameters. See the
 // [client connection docs] for more information.
-//
-// You may also connect to a database using a DSN:
-//
-//	dsn := "gel://admin@localhost/main"
-//	client, err := gel.CreateClientDSN(dsn, opts)
-//
-// Or you can use Option fields.
-//
-//	opts := gelcfg.Options{
-//	    Branch:      "main",
-//	    User:        "admin",
-//	    Concurrency: 4,
-//	}
-//
-//	client, err := gel.CreateClient(opts)
 //
 // # Errors
 //
@@ -128,29 +82,15 @@
 // one directly to the other.
 //
 // Shape fields that are not required must use optional types for receiving
-// query results. The [gelcfg.Optional] struct can be embedded to make structs
+// query results. [geltypes.Optional] can be embedded to make structs
 // optional.
-//
-//	type User struct {
-//	    gelcfg.Optional
-//	    Email string `gel:"email"`
-//	}
-//
-//	var result User
-//	err := client.QuerySingle(ctx, `SELECT User { email } LIMIT 0`, $result)
-//	fmt.Println(result.Missing())
-//	// Output: true
-//
-//	err := client.QuerySingle(ctx, `SELECT User { email } LIMIT 1`, $result)
-//	fmt.Println(result.Missing())
-//	// Output: false
 //
 // Not all types listed above are valid query parameters.  To pass a slice of
 // scalar values use array in your query. Gel doesn't currently support
 // using sets as parameters.
 //
 //	query := `select User filter .id in array_unpack(<array<uuid>>$1)`
-//	client.QuerySingle(ctx, query, $user, []geltypes.UUID{...})
+//	client.QuerySingle(ctx, query, &user, []geltypes.UUID{...})
 //
 // Nested structures are also not directly allowed but you can use [json]
 // instead.
