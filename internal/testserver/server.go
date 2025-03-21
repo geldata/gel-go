@@ -68,7 +68,7 @@ func (i *info) options() gelcfg.Options {
 }
 
 // AsDSN returns a dsn string built from o.
-func AsDSN(o gelcfg.Options) string {
+func AsDSN(o gelcfg.Options) string { //nolint:gocritic
 	pwd, ok := o.Password.Get()
 	if ok {
 		pwd = ":" + pwd

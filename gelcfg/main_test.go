@@ -18,6 +18,7 @@ package gelcfg_test
 
 import (
 	"context"
+	"log"
 	"os"
 	"testing"
 
@@ -34,6 +35,10 @@ var (
 func TestMain(m *testing.M) {
 	ctx = context.Background()
 	opts := testserver.Options()
-	os.Setenv("GEL_DSN", testserver.AsDSN(opts))
+	err := os.Setenv("GEL_DSN", testserver.AsDSN(opts))
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	m.Run()
 }
