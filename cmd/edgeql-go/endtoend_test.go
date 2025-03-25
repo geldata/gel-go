@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -78,19 +77,7 @@ var tests = []struct {
 
 func TestMain(m *testing.M) {
 	o := testserver.Options()
-	pwd, ok := o.Password.Get()
-	if !ok {
-		log.Fatal("missing password")
-	}
-	dsn = fmt.Sprintf(
-		"edgedb://%s:%s@%s:%d?tls_security=%s&tls_ca_file=%s",
-		o.User,
-		pwd,
-		o.Host,
-		o.Port,
-		o.TLSOptions.SecurityMode,
-		o.TLSOptions.CAFile,
-	)
+	dsn = testserver.AsDSN(o)
 	os.Exit(m.Run())
 }
 
