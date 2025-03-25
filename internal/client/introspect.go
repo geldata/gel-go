@@ -19,6 +19,7 @@ package gel
 import (
 	"context"
 
+	"github.com/geldata/gel-go/gelcfg"
 	"github.com/geldata/gel-go/internal"
 	"github.com/geldata/gel-go/internal/descriptor"
 )
@@ -56,6 +57,9 @@ func Describe(
 		fmt:          Binary,
 		expCard:      Many,
 		capabilities: userCapabilities,
+		cfg: QueryConfig{
+			WarningHandler: gelcfg.LogWarnings,
+		},
 	}
 
 	r, err := conn.conn.acquireReader(ctx)
@@ -96,6 +100,9 @@ func DescribeV2(
 		expCard:      Many,
 		capabilities: userCapabilities,
 		parse:        true,
+		cfg: QueryConfig{
+			WarningHandler: gelcfg.LogWarnings,
+		},
 	}
 
 	r, err := conn.conn.acquireReader(ctx)
