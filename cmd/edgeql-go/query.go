@@ -262,7 +262,14 @@ func signatureTypes(
 	description *gelint.CommandDescription,
 	cmdCfg *cmdConfig,
 ) (*goStruct, []string, error) {
-	types, imports, err := generateType(description.In, true, nil, cmdCfg)
+	types, imports, err := generateType(
+		description.In,
+		true,
+		nil,
+		cmdCfg,
+		false,
+		false,
+	)
 	if err != nil {
 		return &goStruct{}, nil, err
 	}
@@ -274,8 +281,14 @@ func signatureTypesV2(
 	description *gelint.CommandDescriptionV2,
 	cmdCfg *cmdConfig,
 ) (*goStruct, []string, error) {
-	types, imports, err := generateTypeV2(&description.In,
-		true, nil, cmdCfg)
+	types, imports, err := generateTypeV2(
+		&description.In,
+		true,
+		nil,
+		cmdCfg,
+		false,
+		false,
+	)
 	if err != nil {
 		return &goStruct{}, nil, err
 	}
@@ -315,6 +328,8 @@ func resultTypes(
 		required,
 		[]string{name + "Result"},
 		cmdCfg,
+		true,
+		false,
 	)
 }
 
@@ -350,6 +365,8 @@ func resultTypesV2(
 		required,
 		[]string{name + "Result"},
 		cmdCfg,
+		true,
+		false,
 	)
 }
 

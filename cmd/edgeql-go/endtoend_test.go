@@ -24,6 +24,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"sync"
 	"testing"
@@ -33,7 +34,15 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var dsn string
+var (
+	dsn         string
+	projectRoot = getProjectRoot()
+)
+
+func getProjectRoot() string {
+	_, b, _, _ := runtime.Caller(0)
+	return filepath.Join(filepath.Dir(b), "../..")
+}
 
 var tests = []struct {
 	description string
@@ -59,6 +68,11 @@ var tests = []struct {
 		description: "invoke edgeql-go with -pubtypes",
 		directory:   "testdata/pubtypes",
 		args:        []string{"-pubtypes"},
+	},
+	{
+		description: "invoke edgeql-go with -rawmessage",
+		directory:   "testdata/rawmessage",
+		args:        []string{"-rawmessage"},
 	},
 }
 
@@ -133,6 +147,17 @@ func runTest(dir string, args []string) func(*testing.T) {
 
 			t.Run(entry.Name(), func(t *testing.T) {
 				projectDir := filepath.Join(tmpDir, entry.Name())
+
+				// Run tests against the current checkout of gel-go instead of
+				// against whatever older version is in the test project's
+				// go.mod file.
+				replace := fmt.Sprintf(
+					"-replace=github.com/geldata/gel-go=%s",
+					projectRoot,
+				)
+				run(t, projectDir, "go", "mod", "edit", replace)
+				run(t, projectDir, "go", "mod", "tidy")
+
 				run(t, projectDir, edgeqlGo, args...)
 				run(t, projectDir, "go", "run", "./...")
 				er := filepath.WalkDir(
@@ -143,13 +168,15 @@ func runTest(dir string, args []string) func(*testing.T) {
 							checkAssertFile(t, f)
 						}
 						if strings.HasSuffix(f, ".go") &&
-							!strings.HasSuffix(f, "ignore.go") {
+							!strings.HasSuffix(f, "ignore.go") &&
+							!strings.HasSuffix(f, "_test.go") {
 							checkGoFile(t, f)
 						}
 						return nil
 					},
 				)
 				require.NoError(t, er)
+				run(t, projectDir, "go", "test", "-count=1", "./...")
 			})
 		}
 	}
