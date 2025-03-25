@@ -641,7 +641,6 @@ func TestConnectionParameterResolution(t *testing.T) {
 				}
 
 				dsn = getStr(t, opts, "dsn")
-				dsn = strings.ReplaceAll(dsn, "_file=/", "_file="+tmpDir+"/")
 				file := getStr(t, opts, "credentialsFile")
 				if file != "" {
 					options.CredentialsFile = filepath.Join(tmpDir, file)
