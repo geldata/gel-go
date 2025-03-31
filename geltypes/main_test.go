@@ -14,15 +14,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package gel_test
+package geltypes_test
 
 import (
 	"context"
 	"log"
+	"testing"
 
-	gel "github.com/geldata/gel-go"
-	"github.com/geldata/gel-go/gelcfg"
-	"github.com/geldata/gel-go/geltypes"
+	"github.com/geldata/gel-go"
 	"github.com/geldata/gel-go/internal/testserver"
 )
 
@@ -32,13 +31,12 @@ var (
 	// examples concise.
 	ctx    context.Context
 	client *gel.Client
-	opts   gelcfg.Options
-	id     geltypes.UUID
 )
 
-func init() {
+func TestMain(m *testing.M) {
 	ctx = context.Background()
-	opts = testserver.Options()
+	opts := testserver.Options()
+
 	var err error
 	client, err = gel.CreateClient(opts)
 	if err != nil {
@@ -48,9 +46,6 @@ func init() {
 	err = client.Execute(ctx, `
 		START MIGRATION TO {
 			module default {
-				# ExampleClient_WithGlobals
-				global used_everywhere: int64;
-
 				type User {
 					required name: str {
 						default := 'default';
@@ -61,20 +56,12 @@ func init() {
 		};
 		POPULATE MIGRATION;
 		COMMIT MIGRATION;
+
+		INSERT User { name := 'Stephanie' };
 	`)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// The server sends warnings in response to both parse and execute.  We
-	// don't want the same warning to show up twice in
-	// ExampleClient_WithWarningHandler, so make sure this query is cached
-	// before the example is run.
-	err = client.
-		// Don't log the warning.
-		WithWarningHandler(func(_ []error) error { return nil }).
-		Execute(ctx, `SELECT _warn_on_call()`)
-	if err != nil {
-		log.Fatal(err)
-	}
+	m.Run()
 }

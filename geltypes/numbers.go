@@ -21,12 +21,7 @@ import (
 )
 
 // Optional represents a shape field that is not required.
-// Optional is embedded in structs to make them optional. For example:
-//
-//	type User struct {
-//	    geltypes.Optional
-//	    Name string `gel:"name"`
-//	}
+// Optional is embedded in structs to make them optional.
 type Optional struct {
 	isSet bool
 }

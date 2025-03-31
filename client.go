@@ -43,6 +43,9 @@ func CreateClient(opts gelcfg.Options) (*Client, error) { // nolint:gocritic,lll
 //
 // dsn is either an instance name or a [DSN].
 //
+//	dsn := "gel://admin@localhost/main"
+//	client, err := gel.CreateClientDSN(dsn, opts)
+//
 // [DSN]: https://docs.geldata.com/reference/reference/dsn#ref-dsn
 func CreateClientDSN(dsn string, opts gelcfg.Options) (*Client, error) { // nolint:gocritic,lll
 	pool, err := gel.NewPool(dsn, opts)
