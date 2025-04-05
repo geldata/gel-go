@@ -33,6 +33,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"syscall"
 	"text/template"
 	"time"
 
@@ -222,6 +223,9 @@ func queueFilesInBackground() chan string {
 			p.rootDir,
 			func(f string, d fs.DirEntry, e error) error {
 				if e != nil {
+					if errors.Is(e, syscall.EACCES) {
+						return nil
+					}
 					return e
 				}
 
