@@ -11,7 +11,7 @@ require (
 	github.com/sigurn/crc16 v0.0.0-20240131213347-83fcde1e29d1
 	github.com/stretchr/testify v1.9.0
 	github.com/xdg/scram v1.0.5
-	golang.org/x/sys v0.30.0
+	golang.org/x/sys v0.32.0
 )
 
 require (
@@ -32,7 +32,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/xdg/stringprep v1.0.3 // indirect
-	golang.org/x/crypto v0.33.0 // indirect
-	golang.org/x/text v0.22.0
+	golang.org/x/crypto v0.37.0 // indirect
+	golang.org/x/text v0.24.0
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
