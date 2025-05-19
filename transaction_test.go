@@ -228,21 +228,30 @@ func TestWithConfigInTx(t *testing.T) {
 	assert.EqualError(t, err, "rollback")
 }
 
-func serverVersion(t *testing.T) int64 {
-	ctx := context.Background()
+func serverVersionGTE(t *testing.T, major, minor int64) bool {
+	query := `
+		WITH version := sys::get_version()
+		SELECT (version.major, version.minor) >= (<int64>$0, <int64>$1)
+	`
 
-	var version int64
-	err := client.QuerySingle(ctx, "SELECT sys::get_version().major", &version)
-	assert.NoError(t, err)
+	var ok bool
+	err := client.QuerySingle(context.Background(), query, &ok, major, minor)
+	require.NoError(t, err)
 
-	return version
+	return ok
+}
+
+func skipIfServerVersionLT(t *testing.T, major, minor int64) {
+	if !serverVersionGTE(t, major, minor) {
+		t.Skip("server version is too old")
+	}
 }
 
 func TestSQLTx(t *testing.T) {
 	ctx := context.Background()
 	rollback := errors.New("rollback")
 
-	if serverVersion(t) >= 6 {
+	if serverVersionGTE(t, 6, 0) {
 		typename := "ExecuteSQL_01"
 		query := fmt.Sprintf("select %s.prop1 limit 1", typename)
 
@@ -378,9 +387,7 @@ func TestTxExerciseQueryJSON(t *testing.T) {
 }
 
 func TestTxExerciseQuerySQL(t *testing.T) {
-	if serverVersion(t) < 6 {
-		t.Skipf("server version is too old to support SQL")
-	}
+	skipIfServerVersionLT(t, 6, 0)
 
 	selectInTx(t, func(
 		ctx context.Context,
@@ -403,9 +410,7 @@ func TestTxExerciseQuerySQL(t *testing.T) {
 }
 
 func TestTxExerciseQuerySingle(t *testing.T) {
-	if serverVersion(t) < 6 {
-		t.Skipf("server version is too old to support SQL")
-	}
+	skipIfServerVersionLT(t, 6, 0)
 
 	selectInTx(t, func(
 		ctx context.Context,
@@ -425,9 +430,7 @@ func TestTxExerciseQuerySingle(t *testing.T) {
 }
 
 func TestTxExerciseQuerySingleJSON(t *testing.T) {
-	if serverVersion(t) < 6 {
-		t.Skipf("server version is too old to support SQL")
-	}
+	skipIfServerVersionLT(t, 6, 0)
 
 	selectInTx(t, func(
 		ctx context.Context,
@@ -447,9 +450,7 @@ func TestTxExerciseQuerySingleJSON(t *testing.T) {
 }
 
 func TestTxQuerySQLMalformedQuery(t *testing.T) {
-	if serverVersion(t) < 6 {
-		t.Skip("server version is too old to support SQL")
-	}
+	skipIfServerVersionLT(t, 6, 0)
 
 	ctx := context.Background()
 	err := client.Tx(ctx, func(ctx context.Context, tx geltypes.Tx) error {
