@@ -21,7 +21,6 @@ package gelerr
 
 import (
 	"fmt"
-
 	"github.com/geldata/gel-go/gelerr"
 )
 
@@ -597,6 +596,50 @@ func (e *DisabledCapabilityError) isEdgeDBCapabilityError() {}
 func (e *DisabledCapabilityError) isEdgeDBProtocolError() {}
 
 func (e *DisabledCapabilityError) HasTag(tag gelerr.ErrorTag) bool {
+	switch tag {
+	default:
+		return false
+	}
+}
+
+func NewUnsafeIsolationLevelError(msg string, err error) error {
+	return &UnsafeIsolationLevelError{msg, err}
+}
+
+type UnsafeIsolationLevelError struct {
+	msg string
+	err error
+}
+
+func (e *UnsafeIsolationLevelError) Error() string {
+	msg := e.msg
+	if e.err != nil {
+		msg = e.err.Error()
+	}
+
+	return "gel.UnsafeIsolationLevelError: " + msg
+}
+
+func (e *UnsafeIsolationLevelError) Unwrap() error { return e.err }
+
+func (e *UnsafeIsolationLevelError) Category(c gelerr.ErrorCategory) bool {
+	switch c {
+	case gelerr.UnsafeIsolationLevelError:
+		return true
+	case gelerr.CapabilityError:
+		return true
+	case gelerr.ProtocolError:
+		return true
+	default:
+		return false
+	}
+}
+
+func (e *UnsafeIsolationLevelError) isEdgeDBCapabilityError() {}
+
+func (e *UnsafeIsolationLevelError) isEdgeDBProtocolError() {}
+
+func (e *UnsafeIsolationLevelError) HasTag(tag gelerr.ErrorTag) bool {
 	switch tag {
 	default:
 		return false
@@ -3347,6 +3390,56 @@ func (e *TransactionDeadlockError) HasTag(tag gelerr.ErrorTag) bool {
 	}
 }
 
+func NewQueryCacheInvalidationError(msg string, err error) error {
+	return &QueryCacheInvalidationError{msg, err}
+}
+
+type QueryCacheInvalidationError struct {
+	msg string
+	err error
+}
+
+func (e *QueryCacheInvalidationError) Error() string {
+	msg := e.msg
+	if e.err != nil {
+		msg = e.err.Error()
+	}
+
+	return "gel.QueryCacheInvalidationError: " + msg
+}
+
+func (e *QueryCacheInvalidationError) Unwrap() error { return e.err }
+
+func (e *QueryCacheInvalidationError) Category(c gelerr.ErrorCategory) bool {
+	switch c {
+	case gelerr.QueryCacheInvalidationError:
+		return true
+	case gelerr.TransactionConflictError:
+		return true
+	case gelerr.TransactionError:
+		return true
+	case gelerr.ExecutionError:
+		return true
+	default:
+		return false
+	}
+}
+
+func (e *QueryCacheInvalidationError) isEdgeDBTransactionConflictError() {}
+
+func (e *QueryCacheInvalidationError) isEdgeDBTransactionError() {}
+
+func (e *QueryCacheInvalidationError) isEdgeDBExecutionError() {}
+
+func (e *QueryCacheInvalidationError) HasTag(tag gelerr.ErrorTag) bool {
+	switch tag {
+	case gelerr.ShouldRetry:
+		return true
+	default:
+		return false
+	}
+}
+
 func NewWatchError(msg string, err error) error {
 	return &WatchError{msg, err}
 }
@@ -4387,6 +4480,8 @@ func ErrorFromCode(code uint32, msg string) error {
 		return &UnsupportedCapabilityError{msg: msg}
 	case 0x03_04_02_00:
 		return &DisabledCapabilityError{msg: msg}
+	case 0x03_04_03_00:
+		return &UnsafeIsolationLevelError{msg: msg}
 	case 0x04_00_00_00:
 		return &QueryError{msg: msg}
 	case 0x04_01_00_00:
@@ -4509,6 +4604,8 @@ func ErrorFromCode(code uint32, msg string) error {
 		return &TransactionSerializationError{msg: msg}
 	case 0x05_03_01_02:
 		return &TransactionDeadlockError{msg: msg}
+	case 0x05_03_01_03:
+		return &QueryCacheInvalidationError{msg: msg}
 	case 0x05_04_00_00:
 		return &WatchError{msg: msg}
 	case 0x06_00_00_00:
