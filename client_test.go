@@ -202,12 +202,8 @@ func TestQuerySingleJSONMissingResult(t *testing.T) {
 func TestQuerySQL(t *testing.T) {
 	ctx := context.Background()
 
-	var version int64
-	err := client.QuerySingle(ctx, "SELECT sys::get_version().major", &version)
-	assert.NoError(t, err)
-
-	if version >= 6 {
-		err = client.ExecuteSQL(ctx, "select 1")
+	if serverVersionGTE(t, 6, 0) {
+		err := client.ExecuteSQL(ctx, "select 1")
 		assert.NoError(t, err)
 
 		var result []struct {
@@ -239,7 +235,7 @@ func TestQuerySQL(t *testing.T) {
 		assert.Equal(t, int64(42), result3[0].Col1)
 	} else {
 		var res []interface{}
-		err = client.QuerySQL(ctx, "select 1", &res)
+		err := client.QuerySQL(ctx, "select 1", &res)
 		assert.EqualError(
 			t, err,
 			"gel.UnsupportedFeatureError: "+
