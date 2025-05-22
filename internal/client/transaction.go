@@ -94,6 +94,7 @@ func (t *Tx) execute(
 		nil,
 		false,
 		&t.cfg,
+		true,
 	)
 	if err != nil {
 		return err
@@ -200,6 +201,7 @@ func (t *Tx) Execute(
 		nil,
 		true,
 		&t.cfg,
+		true,
 	)
 	if err != nil {
 		return err
@@ -224,6 +226,7 @@ func (t *Tx) Query(
 		args,
 		t.state,
 		&t.cfg,
+		true,
 	)
 }
 
@@ -246,6 +249,7 @@ func (t *Tx) QuerySingle(
 		args,
 		t.state,
 		&t.cfg,
+		true,
 	)
 }
 
@@ -265,6 +269,7 @@ func (t *Tx) QueryJSON(
 		args,
 		t.state,
 		&t.cfg,
+		true,
 	)
 }
 
@@ -286,6 +291,7 @@ func (t *Tx) QuerySingleJSON(
 		args,
 		t.state,
 		&t.cfg,
+		true,
 	)
 }
 
@@ -304,6 +310,7 @@ func (t *Tx) ExecuteSQL(
 		nil,
 		true,
 		&t.cfg,
+		true,
 	)
 	if err != nil {
 		return err
@@ -328,5 +335,6 @@ func (t *Tx) QuerySQL(
 		args,
 		t.state,
 		&t.cfg,
+		true,
 	)
 }

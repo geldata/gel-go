@@ -271,6 +271,7 @@ func TestSessionIdleTimeout(t *testing.T) {
 		[]any{},
 		p.State,
 		&p.QueryConfig,
+		false,
 	)
 	require.NoError(t, p.Release(con, err))
 	require.NoError(t, err)

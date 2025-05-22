@@ -114,6 +114,7 @@ func Options() gelcfg.Options {
 		nil,
 		true,
 		&pool.QueryConfig,
+		false,
 	)
 	if err != nil {
 		Fatal(err)
