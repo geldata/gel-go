@@ -6,7 +6,7 @@ import (
 	"context"
 	_ "embed"
 
-	gel "github.com/geldata/gel-go"
+	"github.com/geldata/gel-go/geltypes"
 )
 
 //go:embed select_array.edgeql
@@ -17,7 +17,7 @@ var selectArrayCmd string
 // select_array.edgeql
 func SelectArray(
 	ctx context.Context,
-	client *gel.Client,
+	client geltypes.Executor,
 ) ([]string, error) {
 	var result []string
 
@@ -36,7 +36,7 @@ func SelectArray(
 // returning the results as json encoded bytes
 func SelectArrayJSON(
 	ctx context.Context,
-	client *gel.Client,
+	client geltypes.Executor,
 ) ([]byte, error) {
 	var result []byte
 

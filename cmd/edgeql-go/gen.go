@@ -286,10 +286,6 @@ func generateObject(
 	var imports []string
 	typ := goStruct{Name: nameFromPath(path), Required: required}
 	types := []goType{&typ}
-	if !required {
-		// This is needed for geltypes.Optional in the struct definition.
-		imports = append(imports, "github.com/geldata/gel-go/geltypes")
-	}
 
 	for _, field := range desc.Fields {
 		t, i, err := generateType(
@@ -333,10 +329,6 @@ func generateObjectV2(
 	var imports []string
 	typ := goStruct{Name: nameFromPath(path), Required: required}
 	types := []goType{&typ}
-	if !required {
-		// This is needed for geltypes.Optional in the struct definition.
-		imports = append(imports, "github.com/geldata/gel-go/geltypes")
-	}
 
 	for _, field := range desc.Fields {
 		t, i, err := generateTypeV2(
@@ -475,7 +467,6 @@ func generateBaseScalar(
 		if required {
 			name = "string"
 		} else {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.OptionalStr"
 		}
 
@@ -485,17 +476,14 @@ func generateBaseScalar(
 	switch desc.ID {
 	case codecs.UUIDID:
 		if required {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.UUID"
 		} else {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.OptionalUUID"
 		}
 	case codecs.StrID:
 		if required {
 			name = "string"
 		} else {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.OptionalStr"
 		}
 	case codecs.JSONID:
@@ -507,56 +495,48 @@ func generateBaseScalar(
 				name = "[]byte"
 			}
 		} else {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.OptionalBytes"
 		}
 	case codecs.BytesID:
 		if required {
 			name = "[]byte"
 		} else {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.OptionalBytes"
 		}
 	case codecs.Int16ID:
 		if required {
 			name = "int16"
 		} else {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.OptionalInt16"
 		}
 	case codecs.Int32ID:
 		if required {
 			name = "int32"
 		} else {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.OptionalInt32"
 		}
 	case codecs.Int64ID:
 		if required {
 			name = "int64"
 		} else {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.OptionalInt64"
 		}
 	case codecs.Float32ID:
 		if required {
 			name = "float32"
 		} else {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.OptionalFloat32"
 		}
 	case codecs.Float64ID:
 		if required {
 			name = "float64"
 		} else {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.OptionalFloat64"
 		}
 	case codecs.BoolID:
 		if required {
 			name = "bool"
 		} else {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.OptionalBool"
 		}
 	case codecs.DateTimeID:
@@ -564,39 +544,30 @@ func generateBaseScalar(
 			imports = append(imports, "time")
 			name = "time.Time"
 		} else {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.OptionalDateTime"
 		}
 	case codecs.LocalDTID:
 		if required {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.LocalDateTime"
 		} else {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.OptionalLocalDateTime"
 		}
 	case codecs.LocalDateID:
 		if required {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.LocalDate"
 		} else {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.OptionalLocalDate"
 		}
 	case codecs.LocalTimeID:
 		if required {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.LocalTime"
 		} else {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.OptionalLocalTime"
 		}
 	case codecs.DurationID:
 		if required {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.Duration"
 		} else {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.OptionalDuration"
 		}
 	case codecs.BigIntID:
@@ -604,31 +575,24 @@ func generateBaseScalar(
 			imports = append(imports, "math/big")
 			name = "*big.Int"
 		} else {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.OptionalBigInt"
 		}
 	case codecs.RelativeDurationID:
 		if required {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.RelativeDuration"
 		} else {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.OptionalRelativeDuration"
 		}
 	case codecs.DateDurationID:
 		if required {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.DateDuration"
 		} else {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.OptionalDateDuration"
 		}
 	case codecs.MemoryID:
 		if required {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.Memory"
 		} else {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.OptionalMemory"
 		}
 	}
@@ -653,7 +617,6 @@ func generateBaseScalarV2(
 		if required {
 			name = "string"
 		} else {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.OptionalStr"
 		}
 
@@ -663,17 +626,14 @@ func generateBaseScalarV2(
 	switch desc.ID {
 	case codecs.UUIDID:
 		if required {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.UUID"
 		} else {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.OptionalUUID"
 		}
 	case codecs.StrID:
 		if required {
 			name = "string"
 		} else {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.OptionalStr"
 		}
 	case codecs.JSONID:
@@ -685,56 +645,48 @@ func generateBaseScalarV2(
 				name = "[]byte"
 			}
 		} else {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.OptionalBytes"
 		}
 	case codecs.BytesID:
 		if required {
 			name = "[]byte"
 		} else {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.OptionalBytes"
 		}
 	case codecs.Int16ID:
 		if required {
 			name = "int16"
 		} else {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.OptionalInt16"
 		}
 	case codecs.Int32ID:
 		if required {
 			name = "int32"
 		} else {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.OptionalInt32"
 		}
 	case codecs.Int64ID:
 		if required {
 			name = "int64"
 		} else {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.OptionalInt64"
 		}
 	case codecs.Float32ID:
 		if required {
 			name = "float32"
 		} else {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.OptionalFloat32"
 		}
 	case codecs.Float64ID:
 		if required {
 			name = "float64"
 		} else {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.OptionalFloat64"
 		}
 	case codecs.BoolID:
 		if required {
 			name = "bool"
 		} else {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.OptionalBool"
 		}
 	case codecs.DateTimeID:
@@ -742,39 +694,30 @@ func generateBaseScalarV2(
 			imports = append(imports, "time")
 			name = "time.Time"
 		} else {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.OptionalDateTime"
 		}
 	case codecs.LocalDTID:
 		if required {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.LocalDateTime"
 		} else {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.OptionalLocalDateTime"
 		}
 	case codecs.LocalDateID:
 		if required {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.LocalDate"
 		} else {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.OptionalLocalDate"
 		}
 	case codecs.LocalTimeID:
 		if required {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.LocalTime"
 		} else {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.OptionalLocalTime"
 		}
 	case codecs.DurationID:
 		if required {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.Duration"
 		} else {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.OptionalDuration"
 		}
 	case codecs.BigIntID:
@@ -782,31 +725,24 @@ func generateBaseScalarV2(
 			imports = append(imports, "math/big")
 			name = "*big.Int"
 		} else {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.OptionalBigInt"
 		}
 	case codecs.RelativeDurationID:
 		if required {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.RelativeDuration"
 		} else {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.OptionalRelativeDuration"
 		}
 	case codecs.DateDurationID:
 		if required {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.DateDuration"
 		} else {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.OptionalDateDuration"
 		}
 	case codecs.MemoryID:
 		if required {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.Memory"
 		} else {
-			imports = append(imports, "github.com/geldata/gel-go/geltypes")
 			name = "geltypes.OptionalMemory"
 		}
 	}

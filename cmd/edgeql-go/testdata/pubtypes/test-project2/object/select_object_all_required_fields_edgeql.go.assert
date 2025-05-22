@@ -6,7 +6,6 @@ import (
 	"context"
 	_ "embed"
 
-	gel "github.com/geldata/gel-go"
 	"github.com/geldata/gel-go/geltypes"
 )
 
@@ -27,7 +26,7 @@ type SelectObjectAllRequiredFieldsResult struct {
 // select_object_all_required_fields.edgeql
 func selectObjectAllRequiredFields(
 	ctx context.Context,
-	client *gel.Client,
+	client geltypes.Executor,
 ) (SelectObjectAllRequiredFieldsResult, error) {
 	var result SelectObjectAllRequiredFieldsResult
 
@@ -46,7 +45,7 @@ func selectObjectAllRequiredFields(
 // returning the results as json encoded bytes
 func selectObjectAllRequiredFieldsJSON(
 	ctx context.Context,
-	client *gel.Client,
+	client geltypes.Executor,
 ) ([]byte, error) {
 	var result []byte
 
