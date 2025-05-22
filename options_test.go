@@ -70,10 +70,11 @@ func ExampleClient_WithQueryTag() {
 	err = client.QuerySingle(
 		ctx,
 		`
-	SELECT assert_single((
+	SELECT (
 		SELECT sys::QueryStats
 		FILTER .tag = <str>$0
-	)).query
+		LIMIT 1
+	).query
 	`,
 		&query,
 		tag,

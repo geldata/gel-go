@@ -61,10 +61,7 @@ func initServer() {
 		};
 	`)
 	if err != nil &&
-		strings.Contains(err.Error(), "'user_with_password' already exists") {
-		// The server was initialized in a previous test run.
-		return
-	} else if err != nil {
+		!strings.Contains(err.Error(), "'user_with_password' already exists") {
 		testserver.Fatal(err)
 	}
 	execOrFatal(`
