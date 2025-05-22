@@ -16,7 +16,7 @@ import (
 	"{{.}}"
 	{{end -}}
 	{{end -}}
-	gel "github.com/geldata/gel-go"
+	"github.com/geldata/gel-go/geltypes"
 )
 {{range .Queries}}
 {{template "query.template" .}}

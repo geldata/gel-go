@@ -6,7 +6,6 @@ import (
 	"context"
 	_ "embed"
 
-	gel "github.com/geldata/gel-go"
 	"github.com/geldata/gel-go/geltypes"
 )
 
@@ -35,7 +34,7 @@ type SelectObjectsResultParamsItem struct {
 // select_objects.edgeql
 func selectObjects(
 	ctx context.Context,
-	client *gel.Client,
+	client geltypes.Executor,
 ) ([]SelectObjectsResult, error) {
 	var result []SelectObjectsResult
 
@@ -54,7 +53,7 @@ func selectObjects(
 // returning the results as json encoded bytes
 func selectObjectsJSON(
 	ctx context.Context,
-	client *gel.Client,
+	client geltypes.Executor,
 ) ([]byte, error) {
 	var result []byte
 

@@ -7,7 +7,7 @@ import (
 	_ "embed"
 	"time"
 
-	gel "github.com/geldata/gel-go"
+	"github.com/geldata/gel-go/geltypes"
 )
 
 //go:embed select_args.edgeql
@@ -26,7 +26,7 @@ type selectArgsResult struct {
 // select_args.edgeql
 func selectArgs(
 	ctx context.Context,
-	client *gel.Client,
+	client geltypes.Executor,
 	str string,
 	datetime time.Time,
 ) (selectArgsResult, error) {
@@ -51,7 +51,7 @@ func selectArgs(
 // returning the results as json encoded bytes
 func selectArgsJSON(
 	ctx context.Context,
-	client *gel.Client,
+	client geltypes.Executor,
 	str string,
 	datetime time.Time,
 ) ([]byte, error) {
