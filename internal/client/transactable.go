@@ -19,6 +19,7 @@ package gel
 import (
 	"context"
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/geldata/gel-go/gelerr"
@@ -100,6 +101,8 @@ func (c *transactableConn) Tx(
 	}
 	defer func() { err = FirstError(err, c.unborrow()) }()
 
+	optimisticRepeatableRead := true
+
 	var edbErr gelerr.Error
 	for i := 1; true; i++ {
 		if errors.As(err, &edbErr) && c.conn.soc.Closed() {
@@ -118,7 +121,7 @@ func (c *transactableConn) Tx(
 				state:          state,
 				cfg:            *cfg,
 			}
-			err = tx.start(ctx)
+			err = tx.start(ctx, optimisticRepeatableRead)
 			if err != nil {
 				goto Error
 			}
@@ -142,6 +145,18 @@ func (c *transactableConn) Tx(
 		}
 
 	Error:
+		if errors.As(err, &edbErr) &&
+			edbErr.Category(gelerr.CapabilityError) &&
+			strings.Contains(err.Error(), "REPEATABLE READ") {
+			if !optimisticRepeatableRead {
+				return err
+			}
+
+			optimisticRepeatableRead = false
+			i--
+			continue
+		}
+
 		if errors.As(err, &edbErr) && edbErr.HasTag(gelerr.ShouldRetry) {
 			rule, e := cfg.RetryOptions.RuleForException(edbErr)
 			if e != nil {

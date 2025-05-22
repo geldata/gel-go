@@ -478,3 +478,88 @@ func TestTxQuerySQLMalformedQuery(t *testing.T) {
 	})
 	assert.ErrorContains(t, err, "EdgeQLSyntaxError")
 }
+
+func requireBogusRepeatableReadTx(
+	t *testing.T,
+	client *Client,
+	firstTry bool,
+) {
+	ctx := context.Background()
+
+	type Result struct {
+		Ins struct {
+			ID geltypes.UUID `gel:"id"`
+		} `gel:"ins"`
+		Level string `gel:"level"`
+	}
+
+	err := client.Tx(ctx, func(ctx context.Context, tx geltypes.Tx) error {
+		query := `
+			select {
+				ins := (insert test::Tmp { tmp := "test1" }),
+				level := sys::get_transaction_isolation(),
+			}
+		`
+		var res1 Result
+		err := tx.QuerySingle(ctx, query, &res1)
+		if err != nil {
+			return err
+		}
+
+		query = `
+			select {
+				ins := (insert test::TmpConflict {
+					tmp := <str>random()
+				}),
+				level := sys::get_transaction_isolation(),
+			}
+		`
+
+		var res2 Result
+		err = tx.QuerySingle(ctx, query, &res2)
+		if err != nil {
+			return err
+		}
+
+		// N.B: res1 will be RepeatableRead on the first
+		// iteration, maybe, but contingent on the second query
+		// succeeding it will be Serializable!
+		require.Equal(t, string(gelcfg.Serializable), res1.Level)
+		require.Equal(t, string(gelcfg.Serializable), res2.Level)
+		return nil
+	})
+	require.NoError(t, err)
+}
+
+func TestTxPreferRepeatableRead(t *testing.T) {
+	skipIfServerVersionLT(t, 6, 5)
+	conflictTypesInDB(t)
+	ctx := context.Background()
+
+	c := client.WithTxOptions(gelcfg.NewTxOptions().
+		WithIsolation(gelcfg.PreferRepeatableRead))
+
+	// A transaction that needs to be serializable
+	requireBogusRepeatableReadTx(t, c, true)
+	requireBogusRepeatableReadTx(t, c, false)
+
+	var result struct {
+		Ins struct {
+			ID geltypes.UUID `gel:"id"`
+		} `gel:"ins"`
+		Level string `gel:"level"`
+	}
+
+	// And one that doesn't
+	err := c.Tx(ctx, func(ctx context.Context, tx geltypes.Tx) error {
+		query := `
+			select {
+				ins := (insert test::Tmp { tmp := "test" }),
+				level := sys::get_transaction_isolation(),
+			}
+		`
+		return tx.QuerySingle(ctx, query, &result)
+	})
+	require.NoError(t, err)
+	require.Equal(t, string(gelcfg.RepeatableRead), result.Level)
+}

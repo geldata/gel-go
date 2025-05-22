@@ -93,6 +93,7 @@ func (c *Client) Execute(ctx context.Context, cmd string, args ...interface{}) e
 		nil,
 		true,
 		&c.pool.QueryConfig,
+		false,
 	)
 	if err != nil {
 		return err
@@ -118,6 +119,7 @@ func (c *Client) Query(ctx context.Context, cmd string, out interface{}, args ..
 		args,
 		c.pool.State,
 		&c.pool.QueryConfig,
+		false,
 	)
 	return gel.FirstError(err, c.pool.Release(conn, err))
 }
@@ -145,6 +147,7 @@ func (c *Client) QuerySingle(ctx context.Context, cmd string, out interface{}, a
 		args,
 		c.pool.State,
 		&c.pool.QueryConfig,
+		false,
 	)
 	return gel.FirstError(err, c.pool.Release(conn, err))
 }
@@ -165,6 +168,7 @@ func (c *Client) QueryJSON(ctx context.Context, cmd string, out *[]byte, args ..
 		args,
 		c.pool.State,
 		&c.pool.QueryConfig,
+		false,
 	)
 	return gel.FirstError(err, c.pool.Release(conn, err))
 }
@@ -187,6 +191,7 @@ func (c *Client) QuerySingleJSON(ctx context.Context, cmd string, out interface{
 		args,
 		c.pool.State,
 		&c.pool.QueryConfig,
+		false,
 	)
 	return gel.FirstError(err, c.pool.Release(conn, err))
 }
@@ -207,6 +212,7 @@ func (c *Client) QuerySQL(ctx context.Context, cmd string, out interface{}, args
 		args,
 		c.pool.State,
 		&c.pool.QueryConfig,
+		false,
 	)
 	return gel.FirstError(err, c.pool.Release(conn, err))
 }
@@ -227,6 +233,7 @@ func (c *Client) ExecuteSQL(ctx context.Context, cmd string, args ...interface{}
 		nil,
 		true,
 		&c.pool.QueryConfig,
+		false,
 	)
 	if err != nil {
 		return err

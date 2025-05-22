@@ -30,18 +30,20 @@ import (
 )
 
 type query struct {
-	out          reflect.Value
-	outType      reflect.Type
-	method       string
-	lang         Language
-	cmd          string
-	fmt          Format
-	expCard      Cardinality
-	args         []interface{}
-	capabilities uint64
-	state        map[string]interface{}
-	parse        bool
-	cfg          QueryConfig
+	out                    reflect.Value
+	outType                reflect.Type
+	method                 string
+	lang                   Language
+	cmd                    string
+	fmt                    Format
+	expCard                Cardinality
+	args                   []interface{}
+	capabilities           uint64
+	state                  map[string]interface{}
+	parse                  bool
+	cfg                    QueryConfig
+	unsafeIsolationDangers []error
+	isInTx                 bool
 }
 
 func (q *query) getCapabilities() uint64 {
@@ -73,6 +75,7 @@ func NewQuery(
 	out interface{},
 	parse bool,
 	cfg *QueryConfig,
+	isInTx bool,
 ) (*query, error) { // nolint:revive
 	var (
 		expCard Cardinality
@@ -97,6 +100,7 @@ func NewQuery(
 			state:        state,
 			cfg:          *cfg,
 			parse:        parse,
+			isInTx:       isInTx,
 		}, nil
 	case "Query":
 		expCard = Many
@@ -129,6 +133,7 @@ func NewQuery(
 		state:        state,
 		cfg:          *cfg,
 		parse:        parse,
+		isInTx:       isInTx,
 	}
 
 	var err error
@@ -181,6 +186,7 @@ func RunQuery(
 	args []interface{},
 	state map[string]interface{},
 	cfg *QueryConfig,
+	isInTx bool,
 ) error {
 	if method == "QuerySingleJSON" {
 		switch out.(type) {
@@ -201,6 +207,7 @@ func RunQuery(
 		out,
 		true,
 		cfg,
+		isInTx,
 	)
 	if err != nil {
 		return err
