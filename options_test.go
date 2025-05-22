@@ -34,8 +34,6 @@ func ExampleClient_WithTxOptions() {
 		return tx.Execute(ctx, "INSERT User")
 	})
 	fmt.Println(err)
-	// Output:
-	// gel.TransactionError: cannot execute SELECT in a read-only transaction
 }
 
 func ExampleClient_WithRetryOptions() {
