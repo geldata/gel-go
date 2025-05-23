@@ -242,6 +242,9 @@ func requireRun(t *testing.T, dir, name string, args ...string) {
 func TestEdgeQLGoQueryError(t *testing.T) {
 	srcDir := "testdata/query-error/"
 	tmpDir := t.TempDir()
+	tmpDir, err := filepath.EvalSymlinks(tmpDir)
+	require.NoError(t, err)
+
 	matches, err := filepath.Glob(filepath.Join(srcDir, "*"))
 	require.NoError(t, err)
 
@@ -254,16 +257,15 @@ func TestEdgeQLGoQueryError(t *testing.T) {
 	output, err := run(t, tmpDir, edgeqlGo)
 	assert.EqualError(t, err, "exit status 1")
 
-	filename := filepath.Join(tmpDir, "broken_query.edgeql")
 	//nolint:lll
 	expected := fmt.Sprintf(
-		`edgeql-go: failed to setup query: error introspecting query "%[1]s": gel.EdgeQLSyntaxError: Unexpected 'malformed'
-%[1]s:1:1
+		`edgeql-go: failed to setup query: error introspecting query "%[1]s/broken_query.edgeql": gel.EdgeQLSyntaxError: Unexpected 'malformed'
+%[1]s/broken_query.edgeql:1:1
 
 malformed
 ^ error
 `,
-		filename,
+		tmpDir,
 	)
 	assert.Equal(t, expected, output)
 }
