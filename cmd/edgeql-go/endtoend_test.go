@@ -87,6 +87,25 @@ func TestEdgeQLGo(t *testing.T) {
 	}
 }
 
+func buildEdgeqlGo(t *testing.T, dir string) string {
+	t.Log("building edgeql-go")
+	edgeqlGo := filepath.Join(dir, "edgeql-go")
+	requireRun(t, ".", "go", "build", "-o", edgeqlGo)
+	return edgeqlGo
+}
+
+func replaceGelGoModule(t *testing.T, dir string) {
+	// Run tests against the current checkout of gel-go instead of
+	// against whatever older version is in the test project's
+	// go.mod file.
+	replace := fmt.Sprintf(
+		"-replace=github.com/geldata/gel-go=%s",
+		projectRoot,
+	)
+	requireRun(t, dir, "go", "mod", "edit", replace)
+	requireRun(t, dir, "go", "mod", "tidy")
+}
+
 func runTest(dir string, args []string) func(*testing.T) {
 	return func(t *testing.T) {
 		tmpDir, err := os.MkdirTemp("", "edgeql-go-*")
@@ -95,9 +114,7 @@ func runTest(dir string, args []string) func(*testing.T) {
 			assert.NoError(t, os.RemoveAll(tmpDir))
 		}()
 
-		t.Log("building edgeql-go")
-		edgeqlGo := filepath.Join(tmpDir, "edgeql-go")
-		run(t, ".", "go", "build", "-o", edgeqlGo)
+		edgeqlGo := buildEdgeqlGo(t, tmpDir)
 
 		var wg sync.WaitGroup
 		err = filepath.WalkDir(
@@ -135,18 +152,10 @@ func runTest(dir string, args []string) func(*testing.T) {
 			t.Run(entry.Name(), func(t *testing.T) {
 				projectDir := filepath.Join(tmpDir, entry.Name())
 
-				// Run tests against the current checkout of gel-go instead of
-				// against whatever older version is in the test project's
-				// go.mod file.
-				replace := fmt.Sprintf(
-					"-replace=github.com/geldata/gel-go=%s",
-					projectRoot,
-				)
-				run(t, projectDir, "go", "mod", "edit", replace)
-				run(t, projectDir, "go", "mod", "tidy")
+				replaceGelGoModule(t, projectDir)
 
-				run(t, projectDir, edgeqlGo, args...)
-				run(t, projectDir, "go", "run", "./...")
+				requireRun(t, projectDir, edgeqlGo, args...)
+				requireRun(t, projectDir, "go", "run", "./...")
 				er := filepath.WalkDir(
 					projectDir,
 					func(f string, d fs.DirEntry, e error) error {
@@ -163,7 +172,7 @@ func runTest(dir string, args []string) func(*testing.T) {
 					},
 				)
 				require.NoError(t, er)
-				run(t, projectDir, "go", "test", "-count=1", "./...")
+				requireRun(t, projectDir, "go", "test", "-count=1", "./...")
 			})
 		}
 	}
@@ -217,10 +226,44 @@ func copyFile(t *testing.T, to, from string) {
 	require.NoError(t, err)
 }
 
-func run(t *testing.T, dir, name string, args ...string) {
+func run(t *testing.T, dir, name string, args ...string) (string, error) {
 	cmd := exec.Command(name, args...)
 	cmd.Dir = dir
 	cmd.Env = append(os.Environ(), fmt.Sprintf("EDGEDB_DSN=%s", dsn))
-	stdoutStderr, err := cmd.CombinedOutput()
-	require.NoError(t, err, string(stdoutStderr))
+	output, err := cmd.CombinedOutput()
+	return string(output), err
+}
+
+func requireRun(t *testing.T, dir, name string, args ...string) {
+	output, err := run(t, dir, name, args...)
+	require.NoError(t, err, output)
+}
+
+func TestEdgeQLGoQueryError(t *testing.T) {
+	srcDir := "testdata/query-error/"
+	tmpDir := t.TempDir()
+	matches, err := filepath.Glob(filepath.Join(srcDir, "*"))
+	require.NoError(t, err)
+
+	for _, src := range matches {
+		dst := filepath.Join(tmpDir, filepath.Base(src))
+		copyFile(t, dst, src)
+	}
+	replaceGelGoModule(t, tmpDir)
+	edgeqlGo := buildEdgeqlGo(t, tmpDir)
+	output, err := run(t, tmpDir, edgeqlGo)
+	assert.EqualError(t, err, "exit status 1")
+
+	filename := filepath.Join(tmpDir, "broken_query.edgeql")
+	//nolint:lll
+	expected := fmt.Sprintf(
+		`edgeql-go: failed to setup query: error introspecting query "%[1]s": gel.EdgeQLSyntaxError: Unexpected 'malformed'
+%[1]s:1:1
+
+malformed
+^ error
+`,
+		filename,
+	)
+	assert.Equal(t, expected, output)
 }

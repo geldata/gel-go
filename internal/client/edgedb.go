@@ -133,7 +133,7 @@ func (c *protocolConnection) releaseReader(r *buff.Reader) error {
 		for r.Next(c.acquireReaderSignal) {
 			switch Message(r.MsgType) {
 			case ErrorResponse:
-				err := decodeErrorResponseMsg(r, "")
+				err := decodeErrorResponseMsg(r, "", "")
 				log.Println("from background:", err)
 				r.Err = wrapAll(r.Err, err)
 			default:
