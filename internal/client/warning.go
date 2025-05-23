@@ -34,7 +34,7 @@ type Warning struct {
 }
 
 // Err returns a formatted error for a query
-func (w *Warning) Err(query string) error {
+func (w *Warning) Err(query, filename string) error {
 	if w.Line == nil || w.Start == nil {
 		return gelerr.ErrorFromCode(w.Code, w.Message)
 	}
@@ -66,7 +66,8 @@ func (w *Warning) Err(query string) error {
 	runeCount := utf8.RuneCountInString(line[:byteNo])
 	padding := strings.Repeat(" ", runeCount)
 	msg := w.Message + fmt.Sprintf(
-		"\nquery:%v:%v\n\n%v\n%v^ %v",
+		"\n%s:%v:%v\n\n%v\n%v^ %v",
+		filename,
 		1+lineNo,
 		1+runeCount,
 		line,

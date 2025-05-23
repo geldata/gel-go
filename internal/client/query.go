@@ -42,6 +42,11 @@ type query struct {
 	state        map[string]interface{}
 	parse        bool
 	cfg          QueryConfig
+
+	// Used when providing the position of errors in a query.
+	// The fully qualified edgeql file path.
+	// If cmd is not from it's own file then use the value "query".
+	filename string
 }
 
 func (q *query) getCapabilities() uint64 {
@@ -97,6 +102,7 @@ func NewQuery(
 			state:        state,
 			cfg:          *cfg,
 			parse:        parse,
+			filename:     "query",
 		}, nil
 	case "Query":
 		expCard = Many
@@ -129,6 +135,7 @@ func NewQuery(
 		state:        state,
 		cfg:          *cfg,
 		parse:        parse,
+		filename:     "query",
 	}
 
 	var err error

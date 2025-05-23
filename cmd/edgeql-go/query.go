@@ -119,7 +119,7 @@ func (r *queryConfigV1) setup(
 	cmdCfg *cmdConfig,
 	p *gelint.Pool,
 ) (*queryConfig, error) {
-	description, err := gelint.Describe(ctx, p, cmd)
+	description, err := gelint.Describe(ctx, p, cmd, qryFile)
 
 	if err != nil {
 		return nil, fmt.Errorf("error introspecting query %q: %s", qryFile,
@@ -178,7 +178,7 @@ func (r *queryConfigV2) setup(
 	cmdCfg *cmdConfig,
 	p *gelint.Pool,
 ) (*queryConfig, error) {
-	description, err := gelint.DescribeV2(ctx, p, cmd)
+	description, err := gelint.DescribeV2(ctx, p, cmd, qryFile)
 
 	if err != nil {
 		return nil, fmt.Errorf("error introspecting query %q: %s", qryFile,

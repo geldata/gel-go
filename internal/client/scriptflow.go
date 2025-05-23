@@ -47,6 +47,7 @@ var discardHeaders2pX = discardHeaders1pX
 func decodeHeaders1pX(
 	r *buff.Reader,
 	query string,
+	filename string,
 	warningHandler gelcfg.WarningHandler,
 ) (header.Header1pX, error) {
 	n := int(r.PopUint16())
@@ -65,7 +66,7 @@ func decodeHeaders1pX(
 
 		errors := make([]error, len(warnings))
 		for i := range warnings {
-			errors[i] = warnings[i].Err(query)
+			errors[i] = warnings[i].Err(query, filename)
 		}
 
 		err = warningHandler(errors)
