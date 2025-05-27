@@ -8,7 +8,6 @@ import (
 	"math/big"
 	"time"
 
-	gel "github.com/geldata/gel-go"
 	"github.com/geldata/gel-go/geltypes"
 )
 
@@ -80,7 +79,7 @@ type myQueryResult struct {
 // my_query.edgeql
 func myQuery(
 	ctx context.Context,
-	client *gel.Client,
+	client geltypes.Executor,
 	a geltypes.UUID,
 	b geltypes.OptionalUUID,
 	c string,
@@ -201,7 +200,7 @@ func myQuery(
 // returning the results as json encoded bytes
 func myQueryJSON(
 	ctx context.Context,
-	client *gel.Client,
+	client geltypes.Executor,
 	a geltypes.UUID,
 	b geltypes.OptionalUUID,
 	c string,
