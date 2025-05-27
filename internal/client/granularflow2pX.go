@@ -17,16 +17,21 @@
 package gel
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"unsafe"
 
+	"github.com/geldata/gel-go/gelcfg"
+	"github.com/geldata/gel-go/internal"
 	"github.com/geldata/gel-go/internal/buff"
 	"github.com/geldata/gel-go/internal/codecs"
 	"github.com/geldata/gel-go/internal/descriptor"
 	"github.com/geldata/gel-go/internal/gelerr"
 	"github.com/geldata/gel-go/internal/state"
 )
+
+const dfltTxIsolationCfgKey = "default_transaction_isolation"
 
 func (c *protocolConnection) execGranularFlow2pX(
 	r *buff.Reader,
@@ -105,7 +110,14 @@ func (c *protocolConnection) parse2pX(
 	w.PushString(q.cmd)
 
 	w.PushUUID(c.stateCodec.DescriptorID())
-	err := c.stateCodec.Encode(w, q.state, codecs.Path("state"), false)
+
+	state, err := getActiveState(q, c.protocolVersion, false)
+	if err != nil {
+		return nil, gelerr.NewBinaryProtocolError("", fmt.Errorf(
+			"invalid connection state: %w", err))
+	}
+
+	err = c.stateCodec.Encode(w, state, codecs.Path("state"), false)
 	if err != nil {
 		return nil, gelerr.NewBinaryProtocolError("", fmt.Errorf(
 			"invalid connection state: %w", err))
@@ -156,9 +168,24 @@ func (c *protocolConnection) decodeCommandDataDescriptionMsg2pX(
 	r *buff.Reader,
 	q *query,
 ) (*CommandDescriptionV2, error) {
-	_, err := decodeHeaders2pX(r, q.cmd, q.cfg.WarningHandler)
+	headers, err := decodeHeaders2pX(r, q.cmd, q.cfg.WarningHandler)
 	if err != nil {
 		return nil, err
+	}
+
+	if data, ok := headers["unsafe_isolation_dangers"]; ok {
+		var dangers []*Warning
+		err = json.Unmarshal([]byte(data), &dangers)
+		if err != nil {
+			return nil, err
+		}
+
+		errors := make([]error, len(dangers))
+		for i := range dangers {
+			errors[i] = dangers[i].Err(q.cmd)
+		}
+
+		q.unsafeIsolationDangers = errors
 	}
 
 	c.cacheCapabilities1pX(q, r.PopUint64())
@@ -208,6 +235,80 @@ func (c *protocolConnection) decodeCommandDataDescriptionMsg2pX(
 	return &descs, nil
 }
 
+func prefersRepeatableRead(state map[string]any) (bool, error) {
+	config, ok := state["config"]
+	if !ok {
+		return false, nil
+	}
+
+	isolationLevel, ok := config.(map[string]any)[dfltTxIsolationCfgKey]
+	if !ok {
+		return false, nil
+	}
+
+	if level, ok := isolationLevel.(string); ok {
+		return level == string(gelcfg.PreferRepeatableRead), nil
+	}
+
+	return false, fmt.Errorf(
+		"unexpected type for config.default_transaction_isolation, "+
+			"got %T, but expected string or %T",
+		isolationLevel,
+		gelcfg.PreferRepeatableRead,
+	)
+}
+
+func getActiveState(
+	q *query,
+	protocolVersion internal.ProtocolVersion,
+	isExecute bool,
+) (map[string]any, error) {
+	isolationLevel := q.cfg.TxOptions.IsolationLevel()
+	readOnly := q.cfg.TxOptions.ReadOnly()
+
+	state := CopyState(q.state)
+	var config map[string]any
+	if c, ok := state["config"]; ok {
+		config = c.(map[string]any)
+		// Allow using gelcfg.IsolationLevel in the state config.
+		// Cast to string here to prevent errors when serializing.
+		if isolation, ok := config[dfltTxIsolationCfgKey]; ok {
+			if needsCast, ok := isolation.(gelcfg.IsolationLevel); ok {
+				config[dfltTxIsolationCfgKey] = string(needsCast)
+			}
+		}
+	} else {
+		config = make(map[string]any)
+		state["config"] = config
+	}
+
+	if (isolationLevel != "" || readOnly != "") &&
+		protocolVersion.GTE(protocolVersion3p0) {
+		if isolationLevel != "" {
+			config[dfltTxIsolationCfgKey] = string(isolationLevel)
+		}
+
+		if readOnly != "" {
+			config["default_transaction_access_mode"] = readOnly
+		}
+	}
+
+	prefers, err := prefersRepeatableRead(state)
+	if err != nil {
+		return nil, err
+	}
+
+	if prefers {
+		if isExecute && len(q.unsafeIsolationDangers) == 0 && !q.isInTx {
+			config[dfltTxIsolationCfgKey] = string(gelcfg.RepeatableRead)
+		} else {
+			delete(config, dfltTxIsolationCfgKey)
+		}
+	}
+
+	return state, nil
+}
+
 func (c *protocolConnection) execute2pX(
 	r *buff.Reader,
 	q *query,
@@ -228,7 +329,14 @@ func (c *protocolConnection) execute2pX(
 	w.PushUint8(uint8(q.expCard))
 	w.PushString(q.cmd)
 	w.PushUUID(c.stateCodec.DescriptorID())
-	err := c.stateCodec.Encode(w, q.state, codecs.Path("state"), false)
+
+	state, err := getActiveState(q, c.protocolVersion, true)
+	if err != nil {
+		return gelerr.NewBinaryProtocolError("", fmt.Errorf(
+			"invalid connection state: %w", err))
+	}
+
+	err = c.stateCodec.Encode(w, state, codecs.Path("state"), false)
 	if err != nil {
 		return gelerr.NewBinaryProtocolError("", fmt.Errorf(
 			"invalid connection state: %w", err))

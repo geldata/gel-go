@@ -509,6 +509,183 @@ func TestInvalidWithConfig(t *testing.T) {
 	assert.Equal(t, int64(1), result)
 }
 
+func TestDefaultIsolation(t *testing.T) {
+	skipIfServerVersionLT(t, 6, 0)
+
+	{
+		c := client.WithConfig(map[string]any{
+			"default_transaction_isolation": gelcfg.RepeatableRead,
+		})
+
+		var result []int64
+		err := c.Query(context.Background(), `SELECT 1; SELECT 2;`, &result)
+		require.NoError(t, err)
+		require.Equal(t, []int64{2}, result)
+	}
+
+	{
+		txOps := gelcfg.NewTxOptions().
+			WithIsolation(gelcfg.RepeatableRead)
+		c := client.WithTxOptions(txOps)
+
+		query := `select sys::get_transaction_isolation()`
+		var result string
+		err := c.QuerySingle(context.Background(), query, &result)
+		require.NoError(t, err)
+		require.Equal(t, "RepeatableRead", result)
+	}
+
+	{
+		txOps := gelcfg.NewTxOptions().
+			WithIsolation(gelcfg.PreferRepeatableRead)
+		c := client.WithTxOptions(txOps)
+
+		query := `select sys::get_transaction_isolation()`
+		var result string
+		err := c.QuerySingle(context.Background(), query, &result)
+		require.NoError(t, err)
+		require.Equal(t, string(gelcfg.RepeatableRead), result)
+	}
+
+	t.Run(
+		"TxOptions.IsolationLevel takes precedence over config",
+		func(t *testing.T) {
+			{
+				c := client.WithConfig(map[string]any{
+					"default_transaction_isolation": gelcfg.RepeatableRead,
+				}).WithTxOptions(
+					gelcfg.NewTxOptions().WithIsolation(gelcfg.Serializable),
+				)
+
+				query := `select sys::get_transaction_isolation()`
+				var result string
+				err := c.QuerySingle(context.Background(), query, &result)
+				require.NoError(t, err)
+				require.Equal(t, string(gelcfg.Serializable), result)
+			}
+		},
+	)
+
+	t.Run(
+		"TxOptions.ReadOnly takes precedence over config",
+		func(t *testing.T) {
+			{
+				c := client.WithConfig(map[string]any{
+					"default_transaction_access_mode": "ReadOnly",
+				}).WithTxOptions(
+					gelcfg.NewTxOptions().WithReadOnly(false),
+				)
+
+				query := `SELECT (INSERT User { name := "test" }).name`
+				var result string
+				err := c.QuerySingle(context.Background(), query, &result)
+				require.NoError(t, err)
+				require.Equal(t, "test", result)
+			}
+		},
+	)
+
+	{
+		txOps := gelcfg.NewTxOptions().WithReadOnly(true)
+		c := client.WithTxOptions(txOps)
+
+		query := `SELECT (INSERT User { name := "test" }).name`
+		var result string
+		err := c.QuerySingle(context.Background(), query, &result)
+
+		var edbErr gelerr.Error
+		require.Error(t, err)
+		require.True(t, errors.As(err, &edbErr))
+		require.True(t, edbErr.Category(gelerr.TransactionError), err)
+	}
+}
+
+func conflictTypesInDB(t *testing.T) {
+	ctx := context.Background()
+
+	err := client.Execute(ctx, `
+		CREATE MODULE test;
+		CREATE TYPE test::Tmp {
+			CREATE REQUIRED PROPERTY tmp -> std::str;
+		};
+		CREATE TYPE test::TmpConflict {
+			CREATE REQUIRED PROPERTY tmp -> std::str {
+				CREATE CONSTRAINT exclusive;
+			}
+		};
+		CREATE TYPE test::TmpConflictChild extending test::TmpConflict;
+	`)
+	require.NoError(t, err)
+
+	t.Cleanup(func() {
+		err := client.Execute(ctx, `
+			DROP TYPE test::TmpConflictChild;
+			DROP TYPE test::TmpConflict;
+			DROP TYPE test::Tmp;
+			DROP MODULE test;
+		`)
+		assert.NoError(t, err)
+	})
+}
+
+func TestPreferRepeatableRead(t *testing.T) {
+	skipIfServerVersionLT(t, 6, 5)
+	conflictTypesInDB(t)
+	ctx := context.Background()
+
+	{
+		c := client.WithConfig(map[string]any{
+			"default_transaction_isolation": gelcfg.PreferRepeatableRead,
+		})
+
+		var result struct {
+			Ins struct {
+				ID types.UUID `gel:"id"`
+			} `gel:"ins"`
+			Level string `gel:"level"`
+		}
+
+		// This query can run in RepeatableRead mode
+		query := `
+			select {
+				ins := (insert test::Tmp { tmp := "test" }),
+				level := sys::get_transaction_isolation(),
+			}
+		`
+		err := c.QuerySingle(ctx, query, &result)
+		require.NoError(t, err)
+		require.Equal(t, string(gelcfg.RepeatableRead), result.Level)
+
+		// This one can cannot.
+		query = `
+			select {
+				ins := (insert test::TmpConflict { tmp := "test" }),
+				level := sys::get_transaction_isolation(),
+			}
+		`
+		err = c.QuerySingle(ctx, query, &result)
+		require.NoError(t, err)
+		require.Equal(t, string(gelcfg.Serializable), result.Level)
+	}
+
+	{
+		var result struct {
+			Level string `gel:"level"`
+		}
+
+		query := `
+			select {
+				level := sys::get_transaction_isolation(),
+			}
+		`
+		err := client.WithTxOptions(gelcfg.NewTxOptions().
+			WithIsolation(gelcfg.PreferRepeatableRead)).
+			QuerySingle(ctx, query, &result)
+		require.NoError(t, err)
+		require.Equal(t, string(gelcfg.RepeatableRead), result.Level)
+	}
+}
+
 func TestWithoutConfig(t *testing.T) {
 	if protocolVersion.LT(gel.ProtocolVersion1p0) {
 		t.Skip()

@@ -24,15 +24,21 @@ import "fmt"
 type IsolationLevel string
 
 const (
-	// Serializable is the only isolation level
-	Serializable IsolationLevel = "serializable"
+	// Serializable isolation level
+	Serializable IsolationLevel = "Serializable"
+
+	// RepeatableRead isolation level (supported in read-only transactions)
+	RepeatableRead IsolationLevel = "RepeatableRead"
+
+	// PreferRepeatableRead use RepeatableRead isolation level and fall back to
+	// Serializable if the transaction is read-only.
+	PreferRepeatableRead IsolationLevel = "PreferRepeatableRead"
 )
 
 // NewTxOptions returns the default TxOptions value.
 func NewTxOptions() TxOptions {
 	return TxOptions{
 		fromFactory: true,
-		isolation:   Serializable,
 	}
 }
 
@@ -46,27 +52,43 @@ type TxOptions struct {
 	// default values.
 	fromFactory bool
 
-	readOnly   bool
+	readOnly   string
 	deferrable bool
 	isolation  IsolationLevel
 }
 
-// ReadOnly returns true if the read only access mode is set.
-func (o TxOptions) ReadOnly() bool { return o.readOnly }
+// ReadOnly returns the access mode name or "" if unset.
+//
+// This method is intended for internal use only and is not subject to semantic
+// visioning guarantees.
+func (o TxOptions) ReadOnly() string { return o.readOnly }
 
 // Deferrable returns true if deferrable mode is set.
+//
+// This method is intended for internal use only and is not subject to semantic
+// visioning guarantees.
 func (o TxOptions) Deferrable() bool { return o.deferrable }
 
 // IsolationLevel returns the TxOptions IsolationLevel setting.
+//
+// This method is intended for internal use only and is not subject to semantic
+// visioning guarantees.
 func (o TxOptions) IsolationLevel() IsolationLevel { return o.isolation }
 
 // IsValid returns true if the TxOptions was created with NewTxOptions().
+//
+// This method is intended for internal use only and is not subject to semantic
+// visioning guarantees.
 func (o TxOptions) IsValid() bool { return o.fromFactory }
 
 // WithIsolation returns a copy of the TxOptions
 // with the isolation level set to i.
 func (o TxOptions) WithIsolation(i IsolationLevel) TxOptions {
-	if i != Serializable {
+	switch i {
+	case Serializable:
+	case RepeatableRead:
+	case PreferRepeatableRead:
+	default:
 		panic(fmt.Sprintf("unknown isolation level: %q", i))
 	}
 
@@ -77,7 +99,11 @@ func (o TxOptions) WithIsolation(i IsolationLevel) TxOptions {
 // WithReadOnly returns a copy of the TxOptions with the transaction read only
 // access mode set to r.
 func (o TxOptions) WithReadOnly(r bool) TxOptions {
-	o.readOnly = r
+	if r {
+		o.readOnly = "ReadOnly"
+	} else {
+		o.readOnly = "ReadWrite"
+	}
 	return o
 }
 

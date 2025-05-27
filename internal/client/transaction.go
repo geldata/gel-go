@@ -19,6 +19,7 @@ package gel
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/geldata/gel-go/gelcfg"
 	"github.com/geldata/gel-go/internal/gelerr"
@@ -94,6 +95,7 @@ func (t *Tx) execute(
 		nil,
 		false,
 		&t.cfg,
+		true,
 	)
 	if err != nil {
 		return err
@@ -111,33 +113,50 @@ func (t *Tx) execute(
 	return err
 }
 
-func startTxQuery(o gelcfg.TxOptions) string { // nolint:gocritic
-	query := "START TRANSACTION"
+func startTxQuery(
+	o gelcfg.TxOptions,
+	optimisticRepeatableRead bool,
+) (string, error) { // nolint:gocritic
+	opts := []string{}
 
-	switch o.IsolationLevel() {
+	switch level := o.IsolationLevel(); level {
+	case "":
+		// If unset, don't set an explicit isolation level.
 	case gelcfg.Serializable:
-		query += " ISOLATION SERIALIZABLE"
+		opts = append(opts, "ISOLATION SERIALIZABLE")
+	case gelcfg.RepeatableRead:
+		opts = append(opts, "ISOLATION REPEATABLE READ")
+	case gelcfg.PreferRepeatableRead:
+		if optimisticRepeatableRead {
+			opts = append(opts, "ISOLATION REPEATABLE READ")
+		} else {
+			opts = append(opts, "ISOLATION SERIALIZABLE")
+		}
 	default:
-		panic(fmt.Sprintf("unknown isolation level: %q", o.IsolationLevel()))
+		return "", fmt.Errorf("unknown isolation level: %q", level)
 	}
 
-	if o.ReadOnly() {
-		query += ", READ ONLY"
-	} else {
-		query += ", READ WRITE"
+	switch val := o.ReadOnly(); val {
+	case "ReadOnly":
+		opts = append(opts, "READ ONLY")
+	case "ReadWrite":
+		opts = append(opts, "READ WRITE")
+	case "":
+		// don't set an explicit value
+	default:
+		return "", fmt.Errorf("unknown read only value: %q", val)
 	}
 
 	if o.Deferrable() {
-		query += ", DEFERRABLE"
+		opts = append(opts, "DEFERRABLE")
 	} else {
-		query += ", NOT DEFERRABLE"
+		opts = append(opts, "NOT DEFERRABLE")
 	}
 
-	query += ";"
-	return query
+	return "START TRANSACTION " + strings.Join(opts, ", ") + ";", nil
 }
 
-func (t *Tx) start(ctx context.Context) error {
+func (t *Tx) start(ctx context.Context, optimisticRepeatableRead bool) error {
 	if e := t.assertNotDone("start"); e != nil {
 		return e
 	}
@@ -149,7 +168,11 @@ func (t *Tx) start(ctx context.Context) error {
 		)
 	}
 
-	query := startTxQuery(t.cfg.TxOptions)
+	query, err := startTxQuery(t.cfg.TxOptions, optimisticRepeatableRead)
+	if err != nil {
+		return err
+	}
+
 	return t.execute(ctx, query, startedTx)
 }
 
@@ -200,6 +223,7 @@ func (t *Tx) Execute(
 		nil,
 		true,
 		&t.cfg,
+		true,
 	)
 	if err != nil {
 		return err
@@ -224,6 +248,7 @@ func (t *Tx) Query(
 		args,
 		t.state,
 		&t.cfg,
+		true,
 	)
 }
 
@@ -246,6 +271,7 @@ func (t *Tx) QuerySingle(
 		args,
 		t.state,
 		&t.cfg,
+		true,
 	)
 }
 
@@ -265,6 +291,7 @@ func (t *Tx) QueryJSON(
 		args,
 		t.state,
 		&t.cfg,
+		true,
 	)
 }
 
@@ -286,6 +313,7 @@ func (t *Tx) QuerySingleJSON(
 		args,
 		t.state,
 		&t.cfg,
+		true,
 	)
 }
 
@@ -304,6 +332,7 @@ func (t *Tx) ExecuteSQL(
 		nil,
 		true,
 		&t.cfg,
+		true,
 	)
 	if err != nil {
 		return err
@@ -328,5 +357,6 @@ func (t *Tx) QuerySQL(
 		args,
 		t.state,
 		&t.cfg,
+		true,
 	)
 }
