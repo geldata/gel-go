@@ -137,7 +137,7 @@ func (c *protocolConnection) connect(r *buff.Reader, cfg *connConfig) error {
 				err = wrapAll(err, e)
 			}
 		case ErrorResponse:
-			err = wrapAll(err, decodeErrorResponseMsg(r, ""))
+			err = wrapAll(err, decodeErrorResponseMsg(r, "", ""))
 			done.Signal()
 		default:
 			if e := c.fallThrough(r); e != nil {
@@ -197,7 +197,7 @@ func (c *protocolConnection) authenticate(
 
 			done.Signal()
 		case ErrorResponse:
-			err = decodeErrorResponseMsg(r, "")
+			err = decodeErrorResponseMsg(r, "", "")
 		default:
 			if e := c.fallThrough(r); e != nil {
 				// the connection will not be usable after this x_x
@@ -251,7 +251,7 @@ func (c *protocolConnection) authenticate(
 				err = wrapAll(err, e)
 			}
 		case ErrorResponse:
-			err = wrapAll(decodeErrorResponseMsg(r, ""))
+			err = wrapAll(decodeErrorResponseMsg(r, "", ""))
 		default:
 			if e := c.fallThrough(r); e != nil {
 				// the connection will not be usable after this x_x

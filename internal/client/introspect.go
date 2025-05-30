@@ -45,6 +45,7 @@ func Describe(
 	ctx context.Context,
 	c *Pool,
 	cmd string,
+	filename string,
 ) (*CommandDescription, error) {
 	conn, err := c.Acquire(ctx)
 	if err != nil {
@@ -60,6 +61,7 @@ func Describe(
 		cfg: QueryConfig{
 			WarningHandler: gelcfg.LogWarnings,
 		},
+		filename: filename,
 	}
 
 	r, err := conn.conn.acquireReader(ctx)
@@ -86,6 +88,7 @@ func DescribeV2(
 	ctx context.Context,
 	c *Pool,
 	cmd string,
+	filename string,
 ) (*CommandDescriptionV2, error) {
 	conn, err := c.Acquire(ctx)
 	if err != nil {
@@ -103,6 +106,7 @@ func DescribeV2(
 		cfg: QueryConfig{
 			WarningHandler: gelcfg.LogWarnings,
 		},
+		filename: filename,
 	}
 
 	r, err := conn.conn.acquireReader(ctx)
