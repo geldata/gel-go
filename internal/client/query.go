@@ -30,18 +30,20 @@ import (
 )
 
 type query struct {
-	out          reflect.Value
-	outType      reflect.Type
-	method       string
-	lang         Language
-	cmd          string
-	fmt          Format
-	expCard      Cardinality
-	args         []interface{}
-	capabilities uint64
-	state        map[string]interface{}
-	parse        bool
-	cfg          QueryConfig
+	out                    reflect.Value
+	outType                reflect.Type
+	method                 string
+	lang                   Language
+	cmd                    string
+	fmt                    Format
+	expCard                Cardinality
+	args                   []interface{}
+	capabilities           uint64
+	state                  map[string]interface{}
+	parse                  bool
+	cfg                    QueryConfig
+	unsafeIsolationDangers []error
+	isInTx                 bool
 
 	// Used when providing the position of errors in a query.
 	// The fully qualified edgeql file path.
@@ -78,6 +80,7 @@ func NewQuery(
 	out interface{},
 	parse bool,
 	cfg *QueryConfig,
+	isInTx bool,
 ) (*query, error) { // nolint:revive
 	var (
 		expCard Cardinality
@@ -102,6 +105,7 @@ func NewQuery(
 			state:        state,
 			cfg:          *cfg,
 			parse:        parse,
+			isInTx:       isInTx,
 			filename:     "query",
 		}, nil
 	case "Query":
@@ -135,6 +139,7 @@ func NewQuery(
 		state:        state,
 		cfg:          *cfg,
 		parse:        parse,
+		isInTx:       isInTx,
 		filename:     "query",
 	}
 
@@ -188,6 +193,7 @@ func RunQuery(
 	args []interface{},
 	state map[string]interface{},
 	cfg *QueryConfig,
+	isInTx bool,
 ) error {
 	if method == "QuerySingleJSON" {
 		switch out.(type) {
@@ -208,6 +214,7 @@ func RunQuery(
 		out,
 		true,
 		cfg,
+		isInTx,
 	)
 	if err != nil {
 		return err
