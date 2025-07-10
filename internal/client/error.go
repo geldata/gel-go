@@ -79,7 +79,7 @@ func positionFromHeaders(headers map[uint16]string) (*int, *int, error) {
 
 // decodeErrorResponseMsg decodes an error response
 // https://docs.geldata.com/reference/reference/protocol/messages#errorresponse
-func decodeErrorResponseMsg(r *buff.Reader, query string) error {
+func decodeErrorResponseMsg(r *buff.Reader, query, filename string) error {
 	r.Discard(1) // severity
 	w := Warning{
 		Code:    r.PopUint32(),
@@ -95,11 +95,11 @@ func decodeErrorResponseMsg(r *buff.Reader, query string) error {
 	var err error
 	w.Line, w.Start, err = positionFromHeaders(headers)
 	if err != nil {
-		return errors.Join(w.Err(query), err)
+		return errors.Join(w.Err(query, filename), err)
 	}
 
 	w.Hint = headers[hint]
-	return w.Err(query)
+	return w.Err(query, filename)
 }
 
 type wrappedManyError struct {

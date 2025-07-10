@@ -7,7 +7,7 @@ import (
 	_ "embed"
 	"encoding/json"
 
-	gel "github.com/geldata/gel-go"
+	"github.com/geldata/gel-go/geltypes"
 )
 
 //go:embed json_field_multi.edgeql
@@ -25,7 +25,7 @@ type jsonFieldMultiResult struct {
 // json_field_multi.edgeql
 func jsonFieldMulti(
 	ctx context.Context,
-	client *gel.Client,
+	client geltypes.Executor,
 ) ([]jsonFieldMultiResult, error) {
 	var result []jsonFieldMultiResult
 
@@ -44,7 +44,7 @@ func jsonFieldMulti(
 // returning the results as json encoded bytes
 func jsonFieldMultiJSON(
 	ctx context.Context,
-	client *gel.Client,
+	client geltypes.Executor,
 ) ([]byte, error) {
 	var result []byte
 

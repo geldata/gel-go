@@ -44,6 +44,11 @@ type query struct {
 	cfg                    QueryConfig
 	unsafeIsolationDangers []error
 	isInTx                 bool
+
+	// Used when providing the position of errors in a query.
+	// The fully qualified edgeql file path.
+	// If cmd is not from it's own file then use the value "query".
+	filename string
 }
 
 func (q *query) getCapabilities() uint64 {
@@ -101,6 +106,7 @@ func NewQuery(
 			cfg:          *cfg,
 			parse:        parse,
 			isInTx:       isInTx,
+			filename:     "query",
 		}, nil
 	case "Query":
 		expCard = Many
@@ -134,6 +140,7 @@ func NewQuery(
 		cfg:          *cfg,
 		parse:        parse,
 		isInTx:       isInTx,
+		filename:     "query",
 	}
 
 	var err error

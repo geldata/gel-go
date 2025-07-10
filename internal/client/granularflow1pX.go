@@ -106,7 +106,7 @@ func (c *protocolConnection) parse1pX(
 			decodeReadyForCommandMsg(r)
 			done.Signal()
 		case ErrorResponse:
-			err = wrapAll(err, decodeErrorResponseMsg(r, q.cmd))
+			err = wrapAll(err, decodeErrorResponseMsg(r, q.cmd, q.filename))
 		default:
 			if e := c.fallThrough(r); e != nil {
 				// the connection will not be usable after this x_x
@@ -126,7 +126,7 @@ func (c *protocolConnection) decodeCommandDataDescriptionMsg1pX(
 	r *buff.Reader,
 	q *query,
 ) (*CommandDescription, error) {
-	_, err := decodeHeaders1pX(r, q.cmd, q.cfg.WarningHandler)
+	_, err := decodeHeaders1pX(r, q.cmd, q.filename, q.cfg.WarningHandler)
 	if err != nil {
 		return nil, err
 	}
@@ -259,7 +259,7 @@ func (c *protocolConnection) execute1pX(
 				err = nil
 			}
 
-			err = wrapAll(err, decodeErrorResponseMsg(r, q.cmd))
+			err = wrapAll(err, decodeErrorResponseMsg(r, q.cmd, q.filename))
 		default:
 			if e := c.fallThrough(r); e != nil {
 				// the connection will not be usable after this x_x

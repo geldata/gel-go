@@ -6,7 +6,7 @@ import (
 	"context"
 	_ "embed"
 
-	gel "github.com/geldata/gel-go"
+	"github.com/geldata/gel-go/geltypes"
 )
 
 //go:embed json_scalar_multi.edgeql
@@ -17,7 +17,7 @@ var jsonScalarMultiCmd string
 // json_scalar_multi.edgeql
 func jsonScalarMulti(
 	ctx context.Context,
-	client *gel.Client,
+	client geltypes.Executor,
 	one []byte,
 	two []byte,
 ) ([][]byte, error) {
@@ -42,7 +42,7 @@ func jsonScalarMulti(
 // returning the results as json encoded bytes
 func jsonScalarMultiJSON(
 	ctx context.Context,
-	client *gel.Client,
+	client geltypes.Executor,
 	one []byte,
 	two []byte,
 ) ([]byte, error) {

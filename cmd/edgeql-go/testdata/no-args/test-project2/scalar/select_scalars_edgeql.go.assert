@@ -6,7 +6,6 @@ import (
 	"context"
 	_ "embed"
 
-	gel "github.com/geldata/gel-go"
 	"github.com/geldata/gel-go/geltypes"
 )
 
@@ -18,7 +17,7 @@ var selectScalarsCmd string
 // select_scalars.edgeql
 func selectScalars(
 	ctx context.Context,
-	client *gel.Client,
+	client geltypes.Executor,
 ) ([]geltypes.Memory, error) {
 	var result []geltypes.Memory
 
@@ -37,7 +36,7 @@ func selectScalars(
 // returning the results as json encoded bytes
 func selectScalarsJSON(
 	ctx context.Context,
-	client *gel.Client,
+	client geltypes.Executor,
 ) ([]byte, error) {
 	var result []byte
 

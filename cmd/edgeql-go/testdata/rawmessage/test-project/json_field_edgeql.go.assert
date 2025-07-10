@@ -7,7 +7,6 @@ import (
 	_ "embed"
 	"encoding/json"
 
-	gel "github.com/geldata/gel-go"
 	"github.com/geldata/gel-go/geltypes"
 )
 
@@ -29,7 +28,7 @@ type jsonFieldResult struct {
 // json_field.edgeql
 func jsonField(
 	ctx context.Context,
-	client *gel.Client,
+	client geltypes.Executor,
 	bytes []byte,
 	optional_bytes geltypes.OptionalBytes,
 	json []byte,
@@ -58,7 +57,7 @@ func jsonField(
 // returning the results as json encoded bytes
 func jsonFieldJSON(
 	ctx context.Context,
-	client *gel.Client,
+	client geltypes.Executor,
 	bytes []byte,
 	optional_bytes geltypes.OptionalBytes,
 	json []byte,

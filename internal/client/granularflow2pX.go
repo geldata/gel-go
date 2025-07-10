@@ -148,7 +148,7 @@ func (c *protocolConnection) parse2pX(
 			decodeReadyForCommandMsg(r)
 			done.Signal()
 		case ErrorResponse:
-			err = wrapAll(err, decodeErrorResponseMsg(r, q.cmd))
+			err = wrapAll(err, decodeErrorResponseMsg(r, q.cmd, q.filename))
 		default:
 			if e := c.fallThrough(r); e != nil {
 				// the connection will not be usable after this x_x
@@ -168,7 +168,12 @@ func (c *protocolConnection) decodeCommandDataDescriptionMsg2pX(
 	r *buff.Reader,
 	q *query,
 ) (*CommandDescriptionV2, error) {
-	headers, err := decodeHeaders2pX(r, q.cmd, q.cfg.WarningHandler)
+	headers, err := decodeHeaders2pX(
+		r,
+		q.cmd,
+		q.filename,
+		q.cfg.WarningHandler,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -182,7 +187,7 @@ func (c *protocolConnection) decodeCommandDataDescriptionMsg2pX(
 
 		errors := make([]error, len(dangers))
 		for i := range dangers {
-			errors[i] = dangers[i].Err(q.cmd)
+			errors[i] = dangers[i].Err(q.cmd, q.filename)
 		}
 
 		q.unsafeIsolationDangers = errors
@@ -401,7 +406,7 @@ func (c *protocolConnection) execute2pX(
 				err = nil
 			}
 
-			err = wrapAll(err, decodeErrorResponseMsg(r, q.cmd))
+			err = wrapAll(err, decodeErrorResponseMsg(r, q.cmd, q.filename))
 		default:
 			if e := c.fallThrough(r); e != nil {
 				// the connection will not be usable after this x_x

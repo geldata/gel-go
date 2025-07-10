@@ -6,7 +6,6 @@ import (
 	"context"
 	_ "embed"
 
-	gel "github.com/geldata/gel-go"
 	"github.com/geldata/gel-go/geltypes"
 )
 
@@ -36,7 +35,7 @@ type SelectTupleResult2Item struct {
 // select_tuple.edgeql
 func selectTuple(
 	ctx context.Context,
-	client *gel.Client,
+	client geltypes.Executor,
 ) (SelectTupleResult, error) {
 	var result SelectTupleResult
 
@@ -55,7 +54,7 @@ func selectTuple(
 // returning the results as json encoded bytes
 func selectTupleJSON(
 	ctx context.Context,
-	client *gel.Client,
+	client geltypes.Executor,
 ) ([]byte, error) {
 	var result []byte
 

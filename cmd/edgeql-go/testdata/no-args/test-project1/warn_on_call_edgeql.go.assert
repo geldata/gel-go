@@ -6,7 +6,7 @@ import (
 	"context"
 	_ "embed"
 
-	gel "github.com/geldata/gel-go"
+	"github.com/geldata/gel-go/geltypes"
 )
 
 //go:embed warn_on_call.edgeql
@@ -17,7 +17,7 @@ var warnOnCallCmd string
 // warn_on_call.edgeql
 func warnOnCall(
 	ctx context.Context,
-	client *gel.Client,
+	client geltypes.Executor,
 ) (int64, error) {
 	var result int64
 
@@ -36,7 +36,7 @@ func warnOnCall(
 // returning the results as json encoded bytes
 func warnOnCallJSON(
 	ctx context.Context,
-	client *gel.Client,
+	client geltypes.Executor,
 ) ([]byte, error) {
 	var result []byte
 

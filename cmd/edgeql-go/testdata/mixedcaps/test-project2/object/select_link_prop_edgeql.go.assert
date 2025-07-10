@@ -6,7 +6,6 @@ import (
 	"context"
 	_ "embed"
 
-	gel "github.com/geldata/gel-go"
 	"github.com/geldata/gel-go/geltypes"
 )
 
@@ -34,7 +33,7 @@ type selectLinkPropResultFriendsItem struct {
 // select_link_prop.edgeql
 func selectLinkProp(
 	ctx context.Context,
-	client *gel.Client,
+	client geltypes.Executor,
 ) ([]selectLinkPropResult, error) {
 	var result []selectLinkPropResult
 
@@ -53,7 +52,7 @@ func selectLinkProp(
 // returning the results as json encoded bytes
 func selectLinkPropJSON(
 	ctx context.Context,
-	client *gel.Client,
+	client geltypes.Executor,
 ) ([]byte, error) {
 	var result []byte
 
