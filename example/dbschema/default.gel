@@ -1,0 +1,9 @@
+module default {
+  type Movie {
+    required property title -> str {
+      constraint exclusive;
+    }
+    required property year -> int64;
+    required property description -> str;
+  }
+}
