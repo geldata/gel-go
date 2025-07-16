@@ -25,8 +25,8 @@ type app struct {
 	gelClient *gel.Client
 }
 
-func NewApp() *app {
-	client, err := gel.CreateClient(gelcfg.Options{})
+func NewApp(opts gelcfg.Options) *app {
+	client, err := gel.CreateClient(opts)
 	if err != nil {
 		log.Fatalf("Error creating Gel client: %v", err)
 	}
@@ -189,15 +189,20 @@ func writeJSON(w http.ResponseWriter, data any) {
 	}
 }
 
+func (a *app) Routes() http.Handler {
+	mux := http.NewServeMux()
+	mux.HandleFunc("POST /movie", a.createMovie)
+	mux.HandleFunc("GET /movies", a.getMovies)
+	mux.HandleFunc("GET /movie", a.getMovie)
+	mux.HandleFunc("PUT /movie", a.updateMovie)
+	mux.HandleFunc("DELETE /movie", a.deleteMovie)
+	return mux
+}
+
 func main() {
-	app := NewApp()
-	http.HandleFunc("POST /movie", app.createMovie)
-	http.HandleFunc("GET /movies", app.getMovies)
-	http.HandleFunc("GET /movie", app.getMovie)
-	http.HandleFunc("PUT /movie", app.updateMovie)
-	http.HandleFunc("DELETE /movie", app.deleteMovie)
+	app := NewApp(gelcfg.Options{})
 	log.Println("Starting server on :8080")
-	err := http.ListenAndServe(":8080", nil)
+	err := http.ListenAndServe(":8080", app.Routes())
 	if err != nil {
 		log.Fatalf("Error starting server: %v", err)
 	}

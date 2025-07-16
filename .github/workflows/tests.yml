@@ -78,3 +78,29 @@ jobs:
         run: |
           # run micro benchmarks to be sure they still work
           make bench
+  example:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        go-version: ["1.23", "1.24"]
+        gel-version: [stable, nightly]
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - name: Set up go ${{ matrix.go-version }}
+        uses: actions/setup-go@v3
+        with:
+          go-version: ${{ matrix.go-version }}
+
+      - name: Install Gel
+        uses: geldata/setup-gel@v1
+        with:
+          server-version: ${{ matrix.gel-version }}
+
+      - name: Run Example
+        run: |
+          cd example
+          go test -v ./...
