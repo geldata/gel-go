@@ -26,6 +26,7 @@ import (
 	"github.com/geldata/gel-go/geltypes"
 )
 
+//nolint:lll
 func ExampleClient_WithTxOptions() {
 	opts := gelcfg.NewTxOptions().WithReadOnly(true)
 	configured := client.WithTxOptions(opts)
@@ -34,6 +35,8 @@ func ExampleClient_WithTxOptions() {
 		return tx.Execute(ctx, "INSERT User")
 	})
 	fmt.Println(err)
+	// Output:
+	// gel.TransactionError: Modifications not allowed in a read-only transaction
 }
 
 func ExampleClient_WithRetryOptions() {
