@@ -32,16 +32,10 @@ func TestCredentialsRead(t *testing.T) {
 		database: types.NewOptionalStr("test3n"),
 		password: types.NewOptionalStr("lZTBy1RVCfOpBAOwSCwIyBIR"),
 		port:     types.NewOptionalInt32(10702),
-		user:     "test3n",
+		user:     types.NewOptionalStr("test3n"),
 	}
 
 	assert.Equal(t, expected, creds)
-}
-
-func TestCredentialsEmpty(t *testing.T) {
-	creds, err := validateCredentials(map[string]interface{}{})
-	assert.EqualError(t, err, "`user` key is required")
-	assert.Nil(t, creds)
 }
 
 func TestCredentialsPort(t *testing.T) {

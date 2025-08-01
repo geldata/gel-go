@@ -31,12 +31,13 @@ import (
 type credentials struct {
 	host        types.OptionalStr
 	port        types.OptionalInt32
-	user        string
+	user        types.OptionalStr
 	database    types.OptionalStr
 	branch      types.OptionalStr
 	password    types.OptionalStr
 	ca          types.OptionalBytes
 	tlsSecurity types.OptionalStr
+	secretKey   types.OptionalStr
 }
 
 func readCredentials(path string) (*credentials, error) {
@@ -92,11 +93,11 @@ func validateCredentials(data map[string]interface{}) (*credentials, error) {
 	}
 
 	if user, ok := data["user"]; ok {
-		if result.user, ok = user.(string); !ok {
+		str, ok := user.(string)
+		if !ok {
 			return nil, errors.New("`user` must be a string")
 		}
-	} else {
-		return nil, errors.New("`user` key is required")
+		result.user.Set(str)
 	}
 
 	if host, ok := data["host"]; ok && host != "" {
@@ -108,10 +109,13 @@ func validateCredentials(data map[string]interface{}) (*credentials, error) {
 	}
 
 	if inMap("database", data) &&
-		inMap("branch", data) &&
-		data["database"] != data["branch"] {
-		return nil, errors.New(
-			"`database` and `branch` are both set but do not match")
+		inMap("branch", data) {
+		if data["database"] != data["branch"] &&
+			data["database"] != "edgedb" &&
+			data["branch"] != "__default__" {
+			return nil, errors.New(
+				"`database` and `branch` are both set but do not match")
+		}
 	}
 
 	if database, ok := data["database"]; ok {
@@ -136,6 +140,15 @@ func validateCredentials(data map[string]interface{}) (*credentials, error) {
 			return nil, errors.New("`password` must be a string")
 		}
 		result.password.Set(pwd)
+	}
+
+	if key, ok := data["secret_key"]; ok && key != nil {
+		str, ok := key.(string)
+		if !ok {
+			return nil, errors.New("`secret_key` must be a string")
+		}
+
+		result.secretKey.Set(str)
 	}
 
 	if ca, ok := data["tls_ca"]; ok {

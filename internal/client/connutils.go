@@ -133,6 +133,7 @@ type configResolver struct {
 	host               cfgVal // string
 	port               cfgVal // int
 	database           cfgVal // string
+	branch             cfgVal // string
 	user               cfgVal // string
 	password           cfgVal // OptionalStr
 	tlsCAData          cfgVal // []byte
@@ -219,6 +220,19 @@ func (r *configResolver) setDatabase(val, source string) error {
 		return errors.New(`invalid database name: ""`)
 	}
 	r.database = cfgVal{val: val, source: source}
+	return nil
+}
+
+func (r *configResolver) setBranch(val, source string) error {
+	if r.branch.val != nil {
+		return nil
+	}
+
+	if val == "" {
+		return errors.New(`invalid branch name: ""`)
+	}
+
+	r.branch = cfgVal{val: val, source: source}
 	return nil
 }
 
@@ -351,17 +365,23 @@ func (r *configResolver) resolveOptions(
 	}
 
 	if opts.Database != "" {
-		e := r.setDatabase(
-			opts.Database,
-			"Database options",
-		)
-		if e != nil {
+		source := "Database options"
+		if e := r.setDatabase(opts.Database, source); e != nil {
 			return e
+		}
+		if opts.Branch == "" {
+			if e := r.setBranch(opts.Database, source); e != nil {
+				return e
+			}
 		}
 	}
 
 	if opts.Branch != "" {
-		if e := r.setDatabase(opts.Branch, "Branch options"); e != nil {
+		source := "Branch options"
+		if e := r.setBranch(opts.Branch, source); e != nil {
+			return e
+		}
+		if e := r.setDatabase(opts.Branch, source); e != nil {
 			return e
 		}
 	}
@@ -534,7 +554,7 @@ func (r *configResolver) resolveDSN(
 			return err
 		} else if val.val != nil {
 			br := strings.TrimPrefix(val.val.(string), "/")
-			if e := r.setDatabase(br, source+val.source); e != nil {
+			if e := r.setBranch(br, source+val.source); e != nil {
 				return e
 			}
 		}
@@ -545,7 +565,7 @@ func (r *configResolver) resolveDSN(
 			return err
 		} else if val.val != nil {
 			db := strings.TrimPrefix(val.val.(string), "/")
-			if e := r.setDatabase(db, source+val.source); e != nil {
+			if e := r.setBranch(db, source+val.source); e != nil {
 				return e
 			}
 		}
@@ -744,13 +764,15 @@ func (r *configResolver) applyCredentials(
 	}
 
 	if br, ok := creds.branch.Get(); ok && br != "" {
-		if e := r.setDatabase(br, source); e != nil {
+		if e := r.setBranch(br, source); e != nil {
 			return e
 		}
 	}
 
-	if e := r.setUser(creds.user, source); e != nil {
-		return e
+	if user, ok := creds.user.Get(); ok && user != "" {
+		if e := r.setUser(user, source); e != nil {
+			return e
+		}
 	}
 
 	if pwd, ok := creds.password.Get(); ok {
@@ -767,13 +789,25 @@ func (r *configResolver) applyCredentials(
 		}
 	}
 
+	if key, ok := creds.secretKey.Get(); ok {
+		if e := r.setSecretKey(key, source); e != nil {
+			return e
+		}
+	}
+
 	return nil
 }
 
 func (r *configResolver) resolveEnvVars(paths *cfgPaths) (bool, error) {
 	db, dbOk := os.LookupEnv("EDGEDB_DATABASE")
 	if dbOk {
-		err := r.setDatabase(db, "EDGEDB_DATABASE environment variable")
+		source := "EDGEDB_DATABASE environment variable"
+		err := r.setDatabase(db, source)
+		if err != nil {
+			return false, err
+		}
+
+		err = r.setBranch(db, source)
 		if err != nil {
 			return false, err
 		}
@@ -788,10 +822,13 @@ func (r *configResolver) resolveEnvVars(paths *cfgPaths) (bool, error) {
 				branchEnvVarName,
 			)
 		}
-		err := r.setDatabase(
-			branch,
-			fmt.Sprintf("%s environment variable", branchEnvVarName),
-		)
+		source := fmt.Sprintf("%s environment variable", branchEnvVarName)
+		err := r.setBranch(branch, source)
+		if err != nil {
+			return false, err
+		}
+
+		err = r.setDatabase(branch, source)
 		if err != nil {
 			return false, err
 		}
@@ -1005,6 +1042,7 @@ func (r *configResolver) resolveTOML(paths *cfgPaths) error {
 	)
 }
 
+// Returns envvar name and value if found.
 func lookupGelOrEdgedbEnv(name string) (string, string, bool) {
 	gelName := fmt.Sprintf("GEL%s", name)
 	edbName := fmt.Sprintf("EDGEDB%s", name)
@@ -1038,11 +1076,20 @@ func (r *configResolver) config(opts *gelcfg.Options) (*connConfig, error) {
 		port = r.port.val.(int)
 	}
 
-	database := "edgedb"
 	branch := "__default__"
+	database := "edgedb"
+	if r.branch.val != nil {
+		branch = r.branch.val.(string)
+		if r.database.val == nil {
+			database = branch
+		}
+	}
+
 	if r.database.val != nil {
 		database = r.database.val.(string)
-		branch = database
+		if r.branch.val == nil && database != "edgedb" {
+			branch = database
+		}
 	}
 
 	user := "edgedb"
@@ -1332,7 +1379,7 @@ func parseDSN(dsn string) (*url.URL, map[string]string, error) {
 	}
 
 	db := strings.TrimPrefix(uri.Path, "/")
-	if e := validateQueryArg(vals, "database", db); e != nil {
+	if e := validateQueryArg(vals, "branch", db); e != nil {
 		return nil, nil, e
 	}
 
@@ -1644,6 +1691,18 @@ func (r *configResolver) parseCloudInstanceNameIntoConfig(
 				" cannot exceed %d characters: %s/%s",
 			domainLabelMaxLength-1, org, inst,
 		)
+	}
+
+	if r.secretKey.val == nil {
+		if name, key, ok := lookupGelOrEdgedbEnv("_SECRET_KEY"); ok {
+			err := r.setSecretKey(
+				key,
+				fmt.Sprintf("%s environment variable", name),
+			)
+			if err != nil {
+				return err
+			}
+		}
 	}
 
 	var secretKey string

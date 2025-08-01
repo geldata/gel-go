@@ -431,7 +431,7 @@ var testcaseErrorMapping = map[string]string{
 	"invalid_port":                 "invalid port",
 	"invalid_host":                 "invalid host",
 	"invalid_user":                 "invalid user",
-	"invalid_database":             "invalid database",
+	"invalid_database":             "invalid database|invalid branch",
 	"exclusive_options":            "mutually exclusive options",
 	"multiple_compound_opts":       "mutually exclusive connection options",
 	"multiple_compound_env":        "mutually exclusive environment variables",
