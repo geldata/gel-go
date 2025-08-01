@@ -110,9 +110,9 @@ func validateCredentials(data map[string]interface{}) (*credentials, error) {
 
 	if inMap("database", data) &&
 		inMap("branch", data) {
-		if data["database"] == "edgedb" && data["branch"] == "__default__" {
-			// this is valid
-		} else if data["database"] != data["branch"] {
+		if data["database"] != data["branch"] &&
+			data["database"] != "edgedb" &&
+			data["branch"] != "__default__" {
 			return nil, errors.New(
 				"`database` and `branch` are both set but do not match")
 		}

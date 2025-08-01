@@ -133,7 +133,7 @@ type configResolver struct {
 	host               cfgVal // string
 	port               cfgVal // int
 	database           cfgVal // string
-	branch             cfgVal //string
+	branch             cfgVal // string
 	user               cfgVal // string
 	password           cfgVal // OptionalStr
 	tlsCAData          cfgVal // []byte
@@ -1695,7 +1695,13 @@ func (r *configResolver) parseCloudInstanceNameIntoConfig(
 
 	if r.secretKey.val == nil {
 		if name, key, ok := lookupGelOrEdgedbEnv("_SECRET_KEY"); ok {
-			r.setSecretKey(key, fmt.Sprintf("%s environment variable", name))
+			err := r.setSecretKey(
+				key,
+				fmt.Sprintf("%s environment variable", name),
+			)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
