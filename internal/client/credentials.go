@@ -118,7 +118,7 @@ func validateCredentials(data map[string]interface{}) (*credentials, error) {
 		}
 	}
 
-	if database, ok := data["database"]; ok {
+	if database, ok := data["database"]; ok && database != nil {
 		db, ok := database.(string)
 		if !ok {
 			return nil, errors.New("`database` must be a string")
@@ -126,7 +126,7 @@ func validateCredentials(data map[string]interface{}) (*credentials, error) {
 		result.database.Set(db)
 	}
 
-	if branch, ok := data["branch"]; ok {
+	if branch, ok := data["branch"]; ok && branch != nil {
 		br, ok := branch.(string)
 		if !ok {
 			return nil, errors.New("`branch` must be a string")
