@@ -99,22 +99,25 @@ func TestSendAndReceiveInt64(t *testing.T) {
 
 	query := `
 		WITH
-			x := (
-				WITH
-					n := enumerate(array_unpack(<array<int64>>$0)),
-					s := enumerate(array_unpack(<array<str>>$1)),
-				SELECT (
-					n := n.1,
-					s := s.1,
+			y := (
+				FOR n IN enumerate(array_unpack(<array<int64>>$0)) UNION (
+					FOR s IN enumerate(array_unpack(<array<str>>$1)) UNION (
+						SELECT (
+							n := n.1,
+							s := s.1,
+						)
+						FILTER n.0 = s.0
+					)
 				)
-				FILTER n.0 = s.0
 			)
-		SELECT (
-			encoded := <str>x.n,
-			decoded := <int64>x.s,
-			round_trip := x.n,
-			is_equal := <int64>x.s = x.n,
-			string := <str><int64>x.s,
+		FOR x IN y UNION (
+			SELECT (
+				encoded := <str>x.n,
+				decoded := <int64>x.s,
+				round_trip := x.n,
+				is_equal := <int64>x.s = x.n,
+				string := <str><int64>x.s,
+			)
 		)
 	`
 
@@ -384,22 +387,25 @@ func TestSendAndReceiveInt32(t *testing.T) {
 
 	query := `
 		WITH
-			x := (
-				WITH
-					n := enumerate(array_unpack(<array<int32>>$0)),
-					s := enumerate(array_unpack(<array<str>>$1)),
-				SELECT (
-					n := n.1,
-					s := s.1,
+			y := (
+				FOR n IN enumerate(array_unpack(<array<int32>>$0)) UNION (
+					FOR s IN enumerate(array_unpack(<array<str>>$1)) UNION (
+						SELECT (
+							n := n.1,
+							s := s.1,
+						)
+						FILTER n.0 = s.0
+					)
 				)
-				FILTER n.0 = s.0
 			)
-		SELECT (
-			encoded := <str>x.n,
-			decoded := <int32>x.s,
-			round_trip := x.n,
-			is_equal := <int32>x.s = x.n,
-			string := <str><int32>x.s,
+		FOR x IN y UNION (
+			SELECT (
+				encoded := <str>x.n,
+				decoded := <int32>x.s,
+				round_trip := x.n,
+				is_equal := <int32>x.s = x.n,
+				string := <str><int32>x.s,
+			)
 		)
 	`
 
@@ -721,22 +727,25 @@ func TestSendAndReceiveInt16(t *testing.T) {
 
 	query := `
 		WITH
-			x := (
-				WITH
-					n := enumerate(array_unpack(<array<int16>>$0)),
-					s := enumerate(array_unpack(<array<str>>$1)),
-				SELECT (
-					n := n.1,
-					s := s.1,
+			y := (
+				FOR n IN enumerate(array_unpack(<array<int16>>$0)) UNION (
+					FOR s IN enumerate(array_unpack(<array<str>>$1)) UNION (
+						SELECT (
+							n := n.1,
+							s := s.1,
+						)
+						FILTER n.0 = s.0
+					)
 				)
-				FILTER n.0 = s.0
 			)
-		SELECT (
-			encoded := <str>x.n,
-			decoded := <int16>x.s,
-			round_trip := x.n,
-			is_equal := <int16>x.s = x.n,
-			string := <str><int16>x.s,
+		FOR x IN y UNION (
+			SELECT (
+				encoded := <str>x.n,
+				decoded := <int16>x.s,
+				round_trip := x.n,
+				is_equal := <int16>x.s = x.n,
+				string := <str><int16>x.s,
+			)
 		)
 	`
 
@@ -1292,21 +1301,24 @@ func TestSendAndReceiveFloat64(t *testing.T) {
 
 	query := `
 		WITH
-			x := (
-				WITH
-					n := enumerate(array_unpack(<array<float64>>$0)),
-					s := enumerate(array_unpack(<array<str>>$1)),
-				SELECT (
-					n := n.1,
-					s := s.1,
+			y := (
+				FOR n IN enumerate(array_unpack(<array<float64>>$0)) UNION (
+					FOR s IN enumerate(array_unpack(<array<str>>$1)) UNION (
+						SELECT (
+							n := n.1,
+							s := s.1,
+						)
+						FILTER n.0 = s.0
+					)
 				)
-				FILTER n.0 = s.0
 			)
-		SELECT (
-			encoded := <str>x.n,
-			decoded := <float64>x.s,
-			round_trip := x.n,
-			is_equal := <float64>x.s = x.n,
+		FOR x IN y UNION (
+			SELECT (
+				encoded := <str>x.n,
+				decoded := <float64>x.s,
+				round_trip := x.n,
+				is_equal := <float64>x.s = x.n,
+			)
 		)
 	`
 
@@ -1644,21 +1656,24 @@ func TestSendAndReceiveFloat32(t *testing.T) {
 
 	query := `
 		WITH
-			x := (
-				WITH
-					n := enumerate(array_unpack(<array<float32>>$0)),
-					s := enumerate(array_unpack(<array<str>>$1)),
-				SELECT (
-					n := n.1,
-					s := s.1,
+			y := (
+				FOR n IN enumerate(array_unpack(<array<float32>>$0)) UNION (
+					FOR s IN enumerate(array_unpack(<array<str>>$1)) UNION (
+						SELECT (
+							n := n.1,
+							s := s.1,
+						)
+						FILTER n.0 = s.0
+					)
 				)
-				FILTER n.0 = s.0
 			)
-		SELECT (
-			encoded := <str><float32>x.n,
-			decoded := <float32>x.s,
-			round_trip := x.n,
-			is_equal := <float32>x.s = x.n,
+		FOR x IN y UNION (
+			SELECT (
+				encoded := <str><float32>x.n,
+				decoded := <float32>x.s,
+				round_trip := x.n,
+				is_equal := <float32>x.s = x.n,
+			)
 		)
 	`
 
@@ -2941,20 +2956,23 @@ func TestSendAndReceiveDuration(t *testing.T) {
 
 	query := `
 		WITH
-			sample := (
-				WITH
-					d := enumerate(array_unpack(<array<duration>>$0)),
-					s := enumerate(array_unpack(<array<str>>$1)),
-				SELECT (
-					d := d.1,
-					str := s.1,
+			samples := (
+				FOR d IN enumerate(array_unpack(<array<duration>>$0)) UNION (
+					FOR s IN enumerate(array_unpack(<array<str>>$1)) UNION (
+						SELECT (
+							d := d.1,
+							str := s.1,
+						)
+						FILTER d.0 = s.0
+					)
 				)
-				FILTER d.0 = s.0
 			)
-		SELECT (
-			decoded := <duration>sample.str,
-			round_trip := sample.d,
-			is_equal := <duration>sample.str = sample.d,
+		FOR sample in samples UNION (
+			SELECT (
+				decoded := <duration>sample.str,
+				round_trip := sample.d,
+				is_equal := <duration>sample.str = sample.d,
+			)
 		)
 	`
 
@@ -3238,10 +3256,11 @@ func TestSendAndReceiveRelativeDuration(t *testing.T) {
 	}
 
 	query := `
-		WITH args := array_unpack(<array<cal::relative_duration>>$0)
-		SELECT (
-			round_trip := args,
-			str := <str>args,
+		FOR arg IN array_unpack(<array<cal::relative_duration>>$0) UNION (
+			SELECT (
+				round_trip := arg,
+				str := <str>arg,
+			)
 		)
 	`
 
@@ -3563,10 +3582,11 @@ func TestSendAndReceiveDateDuration(t *testing.T) {
 	}
 
 	query := `
-		WITH args := array_unpack(<array<cal::date_duration>>$0)
-		SELECT (
-			round_trip := args,
-			str := <str>args,
+		FOR arg IN array_unpack(<array<cal::date_duration>>$0) UNION (
+			SELECT (
+				round_trip := arg,
+				str := <str>arg,
+			)
 		)
 	`
 
@@ -3892,22 +3912,26 @@ func TestSendAndReceiveLocalTime(t *testing.T) {
 
 	query := `
 		WITH
-			x := (
-				WITH
-					t := enumerate(array_unpack(<array<cal::local_time>>$0)),
-					s := enumerate(array_unpack(<array<str>>$1)),
-				SELECT (
-					t := t.1,
-					s := s.1,
+			y := (
+				FOR t IN enumerate(array_unpack(<array<cal::local_time>>$0))
+				UNION (
+					FOR s IN enumerate(array_unpack(<array<str>>$1)) UNION (
+						SELECT (
+							t := t.1,
+							s := s.1,
+						)
+						FILTER t.0 = s.0
+					)
 				)
-				FILTER t.0 = s.0
 			)
-		SELECT (
-			encoded := <str>x.t,
-			decoded := <cal::local_time>x.s,
-			round_trip := x.t,
-			is_equal := <cal::local_time>x.s = x.t,
-			string := <str><cal::local_time><str>x.s,
+		FOR x IN y UNION (
+			SELECT (
+				encoded := <str>x.t,
+				decoded := <cal::local_time>x.s,
+				round_trip := x.t,
+				is_equal := <cal::local_time>x.s = x.t,
+				string := <str><cal::local_time><str>x.s,
+			)
 		)
 	`
 
@@ -4181,22 +4205,26 @@ func TestSendAndReceiveLocalDate(t *testing.T) {
 
 	query := `
 		WITH
-			x := (
-				WITH
-					d := enumerate(array_unpack(<array<cal::local_date>>$0)),
-					s := enumerate(array_unpack(<array<str>>$1)),
-				SELECT (
-					d := d.1,
-					s := s.1,
+			y := (
+				FOR d IN enumerate(array_unpack(<array<cal::local_date>>$0))
+				UNION (
+					FOR s IN enumerate(array_unpack(<array<str>>$1)) UNION (
+						SELECT (
+							d := d.1,
+							s := s.1,
+						)
+						FILTER d.0 = s.0
+					)
 				)
-				FILTER d.0 = s.0
 			)
-		SELECT (
-			encoded := <str>x.d,
-			decoded := <cal::local_date>x.s,
-			round_trip := x.d,
-			is_equal := <cal::local_date>x.s = x.d,
-			string := <str><cal::local_date>x.s,
+		FOR x IN y UNION (
+			SELECT (
+				encoded := <str>x.d,
+				decoded := <cal::local_date>x.s,
+				round_trip := x.d,
+				is_equal := <cal::local_date>x.s = x.d,
+				string := <str><cal::local_date>x.s,
+			)
 		)
 	`
 
@@ -4468,24 +4496,27 @@ func TestSendAndReceiveLocalDateTime(t *testing.T) {
 
 	query := `
 		WITH
-			x := (
-				WITH
-					dt := enumerate(array_unpack(
+			y := (
+				FOR dt IN enumerate(array_unpack(
 						<array<cal::local_datetime>>$0
-					)),
-					s := enumerate(array_unpack(<array<str>>$1)),
-				SELECT (
-					dt := dt.1,
-					s := s.1,
+					)) UNION (
+					FOR s IN enumerate(array_unpack(<array<str>>$1)) UNION (
+						SELECT (
+							dt := dt.1,
+							s := s.1,
+						)
+						FILTER dt.0 = s.0
+					)
 				)
-				FILTER dt.0 = s.0
 			)
-		SELECT (
-			encoded := <str>x.dt,
-			decoded := <cal::local_datetime>x.s,
-			round_trip := x.dt,
-			is_equal := <cal::local_datetime>x.s = x.dt,
-			string := <str><cal::local_datetime>x.s,
+		FOR x IN y UNION (
+			SELECT (
+				encoded := <str>x.dt,
+				decoded := <cal::local_datetime>x.s,
+				round_trip := x.dt,
+				is_equal := <cal::local_datetime>x.s = x.dt,
+				string := <str><cal::local_datetime>x.s,
+			)
 		)
 	`
 
@@ -4779,22 +4810,25 @@ func TestSendAndReceiveDateTime(t *testing.T) {
 
 	query := `
 		WITH
-			x := (
-				WITH
-					dt := enumerate(array_unpack(<array<datetime>>$0)),
-					s := enumerate(array_unpack(<array<str>>$1)),
-				SELECT (
-					dt := dt.1,
-					s := s.1,
+			y := (
+				FOR dt IN enumerate(array_unpack(<array<datetime>>$0)) UNION (
+					FOR s IN enumerate(array_unpack(<array<str>>$1)) UNION (
+						SELECT (
+							dt := dt.1,
+							s := s.1,
+						)
+						FILTER dt.0 = s.0
+					)
 				)
-				FILTER dt.0 = s.0
 			)
-		SELECT (
-			encoded := <str>x.dt,
-			decoded := <datetime>x.s,
-			round_trip := x.dt,
-			is_equal := <datetime>x.s = x.dt,
-			string := <str><datetime>x.s,
+		FOR x IN y UNION (
+			SELECT (
+				encoded := <str>x.dt,
+				decoded := <datetime>x.s,
+				round_trip := x.dt,
+				is_equal := <datetime>x.s = x.dt,
+				string := <str><datetime>x.s,
+			)
 		)
 	`
 
@@ -6078,21 +6112,25 @@ func TestSendOptionalUUIDMarshaler(t *testing.T) {
 func TestSendAndReceiveCustomScalars(t *testing.T) {
 	query := `
 		WITH
-			x := (
-				WITH
-					i := enumerate(array_unpack(<array<CustomInt64>>$0)),
-					s := enumerate(array_unpack(<array<str>>$1)),
-				SELECT (
-					i := i.1,
-					s := s.1,
+			y := (
+				FOR i IN enumerate(array_unpack(<array<CustomInt64>>$0)) UNION
+				(
+					FOR s IN enumerate(array_unpack(<array<str>>$1)) UNION (
+						SELECT (
+							i := i.1,
+							s := s.1,
+						)
+						FILTER i.0 = s.0
+					)
 				)
-				FILTER i.0 = s.0
 			)
-		SELECT (
-			encoded := <str>x.i,
-			decoded := <CustomInt64>x.s,
-			round_trip := x.i,
-			is_equal := <CustomInt64>x.s = x.i,
+		FOR x IN y UNION (
+			SELECT (
+				encoded := <str>x.i,
+				decoded := <CustomInt64>x.s,
+				round_trip := x.i,
+				is_equal := <CustomInt64>x.s = x.i,
+			)
 		)
 	`
 
@@ -6944,22 +6982,26 @@ func TestSendAndReceiveMemory(t *testing.T) {
 
 	query := `
 		WITH
-			sample := (
-				WITH
-					m := enumerate(array_unpack(<array<cfg::memory>>$0)),
-					s := enumerate(array_unpack(<array<str>>$1)),
-				SELECT (
-					m := m.1,
-					str := s.1,
+			samples := (
+				FOR m IN enumerate(array_unpack(<array<cfg::memory>>$0)) UNION
+				(
+					FOR s IN enumerate(array_unpack(<array<str>>$1)) UNION (
+						SELECT (
+							m := m.1,
+							str := s.1,
+						)
+						FILTER m.0 = s.0
+					)
 				)
-				FILTER m.0 = s.0
 			)
-		SELECT (
-			encoded := <str>sample.m,
-			decoded := <cfg::memory>sample.str,
-			round_trip := sample.m,
-			is_equal := <str><cfg::memory>sample.str = <str>sample.m,
-			string := <str><cfg::memory>sample.str,
+		FOR sample IN samples UNION (
+			SELECT (
+				encoded := <str>sample.m,
+				decoded := <cfg::memory>sample.str,
+				round_trip := sample.m,
+				is_equal := <str><cfg::memory>sample.str = <str>sample.m,
+				string := <str><cfg::memory>sample.str,
+			)
 		)
 	`
 
