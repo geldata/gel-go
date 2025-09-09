@@ -451,18 +451,17 @@ func (r *configResolver) resolveOptions(
 			"TLSOptions.SecurityMode option")
 	}
 
-	if opts.TLSOptions.ServerName != "" {
-		secSources = append(secSources, "TLSOptions.ServerName")
-		err = r.setTLSServerName(
-			opts.TLSOptions.ServerName,
-			"TLSOptions.ServerName options",
-		)
-	}
-
 	if len(secSources) > 1 {
 		return fmt.Errorf(
 			"mutually exclusive options set in Options: %v",
 			englishList(secSources, "and"))
+	}
+
+	if opts.TLSOptions.ServerName != "" {
+		err = r.setTLSServerName(
+			opts.TLSOptions.ServerName,
+			"TLSOptions.ServerName options",
+		)
 	}
 
 	if opts.SecretKey != "" {
