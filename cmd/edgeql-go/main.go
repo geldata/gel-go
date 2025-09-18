@@ -47,6 +47,8 @@ import (
 var (
 	//go:embed templates/*.template
 	templates embed.FS
+
+	packageNames sync.Map
 )
 
 func usage() {
@@ -89,14 +91,23 @@ func main() {
 		rawmessage: *rawmessage,
 	}
 
-	timer := time.AfterFunc(200*time.Millisecond, func() {
-		log.Println("connecting to Gel")
-	})
-	defer timer.Stop()
-
 	c, err := gelint.NewPool("", gelcfg.Options{})
 	if err != nil {
 		log.Fatalf("creating client: %s", err) // nolint:gocritic
+	}
+
+	timer := time.AfterFunc(200*time.Millisecond, func() {
+		log.Println("connecting to Gel ...")
+	})
+
+	ctx := context.Background()
+	err = c.EnsureConnected(ctx)
+	if err != nil {
+		log.Fatalf("connecting to Gel: %v", err)
+	}
+
+	if !timer.Stop() {
+		log.Println("connected")
 	}
 
 	fileQueue := queueFilesInBackground()
@@ -108,7 +119,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	ctx := context.Background()
 	var wg sync.WaitGroup
 	for queryFile := range fileQueue {
 		wg.Add(1)
@@ -231,6 +241,25 @@ func queueFilesInBackground() chan string {
 				}
 
 				if !d.IsDir() && strings.HasSuffix(f, ".edgeql") {
+					dirname, err := getDirName(f)
+					if err != nil {
+						return err
+					}
+
+					// Cache package names before any go files are written.
+					// getPackageName reads the other go files in the directory
+					// to find the package name. If we are writing go files in
+					// this directory at the same time there is a race
+					// condition where an empty or partially written file will
+					// cause getPackageName to return an error because the file
+					// is malformed.
+					if _, ok := packageNames.Load(dirname); !ok {
+						packageName, err := getPackageName(dirname)
+						if err != nil {
+							return err
+						}
+						packageNames.Store(dirname, packageName)
+					}
 					queue <- f
 				}
 
@@ -252,9 +281,14 @@ func writeGoFile(
 	outFile string,
 	queries []*Query,
 ) error {
-	packageName, err := getPackageName(outFile)
+	dirname, err := getDirName(outFile)
 	if err != nil {
-		log.Fatal(err)
+		return err
+	}
+
+	packageName, ok := packageNames.Load(dirname)
+	if !ok {
+		return fmt.Errorf("no package name found for %q", outFile)
 	}
 
 	var imports []string
@@ -287,16 +321,20 @@ func writeGoFile(
 	return nil
 }
 
-// getPackageName looks up the package name from the first adjacent .go file it
-// finds. If there are no adjacent .go files it uses the lower case version of
-// the directory name as the package name.
-func getPackageName(outFile string) (string, error) {
-	outFile, err := filepath.Abs(outFile)
+func getDirName(file string) (string, error) {
+	file, err := filepath.Abs(file)
 	if err != nil {
 		return "", err
 	}
 
-	dirname := filepath.Dir(outFile)
+	dirname := filepath.Dir(file)
+	return dirname, nil
+}
+
+// getPackageName looks up the package name from the first adjacent .go file it
+// finds. If there are no adjacent .go files it uses the lower case version of
+// the directory name as the package name.
+func getPackageName(dirname string) (string, error) {
 	entries, err := os.ReadDir(dirname)
 	if err != nil {
 		return "", err
