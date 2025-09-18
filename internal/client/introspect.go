@@ -76,6 +76,8 @@ func Describe(
 	}
 
 	d, err := conn.conn.parse1pX(r, q)
+	err = FirstError(err, conn.conn.releaseReader(r))
+	err = FirstError(err, c.Release(conn, err))
 	if err != nil {
 		return nil, err
 	}
@@ -121,6 +123,8 @@ func DescribeV2(
 	}
 
 	d, err := conn.conn.parse2pX(r, q)
+	err = FirstError(err, conn.conn.releaseReader(r))
+	err = FirstError(err, c.Release(conn, err))
 	if err != nil {
 		return nil, err
 	}

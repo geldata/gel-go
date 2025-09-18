@@ -73,6 +73,13 @@ var tests = []struct {
 		directory:   "testdata/rawmessage",
 		args:        []string{"-rawmessage"},
 	},
+	{
+		// in response to https://github.com/geldata/gel-go/issues/387 which
+		// was caused by a connection leak in introspection functions.
+		description: "generate lots and lots of queries",
+		directory:   "testdata/manyqueries",
+		args:        []string{},
+	},
 }
 
 func TestMain(m *testing.M) {
