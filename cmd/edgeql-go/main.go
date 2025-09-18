@@ -37,6 +37,7 @@ import (
 	"time"
 
 	"github.com/geldata/gel-go/gelcfg"
+	"github.com/geldata/gel-go/internal"
 	gelint "github.com/geldata/gel-go/internal/client"
 	"github.com/geldata/gel-go/internal/descriptor"
 	toml "github.com/pelletier/go-toml/v2"
@@ -62,10 +63,11 @@ func usage() {
 }
 
 type cmdConfig struct {
-	mixedCaps  bool
-	pubfuncs   bool
-	pubtypes   bool
-	rawmessage bool
+	mixedCaps       bool
+	pubfuncs        bool
+	pubtypes        bool
+	rawmessage      bool
+	protocolVersion internal.ProtocolVersion
 }
 
 func main() {
@@ -108,6 +110,11 @@ func main() {
 
 	if !timer.Stop() {
 		log.Println("connected")
+	}
+
+	cfg.protocolVersion, err = gelint.ProtocolVersion(ctx, c)
+	if err != nil {
+		log.Fatalf("error determining the protocol version: %s", err)
 	}
 
 	fileQueue := queueFilesInBackground()
