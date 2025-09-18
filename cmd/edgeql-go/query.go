@@ -81,14 +81,9 @@ func newQuery(
 		log.Fatalf("error reading %q: %s", qryFile, err)
 	}
 
-	v, err := gelint.ProtocolVersion(ctx, p)
-	if err != nil {
-		log.Fatalf("error determining the protocol version: %s", err)
-	}
-
 	var qs querySetup
 
-	if v.GTE(internal.ProtocolVersion{Major: 2, Minor: 0}) {
+	if cfg.protocolVersion.GTE(internal.ProtocolVersion{Major: 2, Minor: 0}) {
 		qs = &queryConfigV2{}
 	} else {
 		qs = &queryConfigV1{}
