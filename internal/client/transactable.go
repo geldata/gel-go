@@ -31,6 +31,26 @@ type transactableConn struct {
 	*reconnectingConn
 }
 
+// sleepBackoff waits out a retry back-off unless ctx ends first. A query
+// whose ctx is already over cannot succeed on retry; retrying it only
+// re-entered the connection with a dead ctx, which is how the reader
+// hand-off used to get stranded (see acquireReader).
+func sleepBackoff(ctx context.Context, d time.Duration) bool {
+	if ctx.Err() != nil {
+		return false
+	}
+
+	t := time.NewTimer(d)
+	defer t.Stop()
+
+	select {
+	case <-t.C:
+		return true
+	case <-ctx.Done():
+		return false
+	}
+}
+
 func (c *transactableConn) withRetries(
 	ctx context.Context,
 	q *query,
@@ -71,7 +91,9 @@ func (c *transactableConn) withRetries(
 				return err
 			}
 
-			time.Sleep(rule.Backoff()(i))
+			if !sleepBackoff(ctx, rule.Backoff()(i)) {
+				return err
+			}
 			continue
 		}
 
@@ -87,6 +109,30 @@ func (c *transactableConn) granularFlow(ctx context.Context, q *query) error {
 
 func (c *transactableConn) ScriptFlow(ctx context.Context, q *query) error {
 	return c.withRetries(ctx, q, c.reconnectingConn.ScriptFlow)
+}
+
+// abandonTx retires the connection when a commit or rollback did not get
+// a server answer: a gelerr.Error means the server answered and passes
+// through untouched; anything else means the statement was never sent (a
+// dead ctx) or its answer could not be read, so the transaction may still
+// be open on the server. Closing the socket makes the server roll it back
+// and keeps a mid-transaction session out of the pool. A ctx error is
+// returned as ClientConnectionClosedError so Pool.Release drops the
+// connection at once; any other error keeps its type (the outcome is
+// unknown, a caller must not take it for a retryable connection loss).
+func abandonTx(conn *protocolConnection, err error) error {
+	var edbErr gelerr.Error
+	if err == nil || errors.As(err, &edbErr) {
+		return err
+	}
+
+	_ = conn.soc.Close()
+	if errors.Is(err, context.Canceled) ||
+		errors.Is(err, context.DeadlineExceeded) {
+		return gelerrint.NewClientConnectionClosedError("", err)
+	}
+
+	return err
 }
 
 func (c *transactableConn) Tx(
@@ -128,19 +174,23 @@ func (c *transactableConn) Tx(
 
 			err = action(ctx, tx)
 			if err == nil {
-				err = tx.commit(ctx)
+				err = abandonTx(conn, tx.commit(ctx))
 				if errors.As(err, &edbErr) &&
 					edbErr.Category(gelerr.TransactionError) &&
 					edbErr.HasTag(gelerr.ShouldRetry) {
 					goto Error
 				}
 				return err
-			} else if isClientConnectionError(err) {
+			} else if isClientConnectionError(err) && conn.isClosed() {
+				// This socket is gone; the server dropped the transaction
+				// with it. A connection error from elsewhere (the callback
+				// used another client) leaves this transaction open, so it
+				// still gets the rollback below.
 				goto Error
 			}
 
 			if e := tx.rollback(ctx); e != nil && !errors.As(e, &edbErr) {
-				return e
+				return abandonTx(conn, e)
 			}
 		}
 
@@ -167,7 +217,9 @@ func (c *transactableConn) Tx(
 				return err
 			}
 
-			time.Sleep(rule.Backoff()(i))
+			if !sleepBackoff(ctx, rule.Backoff()(i)) {
+				return err
+			}
 			continue
 		}
 
